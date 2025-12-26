@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { signOut } from "next-auth/react";
 
 const links = [
   { href: "/dashboard", label: "Dashboard" },
@@ -49,12 +50,21 @@ export function Nav() {
           );
         })}
       </div>
-      <Link
-        href="/transactions"
-        className="pill inline-flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-sky-500 text-white border-transparent shadow-[0_12px_32px_rgba(34,197,143,0.35)] hover:brightness-105 transition"
-      >
-        New Transaction
-      </Link>
+      <div className="flex items-center gap-2">
+        <Link
+          href="/transactions"
+          className="pill inline-flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-sky-500 text-white border-transparent shadow-[0_12px_32px_rgba(34,197,143,0.35)] hover:brightness-105 transition"
+        >
+          New Transaction
+        </Link>
+        <button
+          type="button"
+          onClick={() => signOut({ callbackUrl: "/login" })}
+          className="pill inline-flex items-center gap-2 border border-border/80 bg-white/80 text-ink hover:bg-card"
+        >
+          Log out
+        </button>
+      </div>
     </nav>
   );
 }

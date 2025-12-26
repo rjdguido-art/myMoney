@@ -17,7 +17,7 @@ function LoginPageContent() {
     setLoading(true);
     setError(null);
     const result = await signIn("credentials", {
-      redirect: false,
+      redirect: true,
       email,
       password,
       callbackUrl,
@@ -26,10 +26,7 @@ function LoginPageContent() {
 
     if (result?.error) {
       setError("Invalid credentials");
-      return;
     }
-
-    window.location.href = callbackUrl;
   };
 
   return (

@@ -4,10 +4,23 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import bcrypt from "bcrypt";
 import { prisma } from "./prisma";
 
+const missingEnv = ["NEXTAUTH_SECRET", "DATABASE_URL"].filter(
+  (key) => !process.env[key],
+);
+if (missingEnv.length) {
+  console.error(
+    `Missing required environment variables: ${missingEnv.join(", ")}`,
+  );
+}
+if (process.env.NODE_ENV === "production" && !process.env.NEXTAUTH_URL) {
+  console.error("Missing NEXTAUTH_URL in production.");
+}
+
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   session: { strategy: "jwt" },
   pages: { signIn: "/login" },
+  trustHost: true,
   providers: [
     Credentials({
       name: "Credentials",
