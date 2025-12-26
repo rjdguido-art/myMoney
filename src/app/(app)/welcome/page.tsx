@@ -10,7 +10,7 @@ export default async function WelcomePage() {
 
   return (
     <div className="mx-auto flex min-h-[70vh] max-w-3xl items-center px-6">
-      <div className="w-full space-y-6 rounded-2xl border border-border/70 bg-card p-10 shadow-[0_14px_36px_rgba(5,63,43,0.1)]">
+      <div className="w-full space-y-6 rounded-lg border border-slate-200/70 bg-white p-10 shadow-sm">
         <div className="space-y-3">
           <p className="pill bg-emerald-500 text-white border-transparent shadow-[0_10px_24px_rgba(34,197,143,0.32)]">
             {t("welcome.pill", locale)}
@@ -23,7 +23,7 @@ export default async function WelcomePage() {
           </p>
         </div>
 
-        <div className="rounded-xl border border-border/70 bg-white/80 p-4 text-sm text-muted">
+        <div className="rounded-md border border-slate-200/70 bg-white p-4 text-sm text-muted">
           <p className="font-semibold text-ink">{t("welcome.next", locale)}</p>
           <ul className="mt-2 space-y-1">
             {steps.map((step) => (

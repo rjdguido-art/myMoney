@@ -76,13 +76,13 @@ function LoginPageContent() {
         />
       </div>
       <div className="relative mx-auto flex min-h-[calc(100vh-6rem)] max-w-4xl items-center">
-        <div className="grid w-full gap-10 rounded-2xl border border-border/70 bg-card/90 p-10 shadow-[0_18px_45px_rgba(5,63,43,0.14)] backdrop-blur md:grid-cols-2">
+        <div className="grid w-full gap-10 rounded-lg border border-slate-200/70 bg-white p-10 shadow-sm backdrop-blur-sm md:grid-cols-2">
           <div className="space-y-4">
           <div className="flex items-center gap-3">
             <img
               src="/icon.svg"
               alt="myMoney logo"
-              className="h-12 w-12 rounded-2xl shadow-[0_10px_25px_rgba(13,56,95,0.25)]"
+              className="h-12 w-12 rounded-md shadow-sm"
             />
             <div>
               <p className="text-sm uppercase tracking-[0.18em] text-muted">
@@ -95,12 +95,6 @@ function LoginPageContent() {
           <p className="text-muted">
             Access your dashboard, budgets, bills, and insights securely with email and password.
           </p>
-          <div className="rounded-xl border border-border/70 bg-white/80 p-4 text-sm text-muted">
-            <p className="font-semibold text-ink">Heads up</p>
-            <p className="mt-1">
-              We hash passwords with bcrypt and keep sessions short-lived. Use strong, unique credentials.
-            </p>
-          </div>
         </div>
 
         <form className="space-y-4" onSubmit={handleSubmit}>
@@ -111,7 +105,7 @@ function LoginPageContent() {
               onChange={(e) => setEmail(e.target.value)}
               type="email"
               required
-              className="w-full rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+              className="w-full rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
               placeholder="you@example.com"
             />
           </div>
@@ -122,7 +116,7 @@ function LoginPageContent() {
               onChange={(e) => setPassword(e.target.value)}
               type="password"
               required
-              className="w-full rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+              className="w-full rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
               placeholder="••••••••"
             />
           </div>
@@ -132,7 +126,7 @@ function LoginPageContent() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-lg bg-gradient-to-r from-emerald-500 to-sky-500 px-3 py-2 text-white shadow-[0_12px_30px_rgba(34,197,143,0.35)] hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-70"
+            className="w-full rounded-sm bg-gradient-to-r from-emerald-500 to-sky-500 px-3 py-2 text-white shadow-[0_12px_30px_rgba(34,197,143,0.35)] hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-70"
           >
             {loading ? "Signing in..." : "Sign in"}
           </button>

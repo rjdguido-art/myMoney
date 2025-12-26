@@ -65,7 +65,7 @@ function SignupPageContent() {
 
   return (
     <div className="mx-auto flex min-h-screen max-w-4xl items-center px-6">
-      <div className="grid w-full gap-10 rounded-2xl border border-border/70 bg-card p-10 shadow-[0_14px_36px_rgba(5,63,43,0.1)] md:grid-cols-2">
+      <div className="grid w-full gap-10 rounded-lg border border-slate-200/70 bg-white p-10 shadow-sm md:grid-cols-2">
         <div className="space-y-4">
           <p className="pill bg-sky-500 text-white border-transparent shadow-[0_10px_24px_rgba(56,189,248,0.32)]">
             Get started
@@ -74,7 +74,7 @@ function SignupPageContent() {
           <p className="text-muted">
             Securely manage your finances. We use bcrypt hashing and restrict access to protected routes.
           </p>
-          <div className="rounded-xl border border-border/70 bg-white/80 p-4 text-sm text-muted">
+          <div className="rounded-md border border-slate-200/70 bg-white p-4 text-sm text-muted">
             <p className="font-semibold text-ink">Why create an account?</p>
             <p className="mt-1">
               Sync budgets, track transactions, schedule bills, and view insights in one place.
@@ -88,7 +88,7 @@ function SignupPageContent() {
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+              className="w-full rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
               placeholder="Casey Money"
             />
           </div>
@@ -99,7 +99,7 @@ function SignupPageContent() {
               onChange={(e) => setEmail(e.target.value)}
               type="email"
               required
-              className="w-full rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+              className="w-full rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
               placeholder="you@example.com"
             />
           </div>
@@ -110,7 +110,7 @@ function SignupPageContent() {
               onChange={(e) => setPassword(e.target.value)}
               type="password"
               required
-              className="w-full rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+              className="w-full rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
               placeholder="••••••••"
             />
           </div>
@@ -118,7 +118,7 @@ function SignupPageContent() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-lg bg-gradient-to-r from-emerald-500 to-navy-500 px-3 py-2 text-white shadow-[0_12px_30px_rgba(34,197,143,0.35)] hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-70"
+            className="w-full rounded-sm bg-gradient-to-r from-emerald-500 to-navy-500 px-3 py-2 text-white shadow-[0_12px_30px_rgba(34,197,143,0.35)] hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-70"
           >
             {loading ? "Creating..." : "Create account"}
           </button>

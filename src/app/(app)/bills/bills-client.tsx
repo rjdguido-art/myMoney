@@ -244,7 +244,7 @@ export function BillsClient({
 
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
 
-      <div className="overflow-hidden rounded-2xl border border-border/70 bg-card shadow-[0_12px_32px_rgba(13,56,95,0.08)]">
+      <div className="overflow-hidden rounded-lg border border-slate-200/70 bg-white shadow-sm">
         <div className="grid grid-cols-7 bg-surface px-6 py-3 text-sm font-medium text-muted">
           <p>Name</p>
           <p>Due date</p>
@@ -289,13 +289,13 @@ export function BillsClient({
                 </div>
                 <div className="flex justify-end gap-2">
                   <button
-                    className="rounded-lg border border-border/80 px-3 py-1 text-xs text-ink hover:border-emerald-500/50"
+                    className="rounded-sm border border-border/80 px-3 py-1 text-xs text-ink hover:border-emerald-500/50"
                     onClick={() => startEdit(bill)}
                   >
                     Edit
                   </button>
                   <button
-                    className="rounded-lg border border-red-200 px-3 py-1 text-xs text-red-700 hover:border-red-400"
+                    className="rounded-sm border border-red-200 px-3 py-1 text-xs text-red-700 hover:border-red-400"
                     onClick={() => void handleDelete(bill.id)}
                     disabled={submitting}
                   >
@@ -313,7 +313,7 @@ export function BillsClient({
 
       {showForm ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/30 p-4 backdrop-blur">
-          <div className="w-full max-w-3xl rounded-2xl border border-border/70 bg-card p-6 shadow-[0_16px_40px_rgba(5,63,43,0.16)]">
+          <div className="w-full max-w-3xl rounded-lg border border-slate-200/70 bg-white p-6 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted">
@@ -344,7 +344,7 @@ export function BillsClient({
                   onChange={(e) =>
                     setFormState((prev) => ({ ...prev, name: e.target.value }))
                   }
-                  className="w-full rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+                  className="w-full rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
                   placeholder="Rent, internet, subscription..."
                 />
               </div>
@@ -356,7 +356,7 @@ export function BillsClient({
                   onChange={(e) =>
                     setFormState((prev) => ({ ...prev, amount: e.target.value }))
                   }
-                  className="w-full rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+                  className="w-full rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
                   placeholder="0.00"
                 />
               </div>
@@ -368,7 +368,7 @@ export function BillsClient({
                   onChange={(e) =>
                     setFormState((prev) => ({ ...prev, dueDate: e.target.value }))
                   }
-                  className="w-full rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+                  className="w-full rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
                 />
               </div>
               <div className="space-y-1">
@@ -381,7 +381,7 @@ export function BillsClient({
                       frequency: e.target.value as Frequency,
                     }))
                   }
-                  className="w-full rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+                  className="w-full rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
                 >
                   <option value="DAILY">Daily</option>
                   <option value="WEEKLY">Weekly</option>
@@ -404,7 +404,7 @@ export function BillsClient({
                       reminderDays: e.target.value,
                     }))
                   }
-                  className="w-full rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+                  className="w-full rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
                 />
               </div>
               <div className="space-y-1">
@@ -417,7 +417,7 @@ export function BillsClient({
                       status: e.target.value as BillStatus,
                     }))
                   }
-                  className="w-full rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+                  className="w-full rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
                 >
                   <option value="PENDING">Pending</option>
                   <option value="SCHEDULED">Scheduled</option>
@@ -435,7 +435,7 @@ export function BillsClient({
                       accountId: e.target.value,
                     }))
                   }
-                  className="w-full rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+                  className="w-full rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
                 >
                   <option value="">Unassigned</option>
                   {accounts.map((account) => (
@@ -455,7 +455,7 @@ export function BillsClient({
                       categoryId: e.target.value,
                     }))
                   }
-                  className="w-full rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+                  className="w-full rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
                 >
                   <option value="">Uncategorized</option>
                   {categories.map((category) => (
@@ -487,7 +487,7 @@ export function BillsClient({
               </div>
               <div className="flex items-center gap-3">
                 <button
-                  className="rounded-lg border border-border/80 px-4 py-2 text-sm text-ink hover:border-emerald-500/50"
+                  className="rounded-sm border border-border/80 px-4 py-2 text-sm text-ink hover:border-emerald-500/50"
                   onClick={() => {
                     setShowForm(false);
                     setEditing(null);
@@ -498,7 +498,7 @@ export function BillsClient({
                   Cancel
                 </button>
                 <button
-                  className="rounded-lg bg-gradient-to-r from-emerald-500 to-sky-500 px-4 py-2 text-sm font-semibold text-white shadow-[0_12px_30px_rgba(34,197,143,0.35)] hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-70"
+                  className="rounded-sm bg-gradient-to-r from-emerald-500 to-sky-500 px-4 py-2 text-sm font-semibold text-white shadow-[0_12px_30px_rgba(34,197,143,0.35)] hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-70"
                   onClick={() => void handleSubmit()}
                   disabled={submitting}
                 >

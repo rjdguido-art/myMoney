@@ -25,7 +25,7 @@ export default async function SettingsPage() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <section className="space-y-4 rounded-2xl border border-border/70 bg-card p-6 shadow-[0_12px_32px_rgba(13,56,95,0.08)]">
+        <section className="space-y-4 rounded-lg border border-slate-200/70 bg-white p-6 shadow-sm">
           <div>
             <p className="pill bg-white/80 text-emerald-700 border-emerald-500/30">
               {t("settings.profilePill", locale)}
@@ -39,7 +39,7 @@ export default async function SettingsPage() {
             <div className="space-y-2">
               <label className="text-sm text-ink">{t("settings.fullName", locale)}</label>
               <input
-                className="w-full rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+                className="w-full rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
                 placeholder={t("settings.placeholders.fullName", locale)}
                 title={t("settings.helpers.fullName", locale)}
               />
@@ -48,7 +48,7 @@ export default async function SettingsPage() {
             <div className="space-y-2">
               <label className="text-sm text-ink">{t("settings.email", locale)}</label>
               <input
-                className="w-full rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+                className="w-full rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
                 placeholder={t("settings.placeholders.email", locale)}
                 type="email"
                 title={t("settings.helpers.email", locale)}
@@ -58,7 +58,7 @@ export default async function SettingsPage() {
             <div className="space-y-2">
               <label className="text-sm text-ink">{t("settings.timezone", locale)}</label>
               <select
-                className="w-full rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+                className="w-full rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
                 title={t("settings.helpers.timezone", locale)}
               >
                 <option>UTC</option>
@@ -70,7 +70,7 @@ export default async function SettingsPage() {
           </form>
         </section>
 
-        <section className="space-y-4 rounded-2xl border border-border/70 bg-card p-6 shadow-[0_12px_32px_rgba(13,56,95,0.08)]">
+        <section className="space-y-4 rounded-lg border border-slate-200/70 bg-white p-6 shadow-sm">
           <div>
             <p className="pill bg-white/80 text-emerald-700 border-emerald-500/30">
               {t("settings.languageTitle", locale)}
@@ -86,7 +86,7 @@ export default async function SettingsPage() {
           </div>
         </section>
 
-        <section className="space-y-4 rounded-2xl border border-border/70 bg-card p-6 shadow-[0_12px_32px_rgba(13,56,95,0.08)]">
+        <section className="space-y-4 rounded-lg border border-slate-200/70 bg-white p-6 shadow-sm">
           <div>
             <p className="pill bg-white/80 text-navy-700 border-navy-500/30">
               {t("settings.notificationsPill", locale)}
@@ -100,7 +100,7 @@ export default async function SettingsPage() {
             {notifications.map((item) => (
               <label
                 key={item}
-                className="flex items-center justify-between rounded-xl border border-border/60 bg-white/80 px-4 py-3 text-sm text-ink"
+                className="flex items-center justify-between rounded-md border border-slate-200/70 bg-white px-4 py-3 text-sm text-ink"
               >
                 <span>{item}</span>
                 <input type="checkbox" defaultChecked className="h-4 w-4" />
@@ -109,7 +109,7 @@ export default async function SettingsPage() {
           </div>
         </section>
 
-        <section className="space-y-4 rounded-2xl border border-border/70 bg-card p-6 shadow-[0_12px_32px_rgba(13,56,95,0.08)] lg:col-span-2">
+        <section className="space-y-4 rounded-lg border border-slate-200/70 bg-white p-6 shadow-sm lg:col-span-2">
           <div>
             <p className="pill bg-white/80 text-emerald-700 border-emerald-500/30">
               {t("settings.navGuidePill", locale)}
@@ -123,7 +123,7 @@ export default async function SettingsPage() {
             {navCards.map((item) => (
               <div
                 key={item.title}
-                className="rounded-xl border border-border/70 bg-white/80 p-4 text-sm"
+                className="rounded-md border border-slate-200/70 bg-white p-4 text-sm"
               >
                 <p className="font-semibold text-ink">{item.title}</p>
                 <p className="text-muted">{item.detail}</p>

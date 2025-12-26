@@ -37,8 +37,8 @@ export function LanguageToggle({ locale, variant = "pill" }: Props) {
     variant === "compact" ? "text-xs font-medium text-muted" : "text-sm font-medium text-muted";
   const selectClass =
     variant === "compact"
-      ? "rounded-md border border-border/80 bg-white/80 px-2 py-1 text-xs text-ink"
-      : "rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink";
+      ? "rounded-sm border border-border/80 bg-white/80 px-2 py-1 text-xs text-ink"
+      : "rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink";
 
   return (
     <div className="flex items-center gap-2">

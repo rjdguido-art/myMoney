@@ -13,13 +13,13 @@ export default function AuthPage() {
         </p>
       </div>
 
-      <div className="space-y-4 rounded-2xl border border-border/70 bg-card p-6 shadow-[0_12px_32px_rgba(13,56,95,0.08)]">
+      <div className="space-y-4 rounded-lg border border-slate-200/70 bg-white p-6 shadow-sm">
         <form className="space-y-4">
           <div className="space-y-2">
             <label className="text-sm text-ink">Email</label>
             <input
               type="email"
-              className="w-full rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+              className="w-full rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
               placeholder="you@example.com"
             />
           </div>
@@ -27,7 +27,7 @@ export default function AuthPage() {
             <label className="text-sm text-ink">Password</label>
             <input
               type="password"
-              className="w-full rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+              className="w-full rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
               placeholder="••••••••"
             />
           </div>
@@ -42,7 +42,7 @@ export default function AuthPage() {
           </div>
           <button
             type="button"
-            className="w-full rounded-lg bg-gradient-to-r from-emerald-500 to-sky-500 px-3 py-2 text-white shadow-[0_12px_30px_rgba(34,197,143,0.35)] hover:brightness-105"
+            className="w-full rounded-sm bg-gradient-to-r from-emerald-500 to-sky-500 px-3 py-2 text-white shadow-[0_12px_30px_rgba(34,197,143,0.35)] hover:brightness-105"
           >
             Continue
           </button>

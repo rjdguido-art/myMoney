@@ -80,7 +80,7 @@ export default async function RulesPage() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
-        <section className="lg:col-span-1 space-y-4 rounded-2xl border border-border/70 bg-card p-6 shadow-[0_12px_32px_rgba(13,56,95,0.08)]">
+        <section className="lg:col-span-1 space-y-4 rounded-lg border border-slate-200/70 bg-white p-6 shadow-sm">
           <div>
             <p className="text-sm text-muted">New rule</p>
             <h2 className="text-lg font-semibold text-ink">Match & assign</h2>
@@ -91,7 +91,7 @@ export default async function RulesPage() {
               <input
                 name="descriptionContains"
                 required
-                className="w-full rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+                className="w-full rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
                 placeholder="e.g. starbucks"
               />
             </div>
@@ -100,7 +100,7 @@ export default async function RulesPage() {
               <select
                 name="categoryId"
                 required
-                className="w-full rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+                className="w-full rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
                 defaultValue=""
               >
                 <option value="" disabled>
@@ -119,7 +119,7 @@ export default async function RulesPage() {
                 name="priority"
                 type="number"
                 defaultValue={0}
-                className="w-full rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+                className="w-full rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
               />
             </div>
             <button
@@ -131,7 +131,7 @@ export default async function RulesPage() {
           </form>
         </section>
 
-        <section className="lg:col-span-2 space-y-4 rounded-2xl border border-border/70 bg-white/80 p-6">
+        <section className="lg:col-span-2 space-y-4 rounded-lg border border-slate-200/70 bg-white p-6 shadow-sm">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted">Existing rules</p>
@@ -144,7 +144,7 @@ export default async function RulesPage() {
               {rules.map((rule) => (
                 <div
                   key={rule.id}
-                  className="flex flex-col gap-3 rounded-xl border border-border/70 bg-card/80 p-4 md:flex-row md:items-center md:justify-between"
+                  className="flex flex-col gap-3 rounded-md border border-slate-200/70 bg-white p-4 md:flex-row md:items-center md:justify-between"
                 >
                   <div className="space-y-1">
                     <p className="text-sm uppercase tracking-[0.08em] text-emerald-700">
@@ -172,7 +172,7 @@ export default async function RulesPage() {
                           "pill text-sm",
                           rule.active
                             ? "bg-emerald-500 text-white border-transparent hover:brightness-105"
-                            : "border-border/70 bg-white/80 text-ink hover:border-emerald-500/50",
+                            : "border-slate-200/70 bg-white text-ink hover:border-emerald-500/50",
                         ].join(" ")}
                       >
                         {rule.active ? "Active" : "Activate"}
@@ -182,7 +182,7 @@ export default async function RulesPage() {
                       <input type="hidden" name="id" value={rule.id} />
                       <button
                         type="submit"
-                        className="pill border-border/70 bg-white/80 text-sm text-ink hover:border-rose-500/60 hover:text-rose-600"
+                        className="pill border-slate-200/70 bg-white text-sm text-ink hover:border-rose-500/60 hover:text-rose-600"
                       >
                         Delete
                       </button>
@@ -192,7 +192,7 @@ export default async function RulesPage() {
               ))}
             </div>
           ) : (
-            <div className="rounded-xl border border-dashed border-border/80 bg-card/70 p-4 text-sm text-muted">
+            <div className="rounded-md border border-dashed border-slate-200 bg-white p-4 text-sm text-muted">
               No rules yet. Create one to automatically classify merchants as they arrive.
             </div>
           )}

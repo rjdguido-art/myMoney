@@ -79,9 +79,9 @@ export function Nav() {
   const extraLinks = links.filter((link) => overflowLinks.has(link.href));
 
   return (
-    <nav className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border/80 bg-white/70 px-4 py-3 shadow-[0_12px_35px_rgba(5,63,43,0.08)] backdrop-blur transition-shadow duration-300 ease-out hover:shadow-[0_18px_45px_rgba(5,63,43,0.12)]">
+    <nav className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-slate-200/70 bg-white/70 px-4 py-3 shadow-sm backdrop-blur-sm transition-shadow duration-300 ease-out hover:shadow-md">
       <div className="flex items-center gap-3">
-        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-navy-500 text-white shadow-[0_10px_30px_rgba(13,56,95,0.35)]">
+        <div className="flex h-11 w-11 items-center justify-center rounded-md bg-gradient-to-br from-emerald-500 to-navy-500 text-white shadow-[0_10px_30px_rgba(13,56,95,0.35)]">
           <span className="text-lg font-semibold">mm</span>
         </div>
         <div>
@@ -98,17 +98,17 @@ export function Nav() {
             (link.href !== "/dashboard" && pathname.startsWith(link.href));
           const isDisabled = !onboarded && disabledLinks.has(link.href);
           const linkClass = [
-            "rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 ease-out",
+            "rounded-sm px-3 py-2 text-sm font-medium transition-all duration-200 ease-out",
             isActive
-              ? "bg-emerald-500 text-white shadow-[0_10px_25px_rgba(22,163,74,0.35)]"
-              : "text-ink/80 hover:bg-card hover:text-ink border border-transparent hover:border-border",
+              ? "bg-emerald-500/10 text-emerald-700 border border-emerald-500/30"
+              : "text-ink/80 hover:bg-card hover:text-ink border border-transparent hover:border-slate-200/70",
           ].join(" ");
 
           if (isDisabled) {
             return (
               <span
                 key={link.href}
-                className="rounded-lg px-3 py-2 text-sm font-medium text-muted/70 border border-dashed border-border/60 cursor-not-allowed"
+                className="rounded-sm px-3 py-2 text-sm font-medium text-muted/70 border border-dashed border-slate-200/60 cursor-not-allowed"
                 title="Complete onboarding first"
                 aria-disabled="true"
               >
@@ -130,7 +130,7 @@ export function Nav() {
           <button
             type="button"
             onClick={() => setOverflowOpen((prev) => !prev)}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-border/70 bg-white/80 text-ink/70 transition-all duration-200 ease-out hover:bg-card hover:text-ink hover:shadow-[0_8px_20px_rgba(5,63,43,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-sm border border-slate-200/70 bg-white text-ink/70 transition-all duration-200 ease-out hover:bg-card hover:text-ink hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60"
             aria-haspopup="menu"
             aria-expanded={overflowOpen}
             aria-label="More navigation"
@@ -139,7 +139,7 @@ export function Nav() {
           </button>
           {overflowOpen ? (
             <div
-              className="nav-menu absolute right-0 top-12 z-20 w-48 rounded-xl border border-border/80 bg-white/95 p-2 shadow-[0_16px_40px_rgba(5,63,43,0.18)] backdrop-blur"
+              className="nav-menu absolute right-0 top-12 z-20 w-48 rounded-md border border-border/80 bg-white/95 p-2 shadow-md backdrop-blur-sm"
               role="menu"
             >
               {extraLinks.map((link) => {
@@ -148,17 +148,17 @@ export function Nav() {
                   (link.href !== "/dashboard" && pathname.startsWith(link.href));
                 const isDisabled = !onboarded && disabledLinks.has(link.href);
                 const linkClass = [
-                  "nav-menu-item flex w-full items-center rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 ease-out",
+                  "nav-menu-item flex w-full items-center rounded-sm px-3 py-2 text-sm font-medium transition-all duration-200 ease-out",
                   isActive
-                    ? "bg-emerald-500 text-white shadow-[0_10px_25px_rgba(22,163,74,0.35)]"
-                    : "text-ink/80 hover:bg-card hover:text-ink border border-transparent hover:border-border",
+                    ? "bg-emerald-500/10 text-emerald-700 border border-emerald-500/30"
+                    : "text-ink/80 hover:bg-card hover:text-ink border border-transparent hover:border-slate-200/70",
                 ].join(" ");
 
                 if (isDisabled) {
                   return (
                     <span
                       key={link.href}
-                      className="nav-menu-item rounded-lg px-3 py-2 text-sm font-medium text-muted/70 border border-dashed border-border/60 cursor-not-allowed"
+                      className="nav-menu-item rounded-sm px-3 py-2 text-sm font-medium text-muted/70 border border-dashed border-slate-200/60 cursor-not-allowed"
                       title="Complete onboarding first"
                       aria-disabled="true"
                       role="menuitem"

@@ -480,14 +480,14 @@ export function OnboardingClient({
     <div className="space-y-8">
       {showSkeleton ? (
         <div className="space-y-6 animate-pulse">
-          <div className="h-6 w-40 rounded-full bg-border/70" />
+          <div className="h-6 w-40 rounded-sm bg-slate-100" />
           <div className="h-10 w-2/3 rounded bg-border/60" />
           <div className="h-4 w-1/2 rounded bg-border/60" />
           <div className="grid gap-3 md:grid-cols-2">
-            <div className="h-28 rounded-xl bg-border/60" />
-            <div className="h-28 rounded-xl bg-border/60" />
+            <div className="h-28 rounded-md bg-slate-100" />
+            <div className="h-28 rounded-md bg-slate-100" />
           </div>
-          <div className="h-64 rounded-2xl bg-border/60" />
+          <div className="h-64 rounded-lg bg-slate-100" />
         </div>
       ) : null}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -502,9 +502,9 @@ export function OnboardingClient({
           <p className="text-muted">{t("onboarding.intro", language)}</p>
         </div>
         <div className="flex items-center gap-3">
-          <div className="h-2 w-40 overflow-hidden rounded-full bg-border/70">
+          <div className="h-2 w-40 overflow-hidden rounded-sm bg-slate-100">
             <div
-              className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-sky-500 transition-all"
+              className="h-full bg-gradient-to-r from-emerald-500 to-sky-500 transition-all"
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -521,10 +521,10 @@ export function OnboardingClient({
         {steps.map((s, idx) => (
           <div
             key={s.title}
-            className={`rounded-xl border px-4 py-3 text-sm ${
+            className={`rounded-md border px-4 py-3 text-sm ${
               idx === step
-                ? "border-emerald-500 bg-white shadow-[0_10px_28px_rgba(34,197,143,0.18)]"
-                : "border-border/70 bg-card"
+                ? "border-emerald-500 bg-emerald-500/10"
+                : "border-slate-200/70 bg-white"
             }`}
           >
             <p className="font-semibold text-ink">{s.title}</p>
@@ -535,9 +535,9 @@ export function OnboardingClient({
 
       <div className={`card p-8 space-y-6 relative ${showSkeleton ? "opacity-60 pointer-events-none" : ""}`}>
         {submitting ? (
-          <div className="absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-white/80 backdrop-blur">
-            <div className="flex items-center gap-3 rounded-xl border border-border/70 bg-white px-4 py-3 text-sm text-ink shadow-[0_12px_30px_rgba(13,56,95,0.12)]">
-              <span className="h-4 w-4 animate-spin rounded-full border-2 border-emerald-500 border-t-transparent" />
+          <div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-white/90 backdrop-blur-sm">
+            <div className="flex items-center gap-3 rounded-md border border-slate-200/70 bg-white px-4 py-3 text-sm text-ink shadow-sm">
+              <span className="h-4 w-4 animate-spin rounded-sm border-2 border-emerald-500 border-t-transparent" />
               {labels.saving}
             </div>
           </div>
@@ -549,7 +549,7 @@ export function OnboardingClient({
               <select
                 value={language}
                 onChange={(e) => setLanguage(e.target.value as Locale)}
-                className="w-full rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+                className="w-full rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
                 title={helpers.language}
               >
                 <option value="en">{t("nav.languageEnglish", language)}</option>
@@ -561,7 +561,7 @@ export function OnboardingClient({
               <select
                 value={currency}
                 onChange={(e) => setCurrency(e.target.value)}
-                className="w-full rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+                className="w-full rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
                 title={helpers.currency}
               >
                 {currencyOptions.map((c) => (
@@ -574,7 +574,7 @@ export function OnboardingClient({
               <select
                 value={timezone}
                 onChange={(e) => setTimezone(e.target.value)}
-                className="w-full rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+                className="w-full rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
                 title={helpers.timezone}
               >
                 {timezoneOptions.map((tz) => (
@@ -594,7 +594,7 @@ export function OnboardingClient({
               <select
                 value={payFrequency}
                 onChange={(e) => setPayFrequency(e.target.value as PayFrequency)}
-                className="w-full rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+                className="w-full rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
                 title={helpers.payFrequency}
               >
                 {payFrequencyOptions.map((option) => (
@@ -612,7 +612,7 @@ export function OnboardingClient({
                 type="number"
                 min="0"
                 step="0.01"
-                className="w-full rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+                className="w-full rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
                 placeholder="0.00"
                 title={helpers.takeHome}
               />
@@ -631,7 +631,7 @@ export function OnboardingClient({
                 <input
                   value={deduction.name}
                   onChange={(e) => updateDeduction(deduction.id, "name", e.target.value)}
-                  className="rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+                  className="rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
                   placeholder={labels.deductionName}
                   title={helpers.deductionName}
                 />
@@ -641,7 +641,7 @@ export function OnboardingClient({
                   type="number"
                   min="0"
                   step="0.01"
-                  className="rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+                  className="rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
                   placeholder={labels.deductionAmount}
                   title={helpers.deductionAmount}
                 />
@@ -652,7 +652,7 @@ export function OnboardingClient({
               onClick={() =>
                 setDeductions((rows) => [...rows, { id: uid(), name: "", amount: "" }])
               }
-              className="pill border-border/70 bg-white/80 text-ink hover:border-emerald-500/50"
+              className="pill border-slate-200/70 bg-white text-ink hover:border-emerald-500/50"
             >
               {labels.addDeduction}
             </button>
@@ -670,7 +670,7 @@ export function OnboardingClient({
                 <input
                   value={bill.name}
                   onChange={(e) => updateBill(bill.id, "name", e.target.value)}
-                  className="rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+                  className="rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
                   placeholder={labels.billName}
                   title={helpers.billName}
                 />
@@ -680,7 +680,7 @@ export function OnboardingClient({
                   type="number"
                   min="0"
                   step="0.01"
-                  className="rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+                  className="rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
                   placeholder={labels.billAmount}
                   title={helpers.billAmount}
                 />
@@ -690,7 +690,7 @@ export function OnboardingClient({
                   type="number"
                   min="1"
                   max="31"
-                  className="rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+                  className="rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
                   placeholder={labels.billDueDay}
                   title={helpers.billDueDay}
                 />
@@ -699,7 +699,7 @@ export function OnboardingClient({
                   onChange={(e) =>
                     updateBill(bill.id, "frequency", e.target.value as BillFrequency)
                   }
-                  className="rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+                  className="rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
                   title={helpers.billFrequency}
                 >
                   {billFrequencyOptions.map((option) => (
@@ -718,7 +718,7 @@ export function OnboardingClient({
                   { id: uid(), name: "", amount: "", dueDay: "", frequency: "MONTHLY" },
                 ])
               }
-              className="pill border-border/70 bg-white/80 text-ink hover:border-emerald-500/50"
+              className="pill border-slate-200/70 bg-white text-ink hover:border-emerald-500/50"
             >
               {labels.addBill}
             </button>
@@ -736,7 +736,7 @@ export function OnboardingClient({
                 <input
                   value={budget.category}
                   onChange={(e) => updateBudget(budget.id, "category", e.target.value)}
-                  className="rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+                  className="rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
                   placeholder={labels.category}
                   title={helpers.category}
                 />
@@ -746,7 +746,7 @@ export function OnboardingClient({
                   type="number"
                   min="0"
                   step="0.01"
-                  className="rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+                  className="rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
                   placeholder={labels.target}
                   title={helpers.target}
                 />
@@ -757,7 +757,7 @@ export function OnboardingClient({
               onClick={() =>
                 setBudgets((rows) => [...rows, { id: uid(), category: "", amount: "" }])
               }
-              className="pill border-border/70 bg-white/80 text-ink hover:border-emerald-500/50"
+              className="pill border-slate-200/70 bg-white text-ink hover:border-emerald-500/50"
             >
               {labels.addCategory}
             </button>
@@ -775,7 +775,7 @@ export function OnboardingClient({
                 <input
                   value={goal.name}
                   onChange={(e) => updateGoal(goal.id, "name", e.target.value)}
-                  className="rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+                  className="rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
                   placeholder={labels.goalName}
                   title={helpers.goalName}
                 />
@@ -785,7 +785,7 @@ export function OnboardingClient({
                   type="number"
                   min="0"
                   step="0.01"
-                  className="rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+                  className="rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
                   placeholder={labels.goalTarget}
                   title={helpers.goalTarget}
                 />
@@ -796,7 +796,7 @@ export function OnboardingClient({
               onClick={() =>
                 setGoals((rows) => [...rows, { id: uid(), name: "", targetAmount: "" }])
               }
-              className="pill border-border/70 bg-white/80 text-ink hover:border-emerald-500/50"
+              className="pill border-slate-200/70 bg-white text-ink hover:border-emerald-500/50"
             >
               {labels.addGoal}
             </button>
@@ -814,7 +814,7 @@ export function OnboardingClient({
                 <input
                   value={debt.name}
                   onChange={(e) => updateDebt(debt.id, "name", e.target.value)}
-                  className="rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+                  className="rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
                   placeholder={labels.debtName}
                   title={helpers.debtName}
                 />
@@ -824,7 +824,7 @@ export function OnboardingClient({
                   type="number"
                   min="0"
                   step="0.01"
-                  className="rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+                  className="rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
                   placeholder={labels.debtMin}
                   title={helpers.debtMin}
                 />
@@ -835,7 +835,7 @@ export function OnboardingClient({
               onClick={() =>
                 setDebts((rows) => [...rows, { id: uid(), name: "", minimumPayment: "" }])
               }
-              className="pill border-border/70 bg-white/80 text-ink hover:border-emerald-500/50"
+              className="pill border-slate-200/70 bg-white text-ink hover:border-emerald-500/50"
             >
               {labels.addDebt}
             </button>
@@ -845,7 +845,7 @@ export function OnboardingClient({
         {step === 7 && (
           <div className="space-y-4">
             <h2 className="text-lg font-semibold text-ink">{labels.summaryTitle}</h2>
-            <div className="grid gap-3 rounded-xl border border-border/70 bg-white/80 p-4 text-sm text-muted">
+            <div className="grid gap-3 rounded-md border border-slate-200/70 bg-white p-4 text-sm text-muted">
               <p>
                 {labels.language}: <span className="text-ink">{language}</span>
               </p>
@@ -915,7 +915,7 @@ export function OnboardingClient({
             type="button"
             onClick={prevStep}
             disabled={step === 0}
-            className="pill border-border/70 bg-white/80 text-ink disabled:opacity-50"
+            className="pill border-slate-200/70 bg-white text-ink disabled:opacity-50"
           >
             {labels.back}
           </button>

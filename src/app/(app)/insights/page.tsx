@@ -197,7 +197,7 @@ export default async function InsightsPage() {
             Month-to-date category burn, weekly cashflow pace, and a 3-month trendline.
           </p>
         </div>
-        <div className="rounded-2xl border border-emerald-500/40 bg-white/80 px-4 py-3 text-sm text-ink shadow-[0_12px_32px_rgba(34,197,143,0.24)]">
+        <div className="rounded-md border border-slate-200/70 bg-white px-4 py-3 text-sm text-ink shadow-sm">
           <p className="text-muted">Month spend</p>
           <p className="text-lg font-semibold text-ink">
             {formatCurrency(monthSpendTotal, currency)}
@@ -207,7 +207,7 @@ export default async function InsightsPage() {
       </div>
 
       <div className="grid gap-5 lg:grid-cols-2">
-        <div className="space-y-4 rounded-2xl border border-border/70 bg-card/90 p-6">
+        <div className="space-y-4 rounded-lg border border-slate-200/70 bg-white p-6 shadow-sm">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted">This month</p>
@@ -222,7 +222,7 @@ export default async function InsightsPage() {
               {topCategories.map((cat) => (
                 <div
                   key={cat.name}
-                  className="rounded-xl border border-border/70 bg-white/80 p-4"
+                  className="rounded-md border border-slate-200/70 bg-white p-4"
                 >
                   <div className="flex items-center justify-between">
                     <p className="font-semibold text-ink">{cat.name}</p>
@@ -230,9 +230,9 @@ export default async function InsightsPage() {
                       {formatCurrency(cat.total, currency)} · {cat.share}%
                     </p>
                   </div>
-                  <div className="mt-3 h-2 overflow-hidden rounded-full bg-border/60">
+                  <div className="mt-3 h-2 overflow-hidden rounded-sm bg-slate-100">
                     <div
-                      className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-navy-600"
+                      className="h-full bg-gradient-to-r from-emerald-500 to-navy-600"
                       style={{
                         width: `${Math.max(8, cat.share)}%`,
                       }}
@@ -242,13 +242,13 @@ export default async function InsightsPage() {
               ))}
             </div>
           ) : (
-            <div className="rounded-xl border border-dashed border-border/80 bg-white/70 p-4 text-sm text-muted">
+            <div className="rounded-md border border-dashed border-slate-200 bg-white p-4 text-sm text-muted">
               No expense activity this month yet.
             </div>
           )}
         </div>
 
-        <div className="space-y-4 rounded-2xl border border-border/70 bg-white/80 p-6">
+        <div className="space-y-4 rounded-lg border border-slate-200/70 bg-white p-6 shadow-sm">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted">Last 6 weeks</p>
@@ -265,7 +265,7 @@ export default async function InsightsPage() {
                 const expenseHeight = maxWeekly ? Math.round((bucket.expense / maxWeekly) * 100) : 0;
                 return (
                   <div key={bucket.label} className="flex flex-col items-center gap-2">
-                    <div className="flex h-36 w-full flex-col justify-end rounded-xl border border-border/60 bg-card/70 p-1">
+                    <div className="flex h-36 w-full flex-col justify-end rounded-md border border-slate-200/70 bg-white p-1">
                       <div
                         className="w-full rounded-t-md bg-gradient-to-b from-emerald-500 to-sky-500"
                         style={{ height: `${incomeHeight}%` }}
@@ -283,12 +283,12 @@ export default async function InsightsPage() {
               })}
             </div>
           ) : (
-            <div className="rounded-xl border border-dashed border-border/80 bg-card/70 p-4 text-sm text-muted">
+            <div className="rounded-md border border-dashed border-slate-200 bg-white p-4 text-sm text-muted">
               Cashflow data will appear once you have posted transactions in the last six weeks.
             </div>
           )}
           <div className="grid grid-cols-2 gap-3 text-sm">
-            <div className="rounded-lg border border-border/60 bg-card/70 p-3">
+            <div className="rounded-md border border-slate-200/70 bg-white p-3">
               <p className="text-xs text-muted">Avg weekly income</p>
               <p className="text-base font-semibold text-ink">
                 {formatCurrency(
@@ -298,7 +298,7 @@ export default async function InsightsPage() {
                 )}
               </p>
             </div>
-            <div className="rounded-lg border border-border/60 bg-card/70 p-3">
+            <div className="rounded-md border border-slate-200/70 bg-white p-3">
               <p className="text-xs text-muted">Avg weekly expenses</p>
               <p className="text-base font-semibold text-ink">
                 {formatCurrency(
@@ -312,7 +312,7 @@ export default async function InsightsPage() {
         </div>
       </div>
 
-      <div className="space-y-4 rounded-2xl border border-border/70 bg-card/90 p-6">
+      <div className="space-y-4 rounded-lg border border-slate-200/70 bg-white p-6 shadow-sm">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm text-muted">Expense cadence</p>
@@ -331,7 +331,7 @@ export default async function InsightsPage() {
               return (
                 <div
                   key={cat.name}
-                  className="space-y-2 rounded-xl border border-border/70 bg-white/80 p-4"
+                  className="space-y-2 rounded-md border border-slate-200/70 bg-white p-4"
                 >
                   <div className="flex items-center justify-between">
                     <p className="font-semibold text-ink">{cat.name}</p>
@@ -379,7 +379,7 @@ export default async function InsightsPage() {
             })}
           </div>
         ) : (
-          <div className="rounded-xl border border-dashed border-border/80 bg-white/70 p-4 text-sm text-muted">
+          <div className="rounded-md border border-dashed border-slate-200 bg-white p-4 text-sm text-muted">
             Not enough history to plot a 3-month trend yet.
           </div>
         )}

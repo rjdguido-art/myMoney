@@ -59,7 +59,7 @@ export default async function SetupCompletePage() {
 
   return (
     <div className="mx-auto flex min-h-[70vh] max-w-4xl items-center px-6">
-      <div className="w-full space-y-8 rounded-2xl border border-border/70 bg-card p-10 shadow-[0_14px_36px_rgba(5,63,43,0.1)]">
+      <div className="w-full space-y-8 rounded-lg border border-slate-200/70 bg-white p-10 shadow-sm">
         <div className="space-y-3">
           <p className="pill bg-emerald-500 text-white border-transparent shadow-[0_10px_24px_rgba(34,197,143,0.32)]">
             Setup complete
@@ -73,7 +73,7 @@ export default async function SetupCompletePage() {
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">
-          <div className="rounded-xl border border-border/70 bg-white/80 p-5 space-y-2">
+          <div className="rounded-md border border-slate-200/70 bg-white p-5 space-y-2">
             <h2 className="text-lg font-semibold text-ink">Pay schedule</h2>
             {paySchedule ? (
               <div className="text-sm text-muted space-y-1">
@@ -91,7 +91,7 @@ export default async function SetupCompletePage() {
             )}
           </div>
 
-          <div className="rounded-xl border border-border/70 bg-white/80 p-5 space-y-2">
+          <div className="rounded-md border border-slate-200/70 bg-white p-5 space-y-2">
             <h2 className="text-lg font-semibold text-ink">Budget plan</h2>
             {budgetPlan ? (
               <div className="text-sm text-muted space-y-1">
@@ -113,7 +113,7 @@ export default async function SetupCompletePage() {
             )}
           </div>
 
-          <div className="rounded-xl border border-border/70 bg-white/80 p-5 space-y-2">
+          <div className="rounded-md border border-slate-200/70 bg-white p-5 space-y-2">
             <h2 className="text-lg font-semibold text-ink">Bills</h2>
             {bills.length ? (
               <ul className="text-sm text-muted space-y-1">
@@ -129,7 +129,7 @@ export default async function SetupCompletePage() {
             )}
           </div>
 
-          <div className="rounded-xl border border-border/70 bg-white/80 p-5 space-y-2">
+          <div className="rounded-md border border-slate-200/70 bg-white p-5 space-y-2">
             <h2 className="text-lg font-semibold text-ink">Savings goals</h2>
             {goals.length ? (
               <ul className="text-sm text-muted space-y-1">

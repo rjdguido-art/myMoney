@@ -479,7 +479,7 @@ export function TransactionsClient({
         </div>
       </div>
 
-      <div className="grid gap-4 rounded-2xl border border-border/70 bg-card p-6 shadow-[0_12px_32px_rgba(13,56,95,0.08)]">
+      <div className="grid gap-4 rounded-lg border border-slate-200/70 bg-white p-6 shadow-sm">
         <div className="grid gap-3 md:grid-cols-5">
           <div className="space-y-1">
             <label className="text-sm text-muted">From</label>
@@ -489,7 +489,7 @@ export function TransactionsClient({
               onChange={(e) =>
                 setFilters((prev) => ({ ...prev, from: e.target.value }))
               }
-              className="w-full rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+              className="w-full rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
             />
           </div>
           <div className="space-y-1">
@@ -500,7 +500,7 @@ export function TransactionsClient({
               onChange={(e) =>
                 setFilters((prev) => ({ ...prev, to: e.target.value }))
               }
-              className="w-full rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+              className="w-full rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
             />
           </div>
           <div className="space-y-1">
@@ -510,7 +510,7 @@ export function TransactionsClient({
               onChange={(e) =>
                 setFilters((prev) => ({ ...prev, categoryId: e.target.value }))
               }
-              className="w-full rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+              className="w-full rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
             >
               <option value="">All categories</option>
               {categories.map((category) => (
@@ -527,7 +527,7 @@ export function TransactionsClient({
               onChange={(e) =>
                 setFilters((prev) => ({ ...prev, accountId: e.target.value }))
               }
-              className="w-full rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+              className="w-full rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
             >
               <option value="">All accounts</option>
               {accounts.map((account) => (
@@ -546,7 +546,7 @@ export function TransactionsClient({
                 setFilters((prev) => ({ ...prev, search: e.target.value }))
               }
               placeholder="Search..."
-              className="w-full rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+              className="w-full rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
             />
           </div>
         </div>
@@ -554,7 +554,7 @@ export function TransactionsClient({
         <p className="text-sm text-red-600">{error}</p>
       ) : null}
 
-      <div className="rounded-2xl border border-border/70 bg-card/80 p-4 space-y-3">
+      <div className="rounded-lg border border-slate-200/70 bg-white p-4 space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <p className="text-sm text-muted">CSV Import</p>
@@ -585,7 +585,7 @@ export function TransactionsClient({
               <div key={field.key} className="space-y-1">
                 <label className="text-sm text-ink">{field.label}</label>
                 <select
-                  className="w-full rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+                  className="w-full rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
                   value={(mapping as any)[field.key] ?? ""}
                   onChange={(e) =>
                     setMapping((prev) => ({ ...prev, [field.key]: e.target.value }))
@@ -610,7 +610,7 @@ export function TransactionsClient({
               <select
                 value={fallbackAccountId}
                 onChange={(e) => setFallbackAccountId(e.target.value)}
-                className="rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+                className="rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
               >
                 {accounts.map((account) => (
                   <option key={account.id} value={account.id}>
@@ -621,7 +621,7 @@ export function TransactionsClient({
             </div>
             <button
               onClick={buildPreview}
-              className="pill border-border/70 bg-white/80 text-sm text-ink hover:border-emerald-500/50"
+              className="pill border-slate-200/70 bg-white text-sm text-ink hover:border-emerald-500/50"
             >
               Preview first 10 rows
             </button>
@@ -636,7 +636,7 @@ export function TransactionsClient({
         )}
 
         {preview.length > 0 && (
-          <div className="rounded-xl border border-border/60 bg-white/80">
+          <div className="rounded-md border border-slate-200/70 bg-white">
             <div className="overflow-auto">
               <table className="min-w-full divide-y divide-border/70 text-sm">
                 <thead className="bg-card/80">
@@ -672,7 +672,7 @@ export function TransactionsClient({
       </div>
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-border/70 bg-card shadow-[0_12px_32px_rgba(13,56,95,0.08)]">
+      <div className="overflow-hidden rounded-lg border border-slate-200/70 bg-white shadow-sm">
         <div className="grid grid-cols-7 bg-surface px-6 py-3 text-sm font-medium text-muted">
           <p>Merchant</p>
           <p>Category</p>
@@ -732,13 +732,13 @@ export function TransactionsClient({
                 </div>
                 <div className="flex justify-end gap-2">
                   <button
-                    className="rounded-lg border border-border/80 px-3 py-1 text-xs text-ink hover:border-emerald-500/50"
+                    className="rounded-sm border border-border/80 px-3 py-1 text-xs text-ink hover:border-emerald-500/50"
                     onClick={() => startEdit(tx)}
                   >
                     Edit
                   </button>
                   <button
-                    className="rounded-lg border border-red-200 px-3 py-1 text-xs text-red-700 hover:border-red-400"
+                    className="rounded-sm border border-red-200 px-3 py-1 text-xs text-red-700 hover:border-red-400"
                     onClick={() => void handleDelete(tx.id)}
                     disabled={submitting}
                   >
@@ -756,7 +756,7 @@ export function TransactionsClient({
 
       {showForm ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/30 p-4 backdrop-blur">
-          <div className="w-full max-w-3xl rounded-2xl border border-border/70 bg-card p-6 shadow-[0_16px_40px_rgba(5,63,43,0.16)]">
+          <div className="w-full max-w-3xl rounded-lg border border-slate-200/70 bg-white shadow-sm p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted">
@@ -787,7 +787,7 @@ export function TransactionsClient({
                   onChange={(e) =>
                     setFormState((prev) => ({ ...prev, amount: e.target.value }))
                   }
-                  className="w-full rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+                  className="w-full rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
                   placeholder="0.00"
                 />
               </div>
@@ -802,7 +802,7 @@ export function TransactionsClient({
                       postedAt: e.target.value,
                     }))
                   }
-                  className="w-full rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+                  className="w-full rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
                 />
               </div>
               <div className="space-y-1">
@@ -816,7 +816,7 @@ export function TransactionsClient({
                       description: e.target.value,
                     }))
                   }
-                  className="w-full rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+                  className="w-full rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
                   placeholder="Coffee shop, rent, paycheck..."
                 />
               </div>
@@ -830,7 +830,7 @@ export function TransactionsClient({
                       accountId: e.target.value,
                     }))
                   }
-                  className="w-full rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+                  className="w-full rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
                 >
                   <option value="">Select an account</option>
                   {accounts.map((account) => (
@@ -847,7 +847,7 @@ export function TransactionsClient({
                   onChange={(e) =>
                     setFormState((prev) => ({ ...prev, notes: e.target.value }))
                   }
-                  className="w-full rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+                  className="w-full rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
                   placeholder="Optional notes"
                 />
               </div>
@@ -861,7 +861,7 @@ export function TransactionsClient({
                       categoryId: e.target.value,
                     }))
                   }
-                  className="w-full rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+                  className="w-full rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
                 >
                   <option value="">Uncategorized</option>
                   {categories.map((category) => (
@@ -873,7 +873,7 @@ export function TransactionsClient({
               </div>
             </div>
 
-            <div className="mt-6 space-y-3 rounded-xl border border-border/70 bg-white/70 p-4">
+            <div className="mt-6 space-y-3 rounded-md border border-slate-200/70 bg-white p-4">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-semibold text-ink">Splits</p>
@@ -911,7 +911,7 @@ export function TransactionsClient({
                             ),
                           }))
                         }
-                        className="rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+                        className="rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
                       >
                         <option value="">Uncategorized</option>
                         {categories.map((category) => (
@@ -934,7 +934,7 @@ export function TransactionsClient({
                           }))
                         }
                         placeholder="0.00"
-                        className="rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+                        className="rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
                       />
                       <input
                         type="text"
@@ -950,7 +950,7 @@ export function TransactionsClient({
                           }))
                         }
                         placeholder="Note"
-                        className="rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+                        className="rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
                       />
                       <button
                         onClick={() => removeSplitLine(split.id)}
@@ -960,7 +960,7 @@ export function TransactionsClient({
                       </button>
                     </div>
                   ))}
-                  <div className="flex items-center justify-between rounded-lg bg-surface px-3 py-2 text-xs">
+                  <div className="flex items-center justify-between rounded-sm bg-surface px-3 py-2 text-xs">
                     <p className="text-muted">
                       Split total:{" "}
                       {formatAmount(
@@ -990,7 +990,7 @@ export function TransactionsClient({
               </div>
               <div className="flex items-center gap-3">
                 <button
-                  className="rounded-lg border border-border/80 px-4 py-2 text-sm text-ink hover:border-emerald-500/50"
+                  className="rounded-sm border border-border/80 px-4 py-2 text-sm text-ink hover:border-emerald-500/50"
                   onClick={() => {
                     setShowForm(false);
                     setEditing(null);
@@ -1001,7 +1001,7 @@ export function TransactionsClient({
                   Cancel
                 </button>
                 <button
-                  className="rounded-lg bg-gradient-to-r from-emerald-500 to-sky-500 px-4 py-2 text-sm font-semibold text-white shadow-[0_12px_30px_rgba(34,197,143,0.35)] hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-70"
+                  className="rounded-sm bg-gradient-to-r from-emerald-500 to-sky-500 px-4 py-2 text-sm font-semibold text-white shadow-[0_12px_30px_rgba(34,197,143,0.35)] hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-70"
                   onClick={() => void handleSubmit()}
                   disabled={submitting}
                 >
