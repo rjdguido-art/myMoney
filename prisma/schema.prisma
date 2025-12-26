@@ -57,6 +57,7 @@ model User {
   debts          Debt[]
   sessions       Session[]
   deductions     Deduction[]
+  rules          Rule[]
 }
 
 model Session {
@@ -137,6 +138,8 @@ model Transaction {
   @@index([postedAt])
   @@index([accountId])
   @@index([categoryId])
+  @@index([userId, postedAt])
+  @@index([userId, categoryId])
 }
 
 model TransactionSplit {
@@ -149,6 +152,24 @@ model TransactionSplit {
   note           String?
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt
+
+  @@index([categoryId])
+}
+
+model Rule {
+  id                  String    @id @default(cuid())
+  descriptionContains String
+  priority            Int       @default(0)
+  active              Boolean   @default(true)
+  userId              String
+  user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  categoryId          String
+  category            Category  @relation(fields: [categoryId], references: [id])
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  @@index([userId, priority])
+  @@index([userId, descriptionContains])
 }
 
 model RecurringRule {

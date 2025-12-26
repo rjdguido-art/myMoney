@@ -1,0 +1,307 @@
+import { CategoryType, Frequency, type PrismaClient } from "@prisma/client";
+import { computeNextRunAt } from "./recurringRunner";
+import { prisma as defaultPrisma } from "./prisma";
+
+const MS_PER_DAY = 1000 * 60 * 60 * 24;
+
+function toNumber(value: unknown) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function shiftDate(base: Date, cadence: Frequency, interval = 1) {
+  const copy = new Date(base);
+  switch (cadence) {
+    case "DAILY":
+      copy.setDate(copy.getDate() + interval);
+      break;
+    case "WEEKLY":
+      copy.setDate(copy.getDate() + 7 * interval);
+      break;
+    case "BIWEEKLY":
+      copy.setDate(copy.getDate() + 14 * interval);
+      break;
+    case "SEMIMONTHLY":
+      copy.setDate(copy.getDate() + 15 * interval);
+      break;
+    case "MONTHLY":
+      copy.setMonth(copy.getMonth() + interval);
+      break;
+    case "QUARTERLY":
+      copy.setMonth(copy.getMonth() + 3 * interval);
+      break;
+    case "YEARLY":
+      copy.setFullYear(copy.getFullYear() + interval);
+      break;
+    default:
+      copy.setDate(copy.getDate() + interval);
+  }
+  return copy;
+}
+
+function resolveNextDate(anchor: Date, cadence: Frequency, interval: number, from: Date) {
+  let cursor = new Date(anchor);
+  let safety = 0;
+  const step = interval || 1;
+  while (cursor < from && safety < 120) {
+    cursor = shiftDate(cursor, cadence, step);
+    safety += 1;
+  }
+  return cursor;
+}
+
+function resolvePreviousDate(
+  anchor: Date,
+  cadence: Frequency,
+  interval: number,
+  from: Date,
+) {
+  let cursor = new Date(anchor);
+  let previous = new Date(anchor);
+  let safety = 0;
+  const step = interval || 1;
+
+  if (cursor > from) {
+    while (cursor > from && safety < 120) {
+      previous = cursor;
+      cursor = shiftDate(cursor, cadence, -step);
+      safety += 1;
+    }
+    return cursor <= from ? cursor : previous;
+  }
+
+  while (cursor <= from && safety < 120) {
+    previous = cursor;
+    cursor = shiftDate(cursor, cadence, step);
+    safety += 1;
+  }
+  return previous;
+}
+
+type UpcomingBill = {
+  id: string;
+  name: string;
+  amount: number;
+  dueDate: Date;
+};
+
+type ForecastSnapshot = {
+  periodStart: Date | null;
+  periodEnd: Date | null;
+  nextPayDate: Date | null;
+  daysUntilPay: number;
+  netPay: number;
+  billsDue: UpcomingBill[];
+  totals: {
+    bills: number;
+    recurring: number;
+    pending: number;
+    spent: number;
+  };
+  safeToSpend: number;
+  dailyAllowance: number;
+};
+
+function billOccurrences(
+  bill: { id: string; name: string; amount: unknown; dueDate: Date; frequency: Frequency },
+  from: Date,
+  to: Date,
+) {
+  const upcoming: UpcomingBill[] = [];
+  let pointer = new Date(bill.dueDate);
+  let safety = 0;
+
+  while (pointer < from && safety < 48) {
+    pointer = shiftDate(pointer, bill.frequency, 1);
+    safety += 1;
+  }
+
+  while (pointer <= to && safety < 96) {
+    upcoming.push({
+      id: bill.id,
+      name: bill.name,
+      amount: toNumber(bill.amount),
+      dueDate: new Date(pointer),
+    });
+    pointer = shiftDate(pointer, bill.frequency, 1);
+    safety += 1;
+  }
+
+  return upcoming;
+}
+
+function signedAmount(amount: unknown, type?: CategoryType | null) {
+  const value = toNumber(amount);
+  if (type === CategoryType.INCOME) {
+    return -value;
+  }
+  return value;
+}
+
+export async function buildForecast({
+  userId,
+  prisma = defaultPrisma,
+  now = new Date(),
+}: {
+  userId: string;
+  prisma?: PrismaClient;
+  now?: Date;
+}): Promise<ForecastSnapshot> {
+  const paySchedules = await prisma.paySchedule.findMany({
+    where: { userId },
+    orderBy: { createdAt: "asc" },
+  });
+
+  const primary = paySchedules
+    .map((schedule) => {
+      const anchor = schedule.nextPayDate ?? schedule.anchorDate;
+      const nextPayDate = resolveNextDate(anchor, schedule.cadence, schedule.interval, now);
+      const previousPayDate = resolvePreviousDate(
+        anchor,
+        schedule.cadence,
+        schedule.interval,
+        now,
+      );
+      return {
+        scheduleId: schedule.id,
+        netPay: toNumber(schedule.netPay),
+        nextPayDate,
+        previousPayDate,
+        cadence: schedule.cadence,
+      };
+    })
+    .sort((a, b) => a.nextPayDate.getTime() - b.nextPayDate.getTime())[0];
+
+  if (!primary) {
+    return {
+      periodStart: null,
+      periodEnd: null,
+      nextPayDate: null,
+      daysUntilPay: 0,
+      netPay: 0,
+      billsDue: [],
+      totals: { bills: 0, recurring: 0, pending: 0, spent: 0 },
+      safeToSpend: 0,
+      dailyAllowance: 0,
+    };
+  }
+
+  const horizon = primary.nextPayDate;
+  const cycleStart = primary.previousPayDate;
+
+  const [bills, recurringRules, cycleTransactions, futureTransactions] = await Promise.all([
+    prisma.bill.findMany({
+      where: { userId },
+      select: { id: true, name: true, amount: true, dueDate: true, frequency: true },
+    }),
+    prisma.recurringRule.findMany({
+      where: { userId },
+      include: { category: { select: { id: true, type: true } } },
+    }),
+    prisma.transaction.findMany({
+      where: {
+        userId,
+        postedAt: { gte: cycleStart, lte: now },
+      },
+      include: {
+        category: { select: { id: true, type: true } },
+        splits: {
+          include: { category: { select: { id: true, type: true } } },
+        },
+      },
+    }),
+    prisma.transaction.findMany({
+      where: {
+        userId,
+        postedAt: { gt: now, lte: horizon },
+      },
+      include: {
+        category: { select: { id: true, type: true } },
+        splits: {
+          include: { category: { select: { id: true, type: true } } },
+        },
+      },
+    }),
+  ]);
+
+  const billsDue = bills.flatMap((bill) => billOccurrences(bill, now, horizon));
+  const billsTotal = billsDue.reduce((sum, bill) => sum + bill.amount, 0);
+
+  let recurringTotal = 0;
+  for (const rule of recurringRules) {
+    let pointer = rule.nextRunAt ?? rule.nextRun ?? rule.startDate;
+    let safety = 0;
+
+    while (pointer < now && safety < 120) {
+      const next = computeNextRunAt(rule, pointer);
+      if (!next || next.getTime() === pointer.getTime()) break;
+      pointer = next;
+      safety += 1;
+    }
+
+    while (pointer && pointer <= horizon && safety < 240) {
+      recurringTotal += signedAmount(rule.amount, rule.category?.type ?? null);
+      const next = computeNextRunAt(rule, pointer);
+      if (!next || next.getTime() === pointer.getTime()) break;
+      pointer = next;
+      safety += 1;
+    }
+  }
+
+  const sumTransactions = (
+    txs: Array<{
+      amount: unknown;
+      category: { type: CategoryType } | null;
+      splits: Array<{ amount: unknown; category: { type: CategoryType } | null }>;
+    }>,
+  ) => {
+    return txs.reduce((sum, tx) => {
+      if (tx.splits.length) {
+        return (
+          sum +
+          tx.splits.reduce(
+            (inner, split) => inner + signedAmount(split.amount, split.category?.type),
+            0,
+          )
+        );
+      }
+      return sum + signedAmount(tx.amount, tx.category?.type ?? null);
+    }, 0);
+  };
+
+  const spentThisCycle = sumTransactions(cycleTransactions);
+  const pendingFuture = sumTransactions(futureTransactions);
+
+  const rawSafeToSpend =
+    primary.netPay - billsTotal - recurringTotal - pendingFuture - spentThisCycle;
+
+  const daysUntilPay = Math.max(
+    1,
+    Math.ceil((horizon.getTime() - now.getTime()) / MS_PER_DAY),
+  );
+
+  const safeToSpend = Math.max(0, Number(rawSafeToSpend.toFixed(2)));
+  const dailyAllowance = Math.max(
+    0,
+    Number((safeToSpend / daysUntilPay).toFixed(2)),
+  );
+
+  return {
+    periodStart: cycleStart,
+    periodEnd: horizon,
+    nextPayDate: horizon,
+    daysUntilPay,
+    netPay: primary.netPay,
+    billsDue,
+    totals: {
+      bills: Number(billsTotal.toFixed(2)),
+      recurring: Number(recurringTotal.toFixed(2)),
+      pending: Number(pendingFuture.toFixed(2)),
+      spent: Number(spentThisCycle.toFixed(2)),
+    },
+    safeToSpend,
+    dailyAllowance,
+  };
+}
+
+export type { ForecastSnapshot, UpcomingBill };

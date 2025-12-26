@@ -8,6 +8,7 @@ import {
   transactionInclude,
   transactionInputSchema,
 } from "@/lib/transactions";
+import { resolveCategoryRule } from "@/lib/rules";
 
 export async function GET(request: Request) {
   const session = await auth();
@@ -77,6 +78,14 @@ export async function POST(request: Request) {
 
   const data = parsed.data;
 
+  let categoryId = data.categoryId ?? null;
+  if (!categoryId && !data.splits.length) {
+    categoryId = await resolveCategoryRule({
+      userId: session.user.id,
+      description: data.description,
+    });
+  }
+
   const transaction = await prisma.transaction.create({
     data: {
       userId: session.user.id,
@@ -86,7 +95,7 @@ export async function POST(request: Request) {
       postedAt: data.postedAt,
       status: data.status,
       accountId: data.accountId,
-      categoryId: data.categoryId ?? null,
+      categoryId,
       splits: data.splits.length
         ? {
             create: data.splits.map((split) => ({

@@ -110,6 +110,21 @@ export function TransactionsClient({
   );
   const [submitting, setSubmitting] = useState(false);
   const mounted = useRef(false);
+  const [csvHeaders, setCsvHeaders] = useState<string[]>([]);
+  const [csvRows, setCsvRows] = useState<string[][]>([]);
+  const [mapping, setMapping] = useState<{
+    date?: string;
+    amount?: string;
+    merchant?: string;
+    note?: string;
+    account?: string;
+  }>({});
+  const [preview, setPreview] = useState<
+    Array<{ date: string; amount: string; merchant: string; note: string; account: string }>
+  >([]);
+  const [fallbackAccountId, setFallbackAccountId] = useState(
+    initialAccounts[0]?.id ?? "",
+  );
 
   const splitTotal = useMemo(
     () =>
@@ -241,6 +256,142 @@ export function TransactionsClient({
     }
   };
 
+  const parseCsv = async (file: File) => {
+    const text = await file.text();
+    const lines = text.split(/\r?\n/).filter((line) => line.trim().length);
+    if (!lines.length) {
+      setError("CSV file is empty.");
+      return;
+    }
+    const headers = lines[0].split(",").map((h) => h.trim());
+    const rows = lines
+      .slice(1)
+      .map((line) => line.split(",").map((c) => c.trim()))
+      .filter((cols) => cols.some((col) => col.length));
+    setCsvHeaders(headers);
+    setCsvRows(rows);
+    setMapping({});
+    setPreview([]);
+    setError(null);
+  };
+
+  const buildPreview = () => {
+    if (!mapping.date || !mapping.amount || !mapping.merchant) {
+      setError("Map at least date, amount, and merchant columns.");
+      return;
+    }
+    const dateIdx = csvHeaders.indexOf(mapping.date);
+    const amountIdx = csvHeaders.indexOf(mapping.amount);
+    const merchantIdx = csvHeaders.indexOf(mapping.merchant);
+    const noteIdx = mapping.note ? csvHeaders.indexOf(mapping.note) : -1;
+    const accountIdx = mapping.account ? csvHeaders.indexOf(mapping.account) : -1;
+
+    const rows = csvRows.slice(0, 10).map((cols) => ({
+      date: cols[dateIdx] ?? "",
+      amount: cols[amountIdx] ?? "",
+      merchant: cols[merchantIdx] ?? "",
+      note: noteIdx >= 0 ? cols[noteIdx] ?? "" : "",
+      account: accountIdx >= 0 ? cols[accountIdx] ?? "" : "",
+    }));
+    setPreview(rows);
+    setError(null);
+  };
+
+  const importCsv = async () => {
+    if (!csvRows.length) {
+      setError("No CSV rows loaded.");
+      return;
+    }
+    if (!mapping.date || !mapping.amount || !mapping.merchant) {
+      setError("Map at least date, amount, and merchant columns.");
+      return;
+    }
+    const dateIdx = csvHeaders.indexOf(mapping.date);
+    const amountIdx = csvHeaders.indexOf(mapping.amount);
+    const merchantIdx = csvHeaders.indexOf(mapping.merchant);
+    const noteIdx = mapping.note ? csvHeaders.indexOf(mapping.note) : -1;
+    const accountIdx = mapping.account ? csvHeaders.indexOf(mapping.account) : -1;
+
+    const rows = csvRows
+      .map((cols) => {
+        const date = cols[dateIdx];
+        const amount = cols[amountIdx];
+        const merchant = cols[merchantIdx];
+        if (!date || !amount || !merchant) return null;
+        const numericAmount = Number(amount);
+        if (!Number.isFinite(numericAmount)) return null;
+        return {
+          postedAt: date,
+          amount: numericAmount,
+          description: merchant,
+          notes: noteIdx >= 0 ? cols[noteIdx] : undefined,
+          accountName: accountIdx >= 0 ? cols[accountIdx] : undefined,
+          accountId: undefined,
+        };
+      })
+      .filter(Boolean) as Array<{
+        postedAt: string;
+        amount: number;
+        description: string;
+        notes?: string;
+        accountName?: string;
+      }>;
+
+    if (!rows.length) {
+      setError("No valid rows to import.");
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const res = await fetch("/api/transactions/import", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          rows,
+          fallbackAccountId: fallbackAccountId || null,
+        }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body?.error ?? "Import failed");
+      }
+      await refreshTransactions();
+      setError(null);
+      setCsvHeaders([]);
+      setCsvRows([]);
+      setMapping({});
+      setPreview([]);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Import failed";
+      setError(message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const exportCsv = async () => {
+    const params = new URLSearchParams();
+    if (filters.from) params.set("from", filters.from);
+    if (filters.to) params.set("to", filters.to);
+    const res = await fetch(`/api/transactions/export?${params.toString()}`, {
+      cache: "no-store",
+    });
+    if (!res.ok) {
+      setError("Failed to export CSV.");
+      return;
+    }
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "transactions.csv";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  };
+
   const handleDelete = async (id: string) => {
     if (!window.confirm("Delete this transaction?")) return;
     setSubmitting(true);
@@ -319,8 +470,11 @@ export function TransactionsClient({
           >
             Quick add
           </button>
-          <button className="pill bg-emerald-500 text-white border-transparent shadow-[0_10px_28px_rgba(34,197,143,0.35)] hover:brightness-105">
-            Import CSV
+          <button
+            className="pill border-border/80 bg-white/80 text-ink hover:border-emerald-500/50"
+            onClick={exportCsv}
+          >
+            Export CSV
           </button>
         </div>
       </div>
@@ -396,9 +550,126 @@ export function TransactionsClient({
             />
           </div>
         </div>
-        {error ? (
-          <p className="text-sm text-red-600">{error}</p>
-        ) : null}
+      {error ? (
+        <p className="text-sm text-red-600">{error}</p>
+      ) : null}
+
+      <div className="rounded-2xl border border-border/70 bg-card/80 p-4 space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-sm text-muted">CSV Import</p>
+            <h2 className="text-lg font-semibold text-ink">
+              Map columns, preview, then import
+            </h2>
+          </div>
+          <input
+            type="file"
+            accept=".csv,text/csv"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) {
+                void parseCsv(file);
+              }
+            }}
+          />
+        </div>
+        {csvHeaders.length > 0 && (
+          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-5">
+            {[
+              { key: "date", label: "Date" },
+              { key: "amount", label: "Amount" },
+              { key: "merchant", label: "Merchant" },
+              { key: "note", label: "Note (optional)" },
+              { key: "account", label: "Account (optional)" },
+            ].map((field) => (
+              <div key={field.key} className="space-y-1">
+                <label className="text-sm text-ink">{field.label}</label>
+                <select
+                  className="w-full rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+                  value={(mapping as any)[field.key] ?? ""}
+                  onChange={(e) =>
+                    setMapping((prev) => ({ ...prev, [field.key]: e.target.value }))
+                  }
+                >
+                  <option value="">Not mapped</option>
+                  {csvHeaders.map((header) => (
+                    <option key={header} value={header}>
+                      {header}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {csvHeaders.length > 0 && (
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="space-y-1">
+              <label className="text-sm text-ink">Fallback account</label>
+              <select
+                value={fallbackAccountId}
+                onChange={(e) => setFallbackAccountId(e.target.value)}
+                className="rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+              >
+                {accounts.map((account) => (
+                  <option key={account.id} value={account.id}>
+                    {account.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <button
+              onClick={buildPreview}
+              className="pill border-border/70 bg-white/80 text-sm text-ink hover:border-emerald-500/50"
+            >
+              Preview first 10 rows
+            </button>
+            <button
+              onClick={importCsv}
+              disabled={submitting}
+              className="pill bg-emerald-500 text-white text-sm border-transparent shadow-[0_10px_26px_rgba(34,197,143,0.28)] hover:brightness-105 disabled:opacity-60"
+            >
+              {submitting ? "Importing…" : "Import CSV"}
+            </button>
+          </div>
+        )}
+
+        {preview.length > 0 && (
+          <div className="rounded-xl border border-border/60 bg-white/80">
+            <div className="overflow-auto">
+              <table className="min-w-full divide-y divide-border/70 text-sm">
+                <thead className="bg-card/80">
+                  <tr>
+                    {["Date", "Amount", "Merchant", "Note", "Account"].map((col) => (
+                      <th
+                        key={col}
+                        className="px-4 py-2 text-left font-medium uppercase tracking-[0.08em] text-muted"
+                      >
+                        {col}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border/70">
+                  {preview.map((row, idx) => (
+                    <tr key={idx} className="bg-white/80">
+                      <td className="px-4 py-2 text-ink">{row.date}</td>
+                      <td className="px-4 py-2 text-ink">{row.amount}</td>
+                      <td className="px-4 py-2 text-ink">{row.merchant}</td>
+                      <td className="px-4 py-2 text-muted">{row.note}</td>
+                      <td className="px-4 py-2 text-muted">{row.account}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <p className="px-4 py-2 text-xs text-muted">
+              Validates dates and amounts before import; unknown accounts fall back to your selection.
+            </p>
+          </div>
+        )}
+      </div>
       </div>
 
       <div className="overflow-hidden rounded-2xl border border-border/70 bg-card shadow-[0_12px_32px_rgba(13,56,95,0.08)]">
