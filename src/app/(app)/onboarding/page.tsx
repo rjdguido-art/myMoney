@@ -7,7 +7,8 @@ export default async function OnboardingPage() {
   return (
     <OnboardingClient
       initialCurrency={user.currency ?? "USD"}
-      initialLanguage={(user.preferredLanguage as "en" | "es") ?? "en"}
+      initialLanguage={(user.locale as "en" | "es") ?? "en"}
+      initialTimezone={user.timezone ?? "UTC"}
       name={user.name}
     />
   );

@@ -9,6 +9,7 @@ type OnboardingUser = {
   timezone: string;
   preferredLanguage: string;
   onboarded: boolean;
+  locale: string;
 };
 
 export async function requireOnboardedUser(): Promise<OnboardingUser> {
@@ -26,6 +27,7 @@ export async function requireOnboardedUser(): Promise<OnboardingUser> {
       timezone: true,
       preferredLanguage: true,
       onboarded: true,
+      locale: true,
     },
   });
 
@@ -34,7 +36,7 @@ export async function requireOnboardedUser(): Promise<OnboardingUser> {
   }
 
   if (!user.onboarded) {
-    redirect("/onboarding");
+    redirect("/welcome");
   }
 
   return user;
@@ -55,6 +57,7 @@ export async function requireNotOnboardedUser(): Promise<OnboardingUser> {
       timezone: true,
       preferredLanguage: true,
       onboarded: true,
+      locale: true,
     },
   });
 

@@ -2,9 +2,10 @@
 
 import { FormEvent, Suspense, useState } from "react";
 import { signIn } from "next-auth/react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 function LoginPageContent() {
+  const router = useRouter();
   const params = useSearchParams();
   const callbackUrl = params.get("callbackUrl") ?? "/dashboard";
   const [email, setEmail] = useState("");
@@ -17,16 +18,34 @@ function LoginPageContent() {
     setLoading(true);
     setError(null);
     const result = await signIn("credentials", {
-      redirect: true,
+      redirect: false,
       email,
       password,
       callbackUrl,
     });
-    setLoading(false);
 
     if (result?.error) {
+      setLoading(false);
       setError("Invalid credentials");
+      return;
     }
+
+    try {
+      const res = await fetch("/api/onboarding");
+      if (res.ok) {
+        const data = await res.json();
+        if (!data.onboarded) {
+          router.push("/welcome");
+          return;
+        }
+      }
+    } catch {
+      // Fall back to the callback route if onboarding status can't be checked.
+    } finally {
+      setLoading(false);
+    }
+
+    router.push(callbackUrl);
   };
 
   return (

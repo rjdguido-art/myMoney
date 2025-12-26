@@ -1,18 +1,26 @@
 import { requireOnboardedUser } from "@/lib/onboarding";
+import { t, tJSON, type Locale } from "@/lib/i18n";
+import { LanguageToggle } from "@/app/(app)/components/language-toggle";
 
 export default async function SettingsPage() {
-  await requireOnboardedUser();
+  const user = await requireOnboardedUser();
+  const locale = (user.locale as Locale) ?? "en";
+  const notifications = tJSON("settings.notificationItems", locale, [] as string[]);
+  const navCards = tJSON(
+    "settings.navCards",
+    locale,
+    [] as Array<{ title: string; detail: string }>,
+  );
+
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-ink">Settings</h1>
-          <p className="text-muted">
-            Manage account preferences, connections, and notifications.
-          </p>
+          <h1 className="text-2xl font-semibold text-ink">{t("settings.title", locale)}</h1>
+          <p className="text-muted">{t("settings.intro", locale)}</p>
         </div>
         <button className="pill bg-emerald-500 text-white border-transparent shadow-[0_10px_24px_rgba(34,197,143,0.32)] hover:brightness-105">
-          Save changes
+          {t("settings.save", locale)}
         </button>
       </div>
 
@@ -20,54 +28,76 @@ export default async function SettingsPage() {
         <section className="space-y-4 rounded-2xl border border-border/70 bg-card p-6 shadow-[0_12px_32px_rgba(13,56,95,0.08)]">
           <div>
             <p className="pill bg-white/80 text-emerald-700 border-emerald-500/30">
-              Profile
+              {t("settings.profilePill", locale)}
             </p>
-            <h2 className="mt-2 text-lg font-semibold text-ink">Identity</h2>
-            <p className="text-muted">Name, email, and timezone.</p>
+            <h2 className="mt-2 text-lg font-semibold text-ink">
+              {t("settings.profileTitle", locale)}
+            </h2>
+            <p className="text-muted">{t("settings.profileIntro", locale)}</p>
           </div>
           <form className="space-y-4">
             <div className="space-y-2">
-              <label className="text-sm text-ink">Full name</label>
+              <label className="text-sm text-ink">{t("settings.fullName", locale)}</label>
               <input
                 className="w-full rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
-                placeholder="Casey Money"
+                placeholder={t("settings.placeholders.fullName", locale)}
+                title={t("settings.helpers.fullName", locale)}
               />
+              <p className="text-xs text-muted">{t("settings.helpers.fullName", locale)}</p>
             </div>
             <div className="space-y-2">
-              <label className="text-sm text-ink">Email</label>
+              <label className="text-sm text-ink">{t("settings.email", locale)}</label>
               <input
                 className="w-full rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
-                placeholder="you@example.com"
+                placeholder={t("settings.placeholders.email", locale)}
                 type="email"
+                title={t("settings.helpers.email", locale)}
               />
+              <p className="text-xs text-muted">{t("settings.helpers.email", locale)}</p>
             </div>
             <div className="space-y-2">
-              <label className="text-sm text-ink">Timezone</label>
-              <select className="w-full rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none">
+              <label className="text-sm text-ink">{t("settings.timezone", locale)}</label>
+              <select
+                className="w-full rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+                title={t("settings.helpers.timezone", locale)}
+              >
                 <option>UTC</option>
                 <option>ET (UTC-5)</option>
                 <option>PT (UTC-8)</option>
               </select>
+              <p className="text-xs text-muted">{t("settings.helpers.timezone", locale)}</p>
             </div>
           </form>
         </section>
 
         <section className="space-y-4 rounded-2xl border border-border/70 bg-card p-6 shadow-[0_12px_32px_rgba(13,56,95,0.08)]">
           <div>
-            <p className="pill bg-white/80 text-navy-700 border-navy-500/30">
-              Notifications
+            <p className="pill bg-white/80 text-emerald-700 border-emerald-500/30">
+              {t("settings.languageTitle", locale)}
             </p>
             <h2 className="mt-2 text-lg font-semibold text-ink">
-              Alerts & automation
+              {t("settings.languageTitle", locale)}
             </h2>
-            <p className="text-muted">Stay in control with timely nudges.</p>
+            <p className="text-muted">{t("settings.languageIntro", locale)}</p>
+          </div>
+          <div className="space-y-2">
+            <LanguageToggle locale={locale} />
+            <p className="text-xs text-muted">{t("settings.helpers.language", locale)}</p>
+          </div>
+        </section>
+
+        <section className="space-y-4 rounded-2xl border border-border/70 bg-card p-6 shadow-[0_12px_32px_rgba(13,56,95,0.08)]">
+          <div>
+            <p className="pill bg-white/80 text-navy-700 border-navy-500/30">
+              {t("settings.notificationsPill", locale)}
+            </p>
+            <h2 className="mt-2 text-lg font-semibold text-ink">
+              {t("settings.notificationsTitle", locale)}
+            </h2>
+            <p className="text-muted">{t("settings.notificationsIntro", locale)}</p>
           </div>
           <div className="space-y-4">
-            {[
-              "Large transaction alerts",
-              "Upcoming bill reminders",
-              "Weekly spending summary",
-            ].map((item) => (
+            {notifications.map((item) => (
               <label
                 key={item}
                 className="flex items-center justify-between rounded-xl border border-border/60 bg-white/80 px-4 py-3 text-sm text-ink"
@@ -82,22 +112,15 @@ export default async function SettingsPage() {
         <section className="space-y-4 rounded-2xl border border-border/70 bg-card p-6 shadow-[0_12px_32px_rgba(13,56,95,0.08)] lg:col-span-2">
           <div>
             <p className="pill bg-white/80 text-emerald-700 border-emerald-500/30">
-              Navigation guide
+              {t("settings.navGuidePill", locale)}
             </p>
-            <h2 className="mt-2 text-lg font-semibold text-ink">What you can do</h2>
-            <p className="text-muted">
-              Quick map of the core workspaces so you can move fast.
-            </p>
+            <h2 className="mt-2 text-lg font-semibold text-ink">
+              {t("settings.navGuideTitle", locale)}
+            </h2>
+            <p className="text-muted">{t("settings.navGuideIntro", locale)}</p>
           </div>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {[
-              { title: "Dashboard", detail: "Cashflow forecast and safe-to-spend." },
-              { title: "Transactions", detail: "Review, split, and categorize activity." },
-              { title: "Budgets", detail: "Set category targets and track progress." },
-              { title: "Bills", detail: "Track recurring bills and due dates." },
-              { title: "Insights", detail: "See trends and category breakdowns." },
-              { title: "Settings", detail: "Update your preferences and rules." },
-            ].map((item) => (
+            {navCards.map((item) => (
               <div
                 key={item.title}
                 className="rounded-xl border border-border/70 bg-white/80 p-4 text-sm"

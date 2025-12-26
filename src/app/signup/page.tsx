@@ -32,14 +32,34 @@ function SignupPageContent() {
       return;
     }
 
-    await signIn("credentials", {
+    const result = await signIn("credentials", {
       redirect: false,
       email,
       password,
       callbackUrl,
     });
 
-    setLoading(false);
+    if (result?.error) {
+      setLoading(false);
+      setError("Could not sign in after creating your account");
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/onboarding");
+      if (res.ok) {
+        const data = await res.json();
+        if (!data.onboarded) {
+          router.push("/welcome");
+          return;
+        }
+      }
+    } catch {
+      // Fall back to the callback route if onboarding status can't be checked.
+    } finally {
+      setLoading(false);
+    }
+
     router.push(callbackUrl);
   };
 

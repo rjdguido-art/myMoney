@@ -44,6 +44,7 @@ model User {
   currency       String          @default("USD")
   timezone       String          @default("UTC")
   preferredLanguage String       @default("en")
+  locale         String          @default("en")
   onboarded      Boolean         @default(false)
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt

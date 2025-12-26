@@ -4,6 +4,11 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { BillStatus, CategoryType, Frequency } from "@prisma/client";
 
+const deductionSchema = z.object({
+  name: z.string().trim().min(1),
+  amount: z.number().min(0),
+});
+
 const billSchema = z.object({
   name: z.string().trim().min(1),
   amount: z.number().min(0),
@@ -11,30 +16,32 @@ const billSchema = z.object({
   frequency: z.enum(["WEEKLY", "MONTHLY"]),
 });
 
-const debtSchema = z.object({
-  name: z.string().trim().min(1),
-  minimumPayment: z.number().min(0),
-});
-
 const budgetSchema = z.object({
   category: z.string().trim().min(1),
   amount: z.number().min(0),
 });
 
+const goalSchema = z.object({
+  name: z.string().trim().min(1),
+  targetAmount: z.number().min(0),
+});
+
+const debtSchema = z.object({
+  name: z.string().trim().min(1),
+  minimumPayment: z.number().min(0),
+});
+
 const onboardingSchema = z.object({
   preferredLanguage: z.enum(["en", "es"]),
   currency: z.string().trim().min(1),
+  timezone: z.string().trim().min(1),
   payFrequency: z.enum(["WEEKLY", "BIWEEKLY", "SEMIMONTHLY", "MONTHLY"]),
   takeHomePay: z.number().min(0),
+  deductions: z.array(deductionSchema).optional(),
   bills: z.array(billSchema).optional(),
-  savings: z
-    .object({
-      mode: z.enum(["amount", "percent"]),
-      value: z.number().min(0),
-    })
-    .optional(),
+  budgets: z.array(budgetSchema).min(1),
+  savingsGoals: z.array(goalSchema).optional(),
   debts: z.array(debtSchema).optional(),
-  budgets: z.array(budgetSchema).optional(),
 });
 
 function toDecimal(value: number | null | undefined) {
@@ -95,21 +102,50 @@ export async function POST(request: Request) {
   const {
     preferredLanguage,
     currency,
+    timezone,
     payFrequency,
     takeHomePay,
+    deductions,
     bills,
-    savings,
-    debts,
     budgets,
+    savingsGoals,
+    debts,
   } = parsed.data;
 
   await prisma.$transaction(async (tx) => {
     await tx.user.update({
       where: { id: userId },
-      data: { currency, preferredLanguage, onboarded: true },
+      data: {
+        currency,
+        preferredLanguage,
+        locale: preferredLanguage,
+        timezone,
+        onboarded: true,
+      },
     });
 
+    const accountCount = await tx.account.count({ where: { userId } });
+    if (accountCount === 0) {
+      await tx.account.create({
+        data: {
+          userId,
+          name: "Primary Checking",
+          type: "CHECKING",
+          institution: null,
+          balance: 0,
+          currency,
+        },
+      });
+    }
+
+    await tx.bill.deleteMany({ where: { userId } });
+    await tx.recurringRule.deleteMany({ where: { userId } });
     await tx.paySchedule.deleteMany({ where: { userId } });
+    await tx.debt.deleteMany({ where: { userId } });
+    await tx.goal.deleteMany({ where: { userId } });
+    await tx.budgetItem.deleteMany({ where: { budgetPlan: { userId } } });
+    await tx.budgetPlan.deleteMany({ where: { userId } });
+
     await tx.paySchedule.create({
       data: {
         userId,
@@ -122,52 +158,63 @@ export async function POST(request: Request) {
       },
     });
 
-    await tx.bill.deleteMany({ where: { userId } });
+    if (deductions?.length) {
+      const deductionCategory = await tx.category.upsert({
+        where: { userId_name: { userId, name: "Deductions" } },
+        update: { type: CategoryType.EXPENSE },
+        create: { userId, name: "Deductions", type: CategoryType.EXPENSE },
+      });
+
+      for (const deduction of deductions) {
+        await tx.recurringRule.create({
+          data: {
+            userId,
+            name: deduction.name,
+            cadence: payFrequency as Frequency,
+            interval: 1,
+            amount: toDecimal(deduction.amount),
+            currency,
+            startDate: new Date(),
+            categoryId: deductionCategory.id,
+          },
+        });
+      }
+    }
+
     if (bills?.length) {
-      await tx.bill.createMany({
-        data: bills.map((bill) => ({
-          userId,
-          name: bill.name,
-          amount: toDecimal(bill.amount),
-          currency,
-          dueDate: nextDueDate(bill.dueDay),
-          frequency: bill.frequency === "WEEKLY" ? Frequency.WEEKLY : Frequency.MONTHLY,
-          status: BillStatus.SCHEDULED,
-          autopay: false,
-          reminderDays: 3,
-        })),
-      });
-    }
+      for (const bill of bills) {
+        const dueDate = nextDueDate(bill.dueDay);
+        const cadence = bill.frequency === "WEEKLY" ? Frequency.WEEKLY : Frequency.MONTHLY;
+        const recurringRule = await tx.recurringRule.create({
+          data: {
+            userId,
+            name: bill.name,
+            cadence,
+            interval: 1,
+            amount: toDecimal(bill.amount),
+            currency,
+            startDate: dueDate,
+            dayOfMonth: cadence === Frequency.MONTHLY ? bill.dueDay : null,
+            dayOfWeek: cadence === Frequency.WEEKLY ? dueDate.getDay() : null,
+          },
+        });
 
-    await tx.deduction.deleteMany({ where: { userId } });
-    if (savings && savings.value > 0) {
-      await tx.deduction.create({
-        data: {
-          userId,
-          name: "Savings",
-          amount: toDecimal(savings.value),
-          isPercent: savings.mode === "percent",
-        },
-      });
+        await tx.bill.create({
+          data: {
+            userId,
+            name: bill.name,
+            amount: toDecimal(bill.amount),
+            currency,
+            dueDate,
+            frequency: cadence,
+            status: BillStatus.SCHEDULED,
+            autopay: false,
+            reminderDays: 3,
+            recurringRuleId: recurringRule.id,
+          },
+        });
+      }
     }
-
-    await tx.debt.deleteMany({ where: { userId } });
-    if (debts?.length) {
-      await tx.debt.createMany({
-        data: debts.map((debt) => ({
-          userId,
-          name: debt.name,
-          principal: 0,
-          interestRate: 0,
-          minimumPayment: toDecimal(debt.minimumPayment),
-        })),
-      });
-    }
-
-    await tx.budgetItem.deleteMany({
-      where: { budgetPlan: { userId } },
-    });
-    await tx.budgetPlan.deleteMany({ where: { userId } });
 
     if (budgets?.length) {
       const categories = await Promise.all(
@@ -207,6 +254,31 @@ export async function POST(request: Request) {
             spent: 0,
           };
         }),
+      });
+    }
+
+    if (savingsGoals?.length) {
+      await tx.goal.createMany({
+        data: savingsGoals.map((goal) => ({
+          userId,
+          name: goal.name,
+          targetAmount: toDecimal(goal.targetAmount),
+          currentAmount: 0,
+          targetDate: null,
+        })),
+      });
+    }
+
+    if (debts?.length) {
+      await tx.debt.createMany({
+        data: debts.map((debt) => ({
+          userId,
+          name: debt.name,
+          principal: 0,
+          interestRate: 0,
+          minimumPayment: toDecimal(debt.minimumPayment),
+          dueDay: null,
+        })),
       });
     }
   });

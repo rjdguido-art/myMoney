@@ -1,12 +1,15 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { z } from "zod";
+import { t, tJSON, type Locale } from "@/lib/i18n";
 
-type Language = "en" | "es";
 type PayFrequency = "WEEKLY" | "BIWEEKLY" | "SEMIMONTHLY" | "MONTHLY";
 type BillFrequency = "WEEKLY" | "MONTHLY";
 
+type DeductionRow = { id: string; name: string; amount: string };
 type BillRow = {
   id: string;
   name: string;
@@ -14,15 +17,18 @@ type BillRow = {
   dueDay: string;
   frequency: BillFrequency;
 };
-
-type DebtRow = { id: string; name: string; minimumPayment: string };
 type BudgetRow = { id: string; category: string; amount: string };
+type GoalRow = { id: string; name: string; targetAmount: string };
+type DebtRow = { id: string; name: string; minimumPayment: string };
 
 type Props = {
   initialCurrency: string;
-  initialLanguage: Language;
+  initialLanguage: Locale;
+  initialTimezone: string;
   name: string | null;
 };
+
+const STORAGE_KEY = "onboardingDraft";
 
 const currencyOptions = ["USD", "EUR", "GBP", "CAD", "AUD"];
 
@@ -38,6 +44,19 @@ const billFrequencyOptions: { value: BillFrequency; label: { en: string; es: str
   { value: "WEEKLY", label: { en: "Weekly", es: "Semanal" } },
 ];
 
+const fallbackTimezones = [
+  "UTC",
+  "America/New_York",
+  "America/Chicago",
+  "America/Denver",
+  "America/Los_Angeles",
+  "Europe/London",
+  "Europe/Paris",
+  "Asia/Tokyo",
+  "Asia/Singapore",
+  "Australia/Sydney",
+];
+
 const defaultBudgets = [
   "Groceries",
   "Transport",
@@ -47,90 +66,43 @@ const defaultBudgets = [
   "Other",
 ];
 
-const copy = {
-  en: {
-    welcome: "Welcome",
-    intro: "Let’s build a starter spending plan for you.",
-    steps: [
-      { title: "Basics", description: "Preferred language and currency." },
-      { title: "Paycheck", description: "How often you get paid." },
-      { title: "Fixed bills", description: "Recurring bills and due days." },
-      { title: "Savings", description: "Set a savings target per paycheck." },
-      { title: "Debt", description: "Optional minimum payments." },
-      { title: "Budgets", description: "Monthly targets by category." },
-      { title: "Review", description: "Confirm your plan." },
-    ],
-    labels: {
-      language: "Preferred language",
-      currency: "Currency",
-      payFrequency: "Pay frequency",
-      takeHome: "Take-home pay per paycheck",
-      billsTitle: "Add fixed bills",
-      billName: "Bill name",
-      billAmount: "Amount",
-      billDueDay: "Due day (1-31)",
-      billFrequency: "Frequency",
-      addBill: "Add bill",
-      savingsMode: "Savings goal",
-      savingsAmount: "Amount per paycheck",
-      savingsPercent: "Percent per paycheck",
-      debtsTitle: "Debt payments (optional)",
-      debtName: "Debt name",
-      debtMin: "Minimum monthly payment",
-      addDebt: "Add debt",
-      budgetsTitle: "Monthly category targets",
-      category: "Category",
-      target: "Target",
-      addCategory: "Add category",
-      summaryTitle: "Plan summary",
-      confirm: "Confirm & Create Plan",
-      next: "Next",
-      back: "Back",
-      edit: "Edit",
-    },
-  },
-  es: {
-    welcome: "Bienvenido",
-    intro: "Vamos a crear tu plan de gastos inicial.",
-    steps: [
-      { title: "Basicos", description: "Idioma y moneda preferidos." },
-      { title: "Pago", description: "Con que frecuencia cobras." },
-      { title: "Gastos fijos", description: "Facturas recurrentes y vencimientos." },
-      { title: "Ahorro", description: "Meta de ahorro por pago." },
-      { title: "Deudas", description: "Pagos minimos opcionales." },
-      { title: "Presupuestos", description: "Objetivos mensuales por categoria." },
-      { title: "Resumen", description: "Confirma tu plan." },
-    ],
-    labels: {
-      language: "Idioma preferido",
-      currency: "Moneda",
-      payFrequency: "Frecuencia de pago",
-      takeHome: "Ingreso neto por pago",
-      billsTitle: "Agregar gastos fijos",
-      billName: "Nombre",
-      billAmount: "Monto",
-      billDueDay: "Dia de vencimiento (1-31)",
-      billFrequency: "Frecuencia",
-      addBill: "Agregar gasto",
-      savingsMode: "Meta de ahorro",
-      savingsAmount: "Monto por pago",
-      savingsPercent: "Porcentaje por pago",
-      debtsTitle: "Pagos de deuda (opcional)",
-      debtName: "Nombre de deuda",
-      debtMin: "Pago minimo mensual",
-      addDebt: "Agregar deuda",
-      budgetsTitle: "Objetivos mensuales por categoria",
-      category: "Categoria",
-      target: "Objetivo",
-      addCategory: "Agregar categoria",
-      summaryTitle: "Resumen del plan",
-      confirm: "Confirmar y crear plan",
-      next: "Siguiente",
-      back: "Atras",
-      edit: "Editar",
-    },
-  },
-};
+const basicsSchema = z.object({
+  preferredLanguage: z.enum(["en", "es"]),
+  currency: z.string().min(1),
+  timezone: z.string().min(1),
+});
+
+const paycheckSchema = z.object({
+  payFrequency: z.enum(["WEEKLY", "BIWEEKLY", "SEMIMONTHLY", "MONTHLY"]),
+  takeHomePay: z.number().positive(),
+});
+
+const deductionSchema = z.object({
+  name: z.string().min(1),
+  amount: z.number().positive(),
+});
+
+const billSchema = z.object({
+  name: z.string().min(1),
+  amount: z.number().positive(),
+  dueDay: z.number().int().min(1).max(31),
+  frequency: z.enum(["WEEKLY", "MONTHLY"]),
+});
+
+const budgetSchema = z.object({
+  category: z.string().min(1),
+  amount: z.number().positive(),
+});
+
+const goalSchema = z.object({
+  name: z.string().min(1),
+  targetAmount: z.number().positive(),
+});
+
+const debtSchema = z.object({
+  name: z.string().min(1),
+  minimumPayment: z.number().positive(),
+});
 
 function uid() {
   if (typeof crypto !== "undefined" && crypto.randomUUID) return crypto.randomUUID();
@@ -142,51 +114,262 @@ function toNumber(value: string) {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
-export function OnboardingClient({ initialCurrency, initialLanguage, name }: Props) {
+function getTimezoneOptions() {
+  try {
+    if (typeof Intl !== "undefined" && "supportedValuesOf" in Intl) {
+      return (Intl as typeof Intl & { supportedValuesOf: (key: string) => string[] }).supportedValuesOf(
+        "timeZone",
+      );
+    }
+  } catch {
+    return fallbackTimezones;
+  }
+  return fallbackTimezones;
+}
+
+function getResolvedTimezone() {
+  try {
+    if (typeof Intl !== "undefined") {
+      return Intl.DateTimeFormat().resolvedOptions().timeZone;
+    }
+  } catch {
+    return null;
+  }
+  return null;
+}
+
+type DraftState = {
+  step: number;
+  language: Locale;
+  currency: string;
+  timezone: string;
+  payFrequency: PayFrequency;
+  takeHomePay: string;
+  deductions: DeductionRow[];
+  bills: BillRow[];
+  budgets: BudgetRow[];
+  goals: GoalRow[];
+  debts: DebtRow[];
+};
+
+export function OnboardingClient({
+  initialCurrency,
+  initialLanguage,
+  initialTimezone,
+  name,
+}: Props) {
   const router = useRouter();
   const [step, setStep] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [language, setLanguage] = useState<Language>(initialLanguage);
+  const [language, setLanguage] = useState<Locale>(initialLanguage);
   const [currency, setCurrency] = useState(initialCurrency);
+  const [timezone, setTimezone] = useState(initialTimezone);
   const [payFrequency, setPayFrequency] = useState<PayFrequency>("BIWEEKLY");
   const [takeHomePay, setTakeHomePay] = useState("");
+  const [deductions, setDeductions] = useState<DeductionRow[]>([
+    { id: uid(), name: "", amount: "" },
+  ]);
   const [bills, setBills] = useState<BillRow[]>([
     { id: uid(), name: "", amount: "", dueDay: "", frequency: "MONTHLY" },
   ]);
-  const [savingsMode, setSavingsMode] = useState<"amount" | "percent">("amount");
-  const [savingsValue, setSavingsValue] = useState("");
-  const [debts, setDebts] = useState<DebtRow[]>([]);
   const [budgets, setBudgets] = useState<BudgetRow[]>(
     defaultBudgets.map((category) => ({ id: uid(), category, amount: "" })),
   );
+  const [goals, setGoals] = useState<GoalRow[]>([]);
+  const [debts, setDebts] = useState<DebtRow[]>([]);
 
-  const text = copy[language];
-  const steps = useMemo(() => text.steps, [text.steps]);
+  const steps = useMemo(
+    () =>
+      tJSON(
+        "onboarding.steps",
+        language,
+        [] as Array<{ title: string; description: string }>,
+      ),
+    [language],
+  );
+  const labels = useMemo(
+    () => tJSON("onboarding.labels", language, {} as Record<string, string>),
+    [language],
+  );
+  const tips = useMemo(
+    () => tJSON("onboarding.tips", language, {} as Record<string, string>),
+    [language],
+  );
+  const errors = useMemo(
+    () => tJSON("onboarding.errors", language, {} as Record<string, string>),
+    [language],
+  );
+  const helpers = useMemo(
+    () => tJSON("onboarding.helpers", language, {} as Record<string, string>),
+    [language],
+  );
   const progress = ((step + 1) / steps.length) * 100;
+  const timezoneOptions = useMemo(() => getTimezoneOptions(), []);
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (!stored) {
+        const resolved = getResolvedTimezone();
+        if (resolved && initialTimezone === "UTC") {
+          setTimezone(resolved);
+        }
+      } else {
+        const draft = JSON.parse(stored) as DraftState;
+        if (draft) {
+          setStep(Number.isFinite(draft.step) ? draft.step : 0);
+          setLanguage(draft.language ?? initialLanguage);
+          setCurrency(draft.currency ?? initialCurrency);
+          setTimezone(draft.timezone ?? initialTimezone);
+          setPayFrequency(draft.payFrequency ?? "BIWEEKLY");
+          setTakeHomePay(draft.takeHomePay ?? "");
+          setDeductions(
+            draft.deductions?.length ? draft.deductions : [{ id: uid(), name: "", amount: "" }],
+          );
+          setBills(
+            draft.bills?.length
+              ? draft.bills
+              : [{ id: uid(), name: "", amount: "", dueDay: "", frequency: "MONTHLY" }],
+          );
+          setBudgets(
+            draft.budgets?.length
+              ? draft.budgets
+              : defaultBudgets.map((category) => ({ id: uid(), category, amount: "" })),
+          );
+          setGoals(draft.goals ?? []);
+          setDebts(draft.debts ?? []);
+        }
+      }
+    } catch {
+      // Ignore invalid drafts.
+    }
+    setHydrated(true);
+  }, [initialCurrency, initialLanguage, initialTimezone]);
+
+  const showSkeleton = !hydrated;
+
+  useEffect(() => {
+    const draft: DraftState = {
+      step,
+      language,
+      currency,
+      timezone,
+      payFrequency,
+      takeHomePay,
+      deductions,
+      bills,
+      budgets,
+      goals,
+      debts,
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
+  }, [
+    step,
+    language,
+    currency,
+    timezone,
+    payFrequency,
+    takeHomePay,
+    deductions,
+    bills,
+    budgets,
+    goals,
+    debts,
+  ]);
+
+  const validateStep = () => {
+    if (step === 0) {
+      const result = basicsSchema.safeParse({
+        preferredLanguage: language,
+        currency,
+        timezone,
+      });
+      if (!result.success) {
+        setError(errors.basics);
+        return false;
+      }
+    }
+
+    if (step === 1) {
+      const result = paycheckSchema.safeParse({
+        payFrequency,
+        takeHomePay: toNumber(takeHomePay),
+      });
+      if (!result.success) {
+        setError(errors.paycheck);
+        return false;
+      }
+    }
+
+    if (step === 2) {
+      const trimmed = deductions
+        .filter((row) => row.name.trim())
+        .map((row) => ({ name: row.name.trim(), amount: toNumber(row.amount) }));
+      const result = z.array(deductionSchema).safeParse(trimmed);
+      if (!result.success) {
+        setError(errors.deductions);
+        return false;
+      }
+    }
+
+    if (step === 3) {
+      const trimmed = bills
+        .filter((row) => row.name.trim())
+        .map((row) => ({
+          name: row.name.trim(),
+          amount: toNumber(row.amount),
+          dueDay: Number(row.dueDay),
+          frequency: row.frequency,
+        }));
+      const result = z.array(billSchema).safeParse(trimmed);
+      if (!result.success) {
+        setError(errors.bills);
+        return false;
+      }
+    }
+
+    if (step === 4) {
+      const trimmed = budgets
+        .filter((row) => row.category.trim() && toNumber(row.amount) > 0)
+        .map((row) => ({ category: row.category.trim(), amount: toNumber(row.amount) }));
+      const result = z.array(budgetSchema).min(1).safeParse(trimmed);
+      if (!result.success) {
+        setError(errors.budgets);
+        return false;
+      }
+    }
+
+    if (step === 5) {
+      const trimmed = goals
+        .filter((row) => row.name.trim())
+        .map((row) => ({ name: row.name.trim(), targetAmount: toNumber(row.targetAmount) }));
+      const result = z.array(goalSchema).safeParse(trimmed);
+      if (!result.success) {
+        setError(errors.goals);
+        return false;
+      }
+    }
+
+    if (step === 6) {
+      const trimmed = debts
+        .filter((row) => row.name.trim())
+        .map((row) => ({ name: row.name.trim(), minimumPayment: toNumber(row.minimumPayment) }));
+      const result = z.array(debtSchema).safeParse(trimmed);
+      if (!result.success) {
+        setError(errors.debts);
+        return false;
+      }
+    }
+
+    setError(null);
+    return true;
+  };
 
   const nextStep = () => {
-    if (step === 1 && toNumber(takeHomePay) <= 0) {
-      setError(language === "es" ? "Ingresa tu ingreso neto." : "Enter your take-home pay.");
-      return;
-    }
-    if (
-      step === 2 &&
-      bills.some(
-        (bill) =>
-          bill.name.trim() &&
-          (toNumber(bill.amount) <= 0 || !Number(bill.dueDay)),
-      )
-    ) {
-      setError(
-        language === "es"
-          ? "Completa monto y dia de vencimiento."
-          : "Complete amount and due day for each bill.",
-      );
-      return;
-    }
-    setError(null);
+    if (!validateStep()) return;
     setStep((s) => Math.min(s + 1, steps.length - 1));
   };
 
@@ -195,20 +378,37 @@ export function OnboardingClient({ initialCurrency, initialLanguage, name }: Pro
     setStep((s) => Math.max(s - 1, 0));
   };
 
+  const skipStep = () => {
+    setError(null);
+    setStep((s) => Math.min(s + 1, steps.length - 1));
+  };
+
+  const updateDeduction = (id: string, field: keyof DeductionRow, value: string) => {
+    setDeductions((rows) =>
+      rows.map((row) => (row.id === id ? { ...row, [field]: value } : row)),
+    );
+  };
+
   const updateBill = (id: string, field: keyof BillRow, value: string) => {
     setBills((rows) =>
       rows.map((row) => (row.id === id ? { ...row, [field]: value } : row)),
     );
   };
 
-  const updateDebt = (id: string, field: keyof DebtRow, value: string) => {
-    setDebts((rows) =>
+  const updateBudget = (id: string, field: keyof BudgetRow, value: string) => {
+    setBudgets((rows) =>
       rows.map((row) => (row.id === id ? { ...row, [field]: value } : row)),
     );
   };
 
-  const updateBudget = (id: string, field: keyof BudgetRow, value: string) => {
-    setBudgets((rows) =>
+  const updateGoal = (id: string, field: keyof GoalRow, value: string) => {
+    setGoals((rows) =>
+      rows.map((row) => (row.id === id ? { ...row, [field]: value } : row)),
+    );
+  };
+
+  const updateDebt = (id: string, field: keyof DebtRow, value: string) => {
+    setDebts((rows) =>
       rows.map((row) => (row.id === id ? { ...row, [field]: value } : row)),
     );
   };
@@ -220,8 +420,15 @@ export function OnboardingClient({ initialCurrency, initialLanguage, name }: Pro
     const payload = {
       preferredLanguage: language,
       currency,
+      timezone,
       payFrequency,
       takeHomePay: toNumber(takeHomePay),
+      deductions: deductions
+        .filter((deduction) => deduction.name.trim())
+        .map((deduction) => ({
+          name: deduction.name.trim(),
+          amount: toNumber(deduction.amount),
+        })),
       bills: bills
         .filter((bill) => bill.name.trim())
         .map((bill) => ({
@@ -230,21 +437,23 @@ export function OnboardingClient({ initialCurrency, initialLanguage, name }: Pro
           dueDay: Number(bill.dueDay),
           frequency: bill.frequency,
         })),
-      savings:
-        savingsValue.trim() !== ""
-          ? { mode: savingsMode, value: toNumber(savingsValue) }
-          : undefined,
+      budgets: budgets
+        .filter((budget) => budget.category.trim() && toNumber(budget.amount) > 0)
+        .map((budget) => ({
+          category: budget.category.trim(),
+          amount: toNumber(budget.amount),
+        })),
+      savingsGoals: goals
+        .filter((goal) => goal.name.trim())
+        .map((goal) => ({
+          name: goal.name.trim(),
+          targetAmount: toNumber(goal.targetAmount),
+        })),
       debts: debts
         .filter((debt) => debt.name.trim())
         .map((debt) => ({
           name: debt.name.trim(),
           minimumPayment: toNumber(debt.minimumPayment),
-        })),
-      budgets: budgets
-        .filter((budget) => budget.category.trim())
-        .map((budget) => ({
-          category: budget.category.trim(),
-          amount: toNumber(budget.amount),
         })),
     };
 
@@ -256,26 +465,41 @@ export function OnboardingClient({ initialCurrency, initialLanguage, name }: Pro
 
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
-      setError(data.error ?? "Failed to save onboarding");
+      setError(data.error ?? errors.save);
       setSubmitting(false);
       return;
     }
 
-    router.push("/dashboard");
+    localStorage.removeItem(STORAGE_KEY);
+    router.push("/setup-complete");
   };
+
+  const isSkippableStep = new Set([2, 3, 5, 6]).has(step);
 
   return (
     <div className="space-y-8">
+      {showSkeleton ? (
+        <div className="space-y-6 animate-pulse">
+          <div className="h-6 w-40 rounded-full bg-border/70" />
+          <div className="h-10 w-2/3 rounded bg-border/60" />
+          <div className="h-4 w-1/2 rounded bg-border/60" />
+          <div className="grid gap-3 md:grid-cols-2">
+            <div className="h-28 rounded-xl bg-border/60" />
+            <div className="h-28 rounded-xl bg-border/60" />
+          </div>
+          <div className="h-64 rounded-2xl bg-border/60" />
+        </div>
+      ) : null}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <p className="pill bg-white/80 text-emerald-700 border-emerald-500/30">
-            {text.welcome}
+            {t("onboarding.welcome", language)}
           </p>
           <h1 className="mt-2 text-3xl font-semibold text-ink">
-            {text.welcome}
+            {t("onboarding.welcome", language)}
             {name ? `, ${name.split(" ")[0]}` : ""}.
           </h1>
-          <p className="text-muted">{text.intro}</p>
+          <p className="text-muted">{t("onboarding.intro", language)}</p>
         </div>
         <div className="flex items-center gap-3">
           <div className="h-2 w-40 overflow-hidden rounded-full bg-border/70">
@@ -285,7 +509,10 @@ export function OnboardingClient({ initialCurrency, initialLanguage, name }: Pro
             />
           </div>
           <span className="text-sm font-medium text-muted">
-            Step {step + 1} / {steps.length}
+            {t("onboarding.labels.stepLabel", language, {
+              current: step + 1,
+              total: steps.length,
+            })}
           </span>
         </div>
       </div>
@@ -306,29 +533,54 @@ export function OnboardingClient({ initialCurrency, initialLanguage, name }: Pro
         ))}
       </div>
 
-      <div className="card p-8 space-y-6">
+      <div className={`card p-8 space-y-6 relative ${showSkeleton ? "opacity-60 pointer-events-none" : ""}`}>
+        {submitting ? (
+          <div className="absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-white/80 backdrop-blur">
+            <div className="flex items-center gap-3 rounded-xl border border-border/70 bg-white px-4 py-3 text-sm text-ink shadow-[0_12px_30px_rgba(13,56,95,0.12)]">
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-emerald-500 border-t-transparent" />
+              {labels.saving}
+            </div>
+          </div>
+        ) : null}
         {step === 0 && (
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <label className="text-sm text-ink">{text.labels.language}</label>
+              <label className="text-sm text-ink">{labels.language}</label>
               <select
                 value={language}
-                onChange={(e) => setLanguage(e.target.value as Language)}
+                onChange={(e) => setLanguage(e.target.value as Locale)}
                 className="w-full rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+                title={helpers.language}
               >
-                <option value="en">English</option>
-                <option value="es">Espanol</option>
+                <option value="en">{t("nav.languageEnglish", language)}</option>
+                <option value="es">{t("nav.languageSpanish", language)}</option>
               </select>
             </div>
             <div className="space-y-2">
-              <label className="text-sm text-ink">{text.labels.currency}</label>
+              <label className="text-sm text-ink">{labels.currency}</label>
               <select
                 value={currency}
                 onChange={(e) => setCurrency(e.target.value)}
                 className="w-full rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+                title={helpers.currency}
               >
                 {currencyOptions.map((c) => (
                   <option key={c}>{c}</option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-2 md:col-span-2">
+              <label className="text-sm text-ink">{labels.timezone}</label>
+              <select
+                value={timezone}
+                onChange={(e) => setTimezone(e.target.value)}
+                className="w-full rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+                title={helpers.timezone}
+              >
+                {timezoneOptions.map((tz) => (
+                  <option key={tz} value={tz}>
+                    {tz}
+                  </option>
                 ))}
               </select>
             </div>
@@ -338,11 +590,12 @@ export function OnboardingClient({ initialCurrency, initialLanguage, name }: Pro
         {step === 1 && (
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <label className="text-sm text-ink">{text.labels.payFrequency}</label>
+              <label className="text-sm text-ink">{labels.payFrequency}</label>
               <select
                 value={payFrequency}
                 onChange={(e) => setPayFrequency(e.target.value as PayFrequency)}
                 className="w-full rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+                title={helpers.payFrequency}
               >
                 {payFrequencyOptions.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -352,7 +605,7 @@ export function OnboardingClient({ initialCurrency, initialLanguage, name }: Pro
               </select>
             </div>
             <div className="space-y-2">
-              <label className="text-sm text-ink">{text.labels.takeHome}</label>
+              <label className="text-sm text-ink">{labels.takeHome}</label>
               <input
                 value={takeHomePay}
                 onChange={(e) => setTakeHomePay(e.target.value)}
@@ -361,6 +614,7 @@ export function OnboardingClient({ initialCurrency, initialLanguage, name }: Pro
                 step="0.01"
                 className="w-full rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
                 placeholder="0.00"
+                title={helpers.takeHome}
               />
             </div>
           </div>
@@ -369,12 +623,47 @@ export function OnboardingClient({ initialCurrency, initialLanguage, name }: Pro
         {step === 2 && (
           <div className="space-y-4">
             <div>
-              <h2 className="text-lg font-semibold text-ink">{text.labels.billsTitle}</h2>
-              <p className="text-sm text-muted">
-                {language === "es"
-                  ? "Agrega facturas fijas para calcular tu disponibilidad."
-                  : "Add fixed bills to calculate your availability."}
-              </p>
+              <h2 className="text-lg font-semibold text-ink">{labels.deductionsTitle}</h2>
+              <p className="text-sm text-muted">{tips.deductions}</p>
+            </div>
+            {deductions.map((deduction) => (
+              <div key={deduction.id} className="grid gap-3 md:grid-cols-2">
+                <input
+                  value={deduction.name}
+                  onChange={(e) => updateDeduction(deduction.id, "name", e.target.value)}
+                  className="rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+                  placeholder={labels.deductionName}
+                  title={helpers.deductionName}
+                />
+                <input
+                  value={deduction.amount}
+                  onChange={(e) => updateDeduction(deduction.id, "amount", e.target.value)}
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  className="rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+                  placeholder={labels.deductionAmount}
+                  title={helpers.deductionAmount}
+                />
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={() =>
+                setDeductions((rows) => [...rows, { id: uid(), name: "", amount: "" }])
+              }
+              className="pill border-border/70 bg-white/80 text-ink hover:border-emerald-500/50"
+            >
+              {labels.addDeduction}
+            </button>
+          </div>
+        )}
+
+        {step === 3 && (
+          <div className="space-y-4">
+            <div>
+              <h2 className="text-lg font-semibold text-ink">{labels.billsTitle}</h2>
+              <p className="text-sm text-muted">{tips.bills}</p>
             </div>
             {bills.map((bill) => (
               <div key={bill.id} className="grid gap-3 md:grid-cols-4">
@@ -382,7 +671,8 @@ export function OnboardingClient({ initialCurrency, initialLanguage, name }: Pro
                   value={bill.name}
                   onChange={(e) => updateBill(bill.id, "name", e.target.value)}
                   className="rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
-                  placeholder={text.labels.billName}
+                  placeholder={labels.billName}
+                  title={helpers.billName}
                 />
                 <input
                   value={bill.amount}
@@ -391,7 +681,8 @@ export function OnboardingClient({ initialCurrency, initialLanguage, name }: Pro
                   min="0"
                   step="0.01"
                   className="rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
-                  placeholder={text.labels.billAmount}
+                  placeholder={labels.billAmount}
+                  title={helpers.billAmount}
                 />
                 <input
                   value={bill.dueDay}
@@ -400,7 +691,8 @@ export function OnboardingClient({ initialCurrency, initialLanguage, name }: Pro
                   min="1"
                   max="31"
                   className="rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
-                  placeholder={text.labels.billDueDay}
+                  placeholder={labels.billDueDay}
+                  title={helpers.billDueDay}
                 />
                 <select
                   value={bill.frequency}
@@ -408,6 +700,7 @@ export function OnboardingClient({ initialCurrency, initialLanguage, name }: Pro
                     updateBill(bill.id, "frequency", e.target.value as BillFrequency)
                   }
                   className="rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+                  title={helpers.billFrequency}
                 >
                   {billFrequencyOptions.map((option) => (
                     <option key={option.value} value={option.value}>
@@ -427,99 +720,16 @@ export function OnboardingClient({ initialCurrency, initialLanguage, name }: Pro
               }
               className="pill border-border/70 bg-white/80 text-ink hover:border-emerald-500/50"
             >
-              {text.labels.addBill}
+              {labels.addBill}
             </button>
-          </div>
-        )}
-
-        {step === 3 && (
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-sm text-ink">{text.labels.savingsMode}</label>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => setSavingsMode("amount")}
-                  className={`pill ${savingsMode === "amount" ? "bg-emerald-500 text-white border-transparent" : "bg-white/80 text-ink border-border/70"}`}
-                >
-                  {text.labels.savingsAmount}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setSavingsMode("percent")}
-                  className={`pill ${savingsMode === "percent" ? "bg-emerald-500 text-white border-transparent" : "bg-white/80 text-ink border-border/70"}`}
-                >
-                  {text.labels.savingsPercent}
-                </button>
-              </div>
-            </div>
-            <input
-              value={savingsValue}
-              onChange={(e) => setSavingsValue(e.target.value)}
-              type="number"
-              min="0"
-              step="0.01"
-              className="w-full rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
-              placeholder={savingsMode === "amount" ? "0.00" : "0"}
-            />
           </div>
         )}
 
         {step === 4 && (
           <div className="space-y-4">
             <div>
-              <h2 className="text-lg font-semibold text-ink">{text.labels.debtsTitle}</h2>
-            </div>
-            {debts.length === 0 && (
-              <p className="text-sm text-muted">
-                {language === "es"
-                  ? "Si no tienes deudas, puedes omitir este paso."
-                  : "If you have no debts, you can skip this step."}
-              </p>
-            )}
-            {debts.map((debt) => (
-              <div key={debt.id} className="grid gap-3 md:grid-cols-2">
-                <input
-                  value={debt.name}
-                  onChange={(e) => updateDebt(debt.id, "name", e.target.value)}
-                  className="rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
-                  placeholder={text.labels.debtName}
-                />
-                <input
-                  value={debt.minimumPayment}
-                  onChange={(e) => updateDebt(debt.id, "minimumPayment", e.target.value)}
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  className="rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
-                  placeholder={text.labels.debtMin}
-                />
-              </div>
-            ))}
-            <button
-              type="button"
-              onClick={() =>
-                setDebts((rows) => [
-                  ...rows,
-                  { id: uid(), name: "", minimumPayment: "" },
-                ])
-              }
-              className="pill border-border/70 bg-white/80 text-ink hover:border-emerald-500/50"
-            >
-              {text.labels.addDebt}
-            </button>
-          </div>
-        )}
-
-        {step === 5 && (
-          <div className="space-y-4">
-            <div>
-              <h2 className="text-lg font-semibold text-ink">{text.labels.budgetsTitle}</h2>
-              <p className="text-sm text-muted">
-                {language === "es"
-                  ? "Ajusta los nombres y montos segun tus habitos."
-                  : "Edit names and amounts to match your habits."}
-              </p>
+              <h2 className="text-lg font-semibold text-ink">{labels.budgetsTitle}</h2>
+              <p className="text-sm text-muted">{tips.budgets}</p>
             </div>
             {budgets.map((budget) => (
               <div key={budget.id} className="grid gap-3 md:grid-cols-2">
@@ -527,7 +737,8 @@ export function OnboardingClient({ initialCurrency, initialLanguage, name }: Pro
                   value={budget.category}
                   onChange={(e) => updateBudget(budget.id, "category", e.target.value)}
                   className="rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
-                  placeholder={text.labels.category}
+                  placeholder={labels.category}
+                  title={helpers.category}
                 />
                 <input
                   value={budget.amount}
@@ -536,73 +747,165 @@ export function OnboardingClient({ initialCurrency, initialLanguage, name }: Pro
                   min="0"
                   step="0.01"
                   className="rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
-                  placeholder={text.labels.target}
+                  placeholder={labels.target}
+                  title={helpers.target}
                 />
               </div>
             ))}
             <button
               type="button"
               onClick={() =>
-                setBudgets((rows) => [
-                  ...rows,
-                  { id: uid(), category: "", amount: "" },
-                ])
+                setBudgets((rows) => [...rows, { id: uid(), category: "", amount: "" }])
               }
               className="pill border-border/70 bg-white/80 text-ink hover:border-emerald-500/50"
             >
-              {text.labels.addCategory}
+              {labels.addCategory}
+            </button>
+          </div>
+        )}
+
+        {step === 5 && (
+          <div className="space-y-4">
+            <div>
+              <h2 className="text-lg font-semibold text-ink">{labels.goalsTitle}</h2>
+              <p className="text-sm text-muted">{tips.goals}</p>
+            </div>
+            {goals.map((goal) => (
+              <div key={goal.id} className="grid gap-3 md:grid-cols-2">
+                <input
+                  value={goal.name}
+                  onChange={(e) => updateGoal(goal.id, "name", e.target.value)}
+                  className="rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+                  placeholder={labels.goalName}
+                  title={helpers.goalName}
+                />
+                <input
+                  value={goal.targetAmount}
+                  onChange={(e) => updateGoal(goal.id, "targetAmount", e.target.value)}
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  className="rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+                  placeholder={labels.goalTarget}
+                  title={helpers.goalTarget}
+                />
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={() =>
+                setGoals((rows) => [...rows, { id: uid(), name: "", targetAmount: "" }])
+              }
+              className="pill border-border/70 bg-white/80 text-ink hover:border-emerald-500/50"
+            >
+              {labels.addGoal}
             </button>
           </div>
         )}
 
         {step === 6 && (
           <div className="space-y-4">
-            <h2 className="text-lg font-semibold text-ink">{text.labels.summaryTitle}</h2>
+            <div>
+              <h2 className="text-lg font-semibold text-ink">{labels.debtsTitle}</h2>
+              <p className="text-sm text-muted">{tips.debts}</p>
+            </div>
+            {debts.map((debt) => (
+              <div key={debt.id} className="grid gap-3 md:grid-cols-2">
+                <input
+                  value={debt.name}
+                  onChange={(e) => updateDebt(debt.id, "name", e.target.value)}
+                  className="rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+                  placeholder={labels.debtName}
+                  title={helpers.debtName}
+                />
+                <input
+                  value={debt.minimumPayment}
+                  onChange={(e) => updateDebt(debt.id, "minimumPayment", e.target.value)}
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  className="rounded-lg border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+                  placeholder={labels.debtMin}
+                  title={helpers.debtMin}
+                />
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={() =>
+                setDebts((rows) => [...rows, { id: uid(), name: "", minimumPayment: "" }])
+              }
+              className="pill border-border/70 bg-white/80 text-ink hover:border-emerald-500/50"
+            >
+              {labels.addDebt}
+            </button>
+          </div>
+        )}
+
+        {step === 7 && (
+          <div className="space-y-4">
+            <h2 className="text-lg font-semibold text-ink">{labels.summaryTitle}</h2>
             <div className="grid gap-3 rounded-xl border border-border/70 bg-white/80 p-4 text-sm text-muted">
               <p>
-                {text.labels.language}: <span className="text-ink">{language}</span>
+                {labels.language}: <span className="text-ink">{language}</span>
               </p>
               <p>
-                {text.labels.currency}: <span className="text-ink">{currency}</span>
+                {labels.currency}: <span className="text-ink">{currency}</span>
               </p>
               <p>
-                {text.labels.payFrequency}:{" "}
+                {labels.timezone}: <span className="text-ink">{timezone}</span>
+              </p>
+              <p>
+                {labels.payFrequency}:{" "}
                 <span className="text-ink">
                   {payFrequencyOptions.find((option) => option.value === payFrequency)
                     ?.label[language] ?? payFrequency}
                 </span>
               </p>
               <p>
-                {text.labels.takeHome}: <span className="text-ink">{takeHomePay || "0"}</span>
+                {labels.takeHome}: <span className="text-ink">{takeHomePay || "0"}</span>
               </p>
               <p>
-                {text.labels.billsTitle}:{" "}
+                {labels.deductionsTitle}:{" "}
+                <span className="text-ink">
+                  {deductions.filter((row) => row.name.trim()).length}
+                </span>
+              </p>
+              <p>
+                {labels.billsTitle}:{" "}
                 <span className="text-ink">
                   {bills.filter((bill) => bill.name.trim()).length}
                 </span>
               </p>
               <p>
-                {text.labels.savingsMode}:{" "}
+                {labels.budgetsTitle}:{" "}
                 <span className="text-ink">
-                  {savingsMode === "amount"
-                    ? text.labels.savingsAmount
-                    : text.labels.savingsPercent}{" "}
-                  {savingsValue || "0"}
+                  {
+                    budgets.filter(
+                      (budget) => budget.category.trim() && toNumber(budget.amount) > 0,
+                    ).length
+                  }
                 </span>
               </p>
               <p>
-                {text.labels.debtsTitle}:{" "}
+                {labels.goalsTitle}:{" "}
+                <span className="text-ink">
+                  {goals.filter((goal) => goal.name.trim()).length}
+                </span>
+              </p>
+              <p>
+                {labels.debtsTitle}:{" "}
                 <span className="text-ink">
                   {debts.filter((debt) => debt.name.trim()).length}
                 </span>
               </p>
-              <p>
-                {text.labels.budgetsTitle}:{" "}
-                <span className="text-ink">
-                  {budgets.filter((budget) => budget.category.trim()).length}
-                </span>
-              </p>
             </div>
+            <p className="text-sm text-muted">
+              {tips.guidePrompt}{" "}
+              <Link href="/guide" className="text-emerald-700 hover:underline">
+                {tips.guideLink}
+              </Link>
+            </p>
           </div>
         )}
 
@@ -614,26 +917,37 @@ export function OnboardingClient({ initialCurrency, initialLanguage, name }: Pro
             disabled={step === 0}
             className="pill border-border/70 bg-white/80 text-ink disabled:opacity-50"
           >
-            {text.labels.back}
+            {labels.back}
           </button>
-          {step < steps.length - 1 ? (
-            <button
-              type="button"
-              onClick={nextStep}
-              className="pill bg-emerald-500 text-white border-transparent shadow-[0_12px_32px_rgba(34,197,143,0.32)] hover:brightness-105"
-            >
-              {text.labels.next}
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={handleSubmit}
-              disabled={submitting}
-              className="pill bg-emerald-500 text-white border-transparent shadow-[0_12px_32px_rgba(34,197,143,0.32)] hover:brightness-105 disabled:opacity-70"
-            >
-              {submitting ? "Saving..." : text.labels.confirm}
-            </button>
-          )}
+          <div className="flex items-center gap-4">
+            {isSkippableStep && step < steps.length - 1 ? (
+              <button
+                type="button"
+                onClick={skipStep}
+                className="text-sm text-emerald-700 hover:underline"
+              >
+                {labels.skip}
+              </button>
+            ) : null}
+            {step < steps.length - 1 ? (
+              <button
+                type="button"
+                onClick={nextStep}
+                className="pill bg-emerald-500 text-white border-transparent shadow-[0_12px_32px_rgba(34,197,143,0.32)] hover:brightness-105"
+              >
+                {labels.next}
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={handleSubmit}
+                disabled={submitting}
+                className="pill bg-emerald-500 text-white border-transparent shadow-[0_12px_32px_rgba(34,197,143,0.32)] hover:brightness-105 disabled:opacity-70"
+              >
+                {submitting ? labels.saving : labels.confirm}
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>

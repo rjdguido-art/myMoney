@@ -7,9 +7,12 @@ const protectedPrefixes = [
   "/transactions",
   "/budgets",
   "/bills",
+  "/guide",
+  "/setup-complete",
   "/insights",
   "/settings",
   "/onboarding",
+  "/welcome",
 ];
 
 function isProtectedPath(pathname: string) {
@@ -29,6 +32,46 @@ export async function middleware(request: NextRequest) {
     secret: process.env.NEXTAUTH_SECRET,
   });
   if (token) {
+    const isOnboardingRoute =
+      pathname === "/welcome" ||
+      pathname.startsWith("/welcome/") ||
+      pathname === "/guide" ||
+      pathname.startsWith("/guide/") ||
+      pathname === "/onboarding" ||
+      pathname.startsWith("/onboarding/");
+
+    if (isOnboardingRoute) {
+      return NextResponse.next();
+    }
+
+    try {
+      const onboardingUrl = new URL("/api/onboarding", request.url);
+      const onboardingRes = await fetch(onboardingUrl, {
+        headers: {
+          cookie: request.headers.get("cookie") ?? "",
+        },
+      });
+
+      if (onboardingRes.status === 401) {
+        const loginUrl = request.nextUrl.clone();
+        loginUrl.pathname = "/login";
+        loginUrl.searchParams.set("callbackUrl", `${pathname}${search}`);
+        return NextResponse.redirect(loginUrl);
+      }
+
+      if (onboardingRes.ok) {
+        const data = await onboardingRes.json();
+        if (!data.onboarded) {
+          const welcomeUrl = request.nextUrl.clone();
+          welcomeUrl.pathname = "/welcome";
+          welcomeUrl.search = "";
+          return NextResponse.redirect(welcomeUrl);
+        }
+      }
+    } catch {
+      // Allow navigation if onboarding status can't be checked.
+    }
+
     return NextResponse.next();
   }
 
@@ -44,8 +87,11 @@ export const config = {
     "/transactions/:path*",
     "/budgets/:path*",
     "/bills/:path*",
+    "/guide/:path*",
+    "/setup-complete/:path*",
     "/insights/:path*",
     "/settings/:path*",
     "/onboarding/:path*",
+    "/welcome/:path*",
   ],
 };
