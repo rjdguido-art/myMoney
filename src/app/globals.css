@@ -62,3 +62,41 @@ body {
   font-size: 0.875rem;
   color: var(--color-muted);
 }
+
+@keyframes navMenuIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes navItemIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.nav-menu {
+  animation: navMenuIn 180ms ease-out;
+  transform-origin: top right;
+}
+
+.nav-menu-item {
+  animation: navItemIn 220ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-menu,
+  .nav-menu-item {
+    animation: none;
+  }
+}
