@@ -1,0 +1,70 @@
+import { redirect } from "next/navigation";
+import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+
+type OnboardingUser = {
+  id: string;
+  name: string | null;
+  currency: string;
+  timezone: string;
+  preferredLanguage: string;
+  onboarded: boolean;
+};
+
+export async function requireOnboardedUser(): Promise<OnboardingUser> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    redirect("/login");
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: {
+      id: true,
+      name: true,
+      currency: true,
+      timezone: true,
+      preferredLanguage: true,
+      onboarded: true,
+    },
+  });
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  if (!user.onboarded) {
+    redirect("/onboarding");
+  }
+
+  return user;
+}
+
+export async function requireNotOnboardedUser(): Promise<OnboardingUser> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    redirect("/login");
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: {
+      id: true,
+      name: true,
+      currency: true,
+      timezone: true,
+      preferredLanguage: true,
+      onboarded: true,
+    },
+  });
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  if (user.onboarded) {
+    redirect("/dashboard");
+  }
+
+  return user;
+}

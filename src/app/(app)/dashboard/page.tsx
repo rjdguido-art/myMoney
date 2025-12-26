@@ -1,8 +1,7 @@
-import { redirect } from "next/navigation";
 import { CategoryType } from "@prisma/client";
-import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { buildForecast } from "@/lib/forecastEngine";
+import { requireOnboardedUser } from "@/lib/onboarding";
 
 function toNumber(value: unknown) {
   const parsed = Number(value);
@@ -30,21 +29,13 @@ function formatDate(input: Date | null) {
 }
 
 export default async function DashboardPage() {
-  const session = await auth();
-  if (!session?.user?.id) {
-    redirect("/login");
-  }
-
-  const userId = session.user.id;
+  const user = await requireOnboardedUser();
+  const userId = user.id;
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
   const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
 
-  const [user, budgetPlan, monthTransactions, forecast] = await Promise.all([
-    prisma.user.findUnique({
-      where: { id: userId },
-      select: { name: true, currency: true },
-    }),
+  const [budgetPlan, monthTransactions, forecast] = await Promise.all([
     prisma.budgetPlan.findFirst({
       where: {
         userId,
@@ -75,7 +66,7 @@ export default async function DashboardPage() {
     buildForecast({ userId, now }),
   ]);
 
-  const currency = user?.currency ?? "USD";
+  const currency = user.currency ?? "USD";
   const budgetCategoryIds = new Set(
     (budgetPlan?.items ?? [])
       .map((item) => item.categoryId)
@@ -142,7 +133,7 @@ export default async function DashboardPage() {
     (a, b) => a.dueDate.getTime() - b.dueDate.getTime(),
   );
 
-  const friendlyName = user?.name ? user.name.split(" ")[0] : "there";
+  const friendlyName = user.name ? user.name.split(" ")[0] : "there";
 
   return (
     <div className="space-y-10">

@@ -1,4 +1,7 @@
-export default function SettingsPage() {
+import { requireOnboardedUser } from "@/lib/onboarding";
+
+export default async function SettingsPage() {
+  await requireOnboardedUser();
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
@@ -72,6 +75,36 @@ export default function SettingsPage() {
                 <span>{item}</span>
                 <input type="checkbox" defaultChecked className="h-4 w-4" />
               </label>
+            ))}
+          </div>
+        </section>
+
+        <section className="space-y-4 rounded-2xl border border-border/70 bg-card p-6 shadow-[0_12px_32px_rgba(13,56,95,0.08)] lg:col-span-2">
+          <div>
+            <p className="pill bg-white/80 text-emerald-700 border-emerald-500/30">
+              Navigation guide
+            </p>
+            <h2 className="mt-2 text-lg font-semibold text-ink">What you can do</h2>
+            <p className="text-muted">
+              Quick map of the core workspaces so you can move fast.
+            </p>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {[
+              { title: "Dashboard", detail: "Cashflow forecast and safe-to-spend." },
+              { title: "Transactions", detail: "Review, split, and categorize activity." },
+              { title: "Budgets", detail: "Set category targets and track progress." },
+              { title: "Bills", detail: "Track recurring bills and due dates." },
+              { title: "Insights", detail: "See trends and category breakdowns." },
+              { title: "Settings", detail: "Update your preferences and rules." },
+            ].map((item) => (
+              <div
+                key={item.title}
+                className="rounded-xl border border-border/70 bg-white/80 p-4 text-sm"
+              >
+                <p className="font-semibold text-ink">{item.title}</p>
+                <p className="text-muted">{item.detail}</p>
+              </div>
             ))}
           </div>
         </section>

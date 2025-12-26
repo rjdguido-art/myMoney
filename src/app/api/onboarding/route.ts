@@ -1,51 +1,60 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { BillStatus, CategoryType, Frequency } from "@prisma/client";
 
-type PayScheduleInput = {
-  cadence: Frequency;
-  interval: number;
-  anchorDate: string;
-  netPay: number;
-};
+const billSchema = z.object({
+  name: z.string().trim().min(1),
+  amount: z.number().min(0),
+  dueDay: z.number().int().min(1).max(31),
+  frequency: z.enum(["WEEKLY", "MONTHLY"]),
+});
 
-type DeductionInput = {
-  name: string;
-  amount: number;
-  isPercent: boolean;
-};
+const debtSchema = z.object({
+  name: z.string().trim().min(1),
+  minimumPayment: z.number().min(0),
+});
 
-type BillInput = {
-  name: string;
-  amount: number;
-  dueDate: string;
-  frequency: Frequency;
-  reminderDays?: number;
-};
+const budgetSchema = z.object({
+  category: z.string().trim().min(1),
+  amount: z.number().min(0),
+});
 
-type VariableSpendInput = {
-  category: string;
-  amount: number;
-};
-
-type GoalInput = {
-  name: string;
-  targetAmount: number;
-  targetDate?: string;
-};
-
-type DebtInput = {
-  name: string;
-  principal: number;
-  interestRate: number;
-  minimumPayment: number;
-  dueDay?: number;
-};
+const onboardingSchema = z.object({
+  preferredLanguage: z.enum(["en", "es"]),
+  currency: z.string().trim().min(1),
+  payFrequency: z.enum(["WEEKLY", "BIWEEKLY", "SEMIMONTHLY", "MONTHLY"]),
+  takeHomePay: z.number().min(0),
+  bills: z.array(billSchema).optional(),
+  savings: z
+    .object({
+      mode: z.enum(["amount", "percent"]),
+      value: z.number().min(0),
+    })
+    .optional(),
+  debts: z.array(debtSchema).optional(),
+  budgets: z.array(budgetSchema).optional(),
+});
 
 function toDecimal(value: number | null | undefined) {
   if (value === undefined || value === null || Number.isNaN(value)) return 0;
   return Number(value);
+}
+
+function nextDueDate(dueDay: number) {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const lastDay = new Date(year, month + 1, 0).getDate();
+  const day = Math.min(Math.max(dueDay, 1), lastDay);
+  const candidate = new Date(year, month, day, 8, 0, 0, 0);
+  if (candidate < now) {
+    const nextMonthLastDay = new Date(year, month + 2, 0).getDate();
+    const nextDay = Math.min(dueDay, nextMonthLastDay);
+    return new Date(year, month + 1, nextDay, 8, 0, 0, 0);
+  }
+  return candidate;
 }
 
 export async function GET() {
@@ -56,13 +65,14 @@ export async function GET() {
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: { onboarded: true, currency: true, timezone: true },
+    select: { onboarded: true, currency: true, timezone: true, preferredLanguage: true },
   });
 
   return NextResponse.json({
     onboarded: user?.onboarded ?? false,
     currency: user?.currency ?? "USD",
     timezone: user?.timezone ?? "UTC",
+    preferredLanguage: user?.preferredLanguage ?? "en",
   });
 }
 
@@ -72,78 +82,96 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const userId = session.user.id;
-  const payload = (await request.json()) as {
-    currency?: string;
-    timezone?: string;
-    paySchedule?: PayScheduleInput;
-    deductions?: DeductionInput[];
-    bills?: BillInput[];
-    variableSpending?: VariableSpendInput[];
-    goals?: { savings?: GoalInput[]; debts?: DebtInput[] };
-  };
+  const json = await request.json();
+  const parsed = onboardingSchema.safeParse(json);
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: parsed.error.errors[0]?.message ?? "Invalid input" },
+      { status: 400 },
+    );
+  }
 
-  const currency = payload.currency ?? "USD";
-  const timezone = payload.timezone ?? "UTC";
-  const paySchedule = payload.paySchedule;
+  const userId = session.user.id;
+  const {
+    preferredLanguage,
+    currency,
+    payFrequency,
+    takeHomePay,
+    bills,
+    savings,
+    debts,
+    budgets,
+  } = parsed.data;
 
   await prisma.$transaction(async (tx) => {
     await tx.user.update({
       where: { id: userId },
-      data: { currency, timezone, onboarded: true },
+      data: { currency, preferredLanguage, onboarded: true },
     });
 
-    if (paySchedule) {
-      await tx.paySchedule.deleteMany({ where: { userId } });
-      await tx.paySchedule.create({
-        data: {
-          userId,
-          name: "Primary Pay Schedule",
-          cadence: paySchedule.cadence,
-          interval: paySchedule.interval ?? 1,
-          anchorDate: new Date(paySchedule.anchorDate),
-          nextPayDate: new Date(paySchedule.anchorDate),
-          netPay: toDecimal(paySchedule.netPay),
-        },
-      });
-    }
-
-    await tx.deduction.deleteMany({ where: { userId } });
-    if (payload.deductions?.length) {
-      await tx.deduction.createMany({
-        data: payload.deductions.map((item) => ({
-          userId,
-          name: item.name,
-          amount: toDecimal(item.amount),
-          isPercent: !!item.isPercent,
-        })),
-      });
-    }
+    await tx.paySchedule.deleteMany({ where: { userId } });
+    await tx.paySchedule.create({
+      data: {
+        userId,
+        name: "Primary Pay Schedule",
+        cadence: payFrequency as Frequency,
+        interval: 1,
+        anchorDate: new Date(),
+        nextPayDate: new Date(),
+        netPay: toDecimal(takeHomePay),
+      },
+    });
 
     await tx.bill.deleteMany({ where: { userId } });
-    if (payload.bills?.length) {
+    if (bills?.length) {
       await tx.bill.createMany({
-        data: payload.bills.map((bill) => ({
+        data: bills.map((bill) => ({
           userId,
           name: bill.name,
           amount: toDecimal(bill.amount),
           currency,
-          dueDate: new Date(bill.dueDate),
-          frequency: bill.frequency ?? Frequency.MONTHLY,
+          dueDate: nextDueDate(bill.dueDay),
+          frequency: bill.frequency === "WEEKLY" ? Frequency.WEEKLY : Frequency.MONTHLY,
           status: BillStatus.SCHEDULED,
           autopay: false,
-          reminderDays: bill.reminderDays ?? 3,
+          reminderDays: 3,
         })),
       });
     }
 
-    if (payload.variableSpending?.length) {
-      const budgetStart = new Date();
-      const budgetEnd = new Date();
-      budgetEnd.setMonth(budgetEnd.getMonth() + 1);
+    await tx.deduction.deleteMany({ where: { userId } });
+    if (savings && savings.value > 0) {
+      await tx.deduction.create({
+        data: {
+          userId,
+          name: "Savings",
+          amount: toDecimal(savings.value),
+          isPercent: savings.mode === "percent",
+        },
+      });
+    }
 
+    await tx.debt.deleteMany({ where: { userId } });
+    if (debts?.length) {
+      await tx.debt.createMany({
+        data: debts.map((debt) => ({
+          userId,
+          name: debt.name,
+          principal: 0,
+          interestRate: 0,
+          minimumPayment: toDecimal(debt.minimumPayment),
+        })),
+      });
+    }
+
+    await tx.budgetItem.deleteMany({
+      where: { budgetPlan: { userId } },
+    });
+    await tx.budgetPlan.deleteMany({ where: { userId } });
+
+    if (budgets?.length) {
       const categories = await Promise.all(
-        payload.variableSpending.map((item) =>
+        budgets.map((item) =>
           tx.category.upsert({
             where: { userId_name: { userId, name: item.category } },
             update: { type: CategoryType.EXPENSE },
@@ -156,52 +184,29 @@ export async function POST(request: Request) {
         ),
       );
 
+      const now = new Date();
+      const periodStart = new Date(now.getFullYear(), now.getMonth(), 1);
+      const periodEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+
       const budgetPlan = await tx.budgetPlan.create({
         data: {
           userId,
-          name: "Onboarding Plan",
-          periodStart: budgetStart,
-          periodEnd: budgetEnd,
+          name: "Starter Plan",
+          periodStart,
+          periodEnd,
         },
       });
 
       await tx.budgetItem.createMany({
-        data: payload.variableSpending.map((item) => {
-          const cat = categories.find((c) => c.name === item.category);
+        data: budgets.map((item) => {
+          const category = categories.find((cat) => cat.name === item.category);
           return {
             budgetPlanId: budgetPlan.id,
-            categoryId: cat?.id,
+            categoryId: category?.id,
             amount: toDecimal(item.amount),
             spent: 0,
           };
         }),
-      });
-    }
-
-    await tx.goal.deleteMany({ where: { userId } });
-    if (payload.goals?.savings?.length) {
-      await tx.goal.createMany({
-        data: payload.goals.savings.map((goal) => ({
-          userId,
-          name: goal.name,
-          targetAmount: toDecimal(goal.targetAmount),
-          currentAmount: 0,
-          targetDate: goal.targetDate ? new Date(goal.targetDate) : null,
-        })),
-      });
-    }
-
-    await tx.debt.deleteMany({ where: { userId } });
-    if (payload.goals?.debts?.length) {
-      await tx.debt.createMany({
-        data: payload.goals.debts.map((debt) => ({
-          userId,
-          name: debt.name,
-          principal: toDecimal(debt.principal),
-          interestRate: debt.interestRate ?? 0,
-          minimumPayment: toDecimal(debt.minimumPayment),
-          dueDay: debt.dueDay ?? null,
-        })),
       });
     }
   });

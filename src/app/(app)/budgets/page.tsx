@@ -1,3 +1,5 @@
+import { requireOnboardedUser } from "@/lib/onboarding";
+
 const plans = [
   { name: "Housing", allocated: 2200, used: 1950 },
   { name: "Food & Dining", allocated: 750, used: 520 },
@@ -5,7 +7,8 @@ const plans = [
   { name: "Investments", allocated: 650, used: 650 },
 ];
 
-export default function BudgetsPage() {
+export default async function BudgetsPage() {
+  await requireOnboardedUser();
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">

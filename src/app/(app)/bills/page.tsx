@@ -1,16 +1,11 @@
-import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { billInclude, serializeBill } from "@/lib/bills";
+import { requireOnboardedUser } from "@/lib/onboarding";
 import { BillsClient } from "./bills-client";
 
 export default async function BillsPage() {
-  const session = await auth();
-  if (!session?.user?.id) {
-    redirect("/login");
-  }
-
-  const userId = session.user.id;
+  const user = await requireOnboardedUser();
+  const userId = user.id;
 
   const [bills, accounts, categories] = await Promise.all([
     prisma.bill.findMany({

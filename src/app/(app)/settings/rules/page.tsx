@@ -1,12 +1,10 @@
-import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { requireOnboardedUser } from "@/lib/onboarding";
 
 async function createRule(formData: FormData) {
   "use server";
-  const session = await auth();
-  if (!session?.user?.id) redirect("/login");
+  const user = await requireOnboardedUser();
 
   const descriptionContains = String(formData.get("descriptionContains") || "").trim();
   const categoryId = String(formData.get("categoryId") || "").trim();
@@ -19,7 +17,7 @@ async function createRule(formData: FormData) {
 
   await prisma.rule.create({
     data: {
-      userId: session.user.id,
+      userId: user.id,
       descriptionContains,
       categoryId,
       priority,
@@ -31,13 +29,12 @@ async function createRule(formData: FormData) {
 
 async function toggleRule(formData: FormData) {
   "use server";
-  const session = await auth();
-  if (!session?.user?.id) redirect("/login");
+  const user = await requireOnboardedUser();
   const id = String(formData.get("id") || "");
   const nextActive = formData.get("nextActive") === "true";
   if (!id) return;
   await prisma.rule.update({
-    where: { id, userId: session.user.id },
+    where: { id, userId: user.id },
     data: { active: nextActive },
   });
   revalidatePath("/settings/rules");
@@ -45,30 +42,26 @@ async function toggleRule(formData: FormData) {
 
 async function deleteRule(formData: FormData) {
   "use server";
-  const session = await auth();
-  if (!session?.user?.id) redirect("/login");
+  const user = await requireOnboardedUser();
   const id = String(formData.get("id") || "");
   if (!id) return;
   await prisma.rule.delete({
-    where: { id, userId: session.user.id },
+    where: { id, userId: user.id },
   });
   revalidatePath("/settings/rules");
 }
 
 export default async function RulesPage() {
-  const session = await auth();
-  if (!session?.user?.id) {
-    redirect("/login");
-  }
+  const user = await requireOnboardedUser();
 
   const [rules, categories] = await Promise.all([
     prisma.rule.findMany({
-      where: { userId: session.user.id },
+      where: { userId: user.id },
       include: { category: { select: { id: true, name: true } } },
       orderBy: [{ priority: "desc" }, { createdAt: "asc" }],
     }),
     prisma.category.findMany({
-      where: { userId: session.user.id },
+      where: { userId: user.id },
       select: { id: true, name: true },
       orderBy: { name: "asc" },
     }),

@@ -1,19 +1,14 @@
-import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import {
   serializeTransaction,
   transactionInclude,
 } from "@/lib/transactions";
+import { requireOnboardedUser } from "@/lib/onboarding";
 import { TransactionsClient } from "./transactions-client";
 
 export default async function TransactionsPage() {
-  const session = await auth();
-  if (!session?.user?.id) {
-    redirect("/login");
-  }
-
-  const userId = session.user.id;
+  const user = await requireOnboardedUser();
+  const userId = user.id;
 
   const [transactions, accounts, categories] = await Promise.all([
     prisma.transaction.findMany({

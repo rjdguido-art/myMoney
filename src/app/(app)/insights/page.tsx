@@ -1,7 +1,6 @@
 import { CategoryType } from "@prisma/client";
-import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { requireOnboardedUser } from "@/lib/onboarding";
 
 type LineCategory = { id?: string | null; name?: string | null; type?: CategoryType | null };
 type WeeklyBucket = { start: Date; label: string; income: number; expense: number };
@@ -50,10 +49,7 @@ function sparklinePoints(values: number[], width: number, height: number) {
 }
 
 export default async function InsightsPage() {
-  const session = await auth();
-  if (!session?.user?.id) {
-    redirect("/login");
-  }
+  const user = await requireOnboardedUser();
 
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -72,12 +68,8 @@ export default async function InsightsPage() {
   const rangeStart = cashflowStart < trendStart ? cashflowStart : trendStart;
   const rangeEnd = monthEnd;
 
-  const userId = session.user.id;
-  const [user, transactions] = await Promise.all([
-    prisma.user.findUnique({
-      where: { id: userId },
-      select: { currency: true },
-    }),
+  const userId = user.id;
+  const [transactions] = await Promise.all([
     prisma.transaction.findMany({
       where: {
         userId,
@@ -98,7 +90,7 @@ export default async function InsightsPage() {
     }),
   ]);
 
-  const currency = user?.currency ?? "USD";
+  const currency = user.currency ?? "USD";
   const monthCategoryTotals = new Map<string, { name: string; total: number }>();
   const weeklyBuckets = new Map<string, WeeklyBucket>();
   const monthWindows = Array.from({ length: 3 }, (_, idx) => {
