@@ -1,11 +1,11 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, Suspense, useEffect, useState } from "react";
 import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import { initFirebase } from "@/lib/firebase";
 
-export default function LoginPage() {
+function LoginPageContent() {
   const params = useSearchParams();
   const callbackUrl = params.get("callbackUrl") ?? "/dashboard";
   const [email, setEmail] = useState("");
@@ -100,5 +100,13 @@ export default function LoginPage() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="p-6 text-muted">Loading…</div>}>
+      <LoginPageContent />
+    </Suspense>
   );
 }

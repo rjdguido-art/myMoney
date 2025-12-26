@@ -109,6 +109,7 @@ model Category {
   bills          Bill[]
   goals          Goal[]
   splits         TransactionSplit[]
+  rules          Rule[]
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
 

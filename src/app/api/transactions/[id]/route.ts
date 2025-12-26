@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import {
@@ -9,16 +9,17 @@ import {
 } from "@/lib/transactions";
 
 export async function PUT(
-  request: Request,
-  { params }: { params: { id: string } },
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
 ) {
+  const { id } = await params;
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const existing = await prisma.transaction.findFirst({
-    where: { id: params.id, userId: session.user.id },
+    where: { id, userId: session.user.id },
     select: { id: true },
   });
 
@@ -40,10 +41,10 @@ export async function PUT(
   let updated: TransactionWithRelations | null = null;
 
   await prisma.$transaction(async (tx) => {
-    await tx.transactionSplit.deleteMany({ where: { transactionId: params.id } });
+    await tx.transactionSplit.deleteMany({ where: { transactionId: id } });
 
     updated = await tx.transaction.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         description: data.description,
         notes: data.notes ?? null,
@@ -74,16 +75,17 @@ export async function PUT(
 }
 
 export async function DELETE(
-  _request: Request,
-  { params }: { params: { id: string } },
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
 ) {
+  const { id } = await params;
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const existing = await prisma.transaction.findFirst({
-    where: { id: params.id, userId: session.user.id },
+    where: { id, userId: session.user.id },
     select: { id: true },
   });
 
@@ -91,9 +93,7 @@ export async function DELETE(
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  await prisma.transaction.delete({
-    where: { id: params.id },
-  });
+  await prisma.transaction.delete({ where: { id } });
 
   return NextResponse.json({ ok: true });
 }

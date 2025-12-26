@@ -140,17 +140,6 @@ export function TransactionsClient({
     [accounts, formState.accountId],
   );
 
-  useEffect(() => {
-    if (!mounted.current) {
-      mounted.current = true;
-      return;
-    }
-    const timer = setTimeout(() => {
-      void refreshTransactions();
-    }, 250);
-    return () => clearTimeout(timer);
-  }, [refreshTransactions]);
-
   const refreshTransactions = useCallback(async () => {
     const params = new URLSearchParams();
     if (filters.from) params.set("from", filters.from);
@@ -182,6 +171,17 @@ export function TransactionsClient({
       setLoading(false);
     }
   }, [filters]);
+
+  useEffect(() => {
+    if (!mounted.current) {
+      mounted.current = true;
+      return;
+    }
+    const timer = setTimeout(() => {
+      void refreshTransactions();
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [refreshTransactions]);
 
   const handleSubmit = async () => {
     setError(null);
