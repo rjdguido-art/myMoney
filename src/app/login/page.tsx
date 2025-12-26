@@ -49,12 +49,48 @@ function LoginPageContent() {
   };
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-4xl items-center px-6">
-      <div className="grid w-full gap-10 rounded-2xl border border-border/70 bg-card p-10 shadow-[0_14px_36px_rgba(5,63,43,0.1)] md:grid-cols-2">
-        <div className="space-y-4">
-          <p className="pill bg-emerald-500 text-white border-transparent shadow-[0_10px_24px_rgba(34,197,143,0.32)]">
-            Welcome back
-          </p>
+    <div className="login-shell relative overflow-hidden px-6 py-12">
+      <div className="login-background" aria-hidden="true">
+        <div className="login-orb login-orb--one" />
+        <div className="login-orb login-orb--two" />
+        <div className="login-orb login-orb--three" />
+        <img
+          className="login-float login-float--one"
+          src="/login/feature-1.png"
+          alt=""
+        />
+        <img
+          className="login-float login-float--two"
+          src="/login/feature-2.png"
+          alt=""
+        />
+        <img
+          className="login-float login-float--three"
+          src="/login/feature-3.png"
+          alt=""
+        />
+        <img
+          className="login-float login-float--four"
+          src="/login/feature-4.png"
+          alt=""
+        />
+      </div>
+      <div className="relative mx-auto flex min-h-[calc(100vh-6rem)] max-w-4xl items-center">
+        <div className="grid w-full gap-10 rounded-2xl border border-border/70 bg-card/90 p-10 shadow-[0_18px_45px_rgba(5,63,43,0.14)] backdrop-blur md:grid-cols-2">
+          <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <img
+              src="/icon.svg"
+              alt="myMoney logo"
+              className="h-12 w-12 rounded-2xl shadow-[0_10px_25px_rgba(13,56,95,0.25)]"
+            />
+            <div>
+              <p className="text-sm uppercase tracking-[0.18em] text-muted">
+                myMoney
+              </p>
+              <p className="text-base font-semibold text-ink">Welcome back</p>
+            </div>
+          </div>
           <h1 className="text-3xl font-semibold text-ink">Sign in</h1>
           <p className="text-muted">
             Access your dashboard, budgets, bills, and insights securely with email and password.
@@ -108,7 +144,8 @@ function LoginPageContent() {
               Forgot password
             </a>
           </div>
-        </form>
+          </form>
+        </div>
       </div>
     </div>
   );

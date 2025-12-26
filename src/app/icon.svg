@@ -1,0 +1,22 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="myMoney">
+  <defs>
+    <linearGradient id="mmGradient" x1="96" y1="40" x2="416" y2="472" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#28c7a0" />
+      <stop offset="1" stop-color="#1f4da8" />
+    </linearGradient>
+  </defs>
+  <circle cx="256" cy="256" r="232" fill="url(#mmGradient)" />
+  <circle cx="256" cy="256" r="232" fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="10" />
+  <text
+    x="256"
+    y="295"
+    text-anchor="middle"
+    fill="#ffffff"
+    font-family="Arial, Helvetica, sans-serif"
+    font-size="172"
+    font-weight="700"
+    letter-spacing="-6"
+  >
+    mm
+  </text>
+</svg>
