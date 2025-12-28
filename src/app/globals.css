@@ -80,6 +80,15 @@ body {
   font-family: "Inter", system-ui, -apple-system, sans-serif;
 }
 
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-display);
+}
+
 .card {
   border: 1px solid rgba(226, 232, 240, 0.7);
   background: #ffffff;
@@ -564,6 +573,37 @@ button > *,
   align-items: center;
   justify-content: center;
   color: rgba(13, 56, 95, 0.8);
+}
+
+.page-transition {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(120deg, rgba(34, 197, 143, 0.95), rgba(56, 189, 248, 0.95));
+  transform: translateY(100%);
+  z-index: 80;
+  pointer-events: none;
+}
+
+.page-transition.is-active {
+  animation: pageWipeIn 320ms ease-out forwards, pageWipeOut 380ms ease-in 320ms forwards;
+}
+
+@keyframes pageWipeIn {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0%);
+  }
+}
+
+@keyframes pageWipeOut {
+  from {
+    transform: translateY(0%);
+  }
+  to {
+    transform: translateY(-100%);
+  }
 }
 
 @keyframes homeFloat {

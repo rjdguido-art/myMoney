@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import PageTransition from "./page-transition";
 
 export const metadata: Metadata = {
   title: "myMoney",
@@ -19,6 +20,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="antialiased bg-surface text-ink">
+        <PageTransition />
         {children}
       </body>
     </html>
