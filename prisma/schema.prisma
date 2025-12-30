@@ -67,6 +67,7 @@ model User {
   sessions       Session[]
   deductions     Deduction[]
   rules          Rule[]
+  notificationLogs NotificationLog[]
 }
 
 model Session {
