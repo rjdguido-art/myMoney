@@ -1,6 +1,6 @@
-# myMoney
+# ArgoBucks
 
-myMoney is a personal finance workbench that blends cashflow forecasting, budgeting, and transaction hygiene. A guided onboarding captures pay cadence, deductions, bills, and goals, then the dashboard forecasts safe-to-spend before your next paycheck. You can manage transactions (with splits and rules), budgets, bills, recurring items, goals, debts, and category-level insights.
+ArgoBucks is a personal finance workbench that blends cashflow forecasting, budgeting, and transaction hygiene. A guided onboarding captures pay cadence, deductions, bills, and goals, then the dashboard forecasts safe-to-spend before your next paycheck. You can manage transactions (with splits and rules), budgets, bills, recurring items, goals, debts, and category-level insights.
 
 ## Features
 - Cashflow forecast that merges pay schedules, fixed bills, variable spend estimates, and live transactions.

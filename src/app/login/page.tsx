@@ -76,17 +76,17 @@ function LoginPageContent() {
         />
       </div>
       <div className="relative mx-auto flex min-h-[calc(100vh-6rem)] max-w-4xl items-center">
-        <div className="grid w-full gap-10 rounded-lg border border-slate-200/70 bg-white p-10 shadow-sm backdrop-blur-sm md:grid-cols-2">
+        <div className="grid w-full gap-10 rounded-lg border border-border/80 bg-white p-10 shadow-sm backdrop-blur-sm md:grid-cols-2">
           <div className="space-y-4">
           <div className="flex items-center gap-3">
             <img
               src="/icon.svg"
-              alt="myMoney logo"
+              alt="ArgoBucks logo"
               className="h-12 w-12 rounded-md shadow-sm"
             />
             <div>
               <p className="text-sm uppercase tracking-[0.18em] text-muted">
-                myMoney
+                ArgoBucks
               </p>
               <p className="text-base font-semibold text-ink">Welcome back</p>
             </div>
@@ -126,7 +126,7 @@ function LoginPageContent() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-sm bg-gradient-to-r from-emerald-500 to-sky-500 px-3 py-2 text-white shadow-[0_12px_30px_rgba(34,197,143,0.35)] hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-70"
+            className="w-full rounded-sm bg-gradient-to-r from-emerald-500 to-sky-500 px-3 py-2 text-white shadow-[0_12px_30px_rgba(121,211,198,0.35)] hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-70"
           >
             {loading ? "Signing in..." : "Sign in"}
           </button>

@@ -24,7 +24,7 @@ const en = {
   "welcome.viewGuide": "View Guide",
   "welcome.footer": "You can update these later in Settings.",
   "guide.pill": "Guide",
-  "guide.title": "Your myMoney walkthrough",
+  "guide.title": "Your ArgoBucks walkthrough",
   "guide.intro": "Get a quick overview of what each area does so you can set up your money flow with confidence.",
   "guide.dashboardTitle": "Dashboard overview",
   "guide.dashboardBody": "See your safe-to-spend amount, upcoming payday, month-to-date spending, and cash runway at a glance.",

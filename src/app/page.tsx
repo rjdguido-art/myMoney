@@ -110,6 +110,19 @@ export default function Home() {
   return (
     <main className="home-shell">
       <div className="home-bg" aria-hidden="true">
+        <video
+          className="home-video-bg"
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+        >
+          <source
+            src="https://presspersona.blob.core.windows.net/images/hachi%20in%20the%20sky.mp4"
+            type="video/mp4"
+          />
+        </video>
         <div className="home-grid" />
         <div className="home-shape home-shape--sun" />
         <div className="home-shape home-shape--sky" />
@@ -124,22 +137,22 @@ export default function Home() {
           <div className="flex items-center gap-3">
             <img
               src="/icon.svg"
-              alt="myMoney logo"
-              className="h-10 w-10 rounded-md border border-black/10 bg-white/80 p-1"
+              alt="ArgoBucks logo"
+              className="h-10 w-10 rounded-md border border-ink/10 bg-white/80 p-1"
             />
             <div>
-              <p className="text-xs uppercase tracking-[0.3em] text-black/60">myMoney</p>
-              <p className="text-sm font-semibold text-black/80">Feel in control</p>
+              <p className="text-xs uppercase tracking-[0.3em] text-ink/60">ArgoBucks</p>
+              <p className="text-sm font-semibold text-ink/80">Feel in control</p>
             </div>
           </div>
-          <nav className="hidden items-center gap-6 text-sm text-black/70 md:flex">
-            <a href="#features" className="hover:text-black">
+          <nav className="hidden items-center gap-6 text-sm text-ink/70 md:flex">
+            <a href="#features" className="hover:text-ink">
               Features
             </a>
-            <a href="#flow" className="hover:text-black">
+            <a href="#flow" className="hover:text-ink">
               Flow
             </a>
-            <a href="#cta" className="hover:text-black">
+            <a href="#cta" className="hover:text-ink">
               Get started
             </a>
             <button
@@ -168,7 +181,7 @@ export default function Home() {
                 ))}
               </span>
             </div>
-            <p className="max-w-xl text-lg text-black/70">
+            <p className="max-w-xl text-lg text-ink/70">
               A welcoming home for budgets, bills, and insights that keeps you steady and clear.
             </p>
             <div className="flex flex-wrap items-center gap-4">
@@ -182,15 +195,15 @@ export default function Home() {
               >
                 Sign in
               </button>
-              <span className="text-sm text-black/60">
+              <span className="text-sm text-ink/60">
                 No credit card needed.
               </span>
             </div>
             <div className="home-divider" />
-            <div className="flex flex-wrap gap-6 text-sm text-black/70">
+            <div className="flex flex-wrap gap-6 text-sm text-ink/70">
               {stats.map((stat) => (
                 <div key={stat.label} className="flex items-baseline gap-2">
-                  <span className="text-lg font-semibold text-black">{stat.value}</span>
+                  <span className="text-lg font-semibold text-ink">{stat.value}</span>
                   <span>{stat.label}</span>
                 </div>
               ))}
@@ -200,43 +213,43 @@ export default function Home() {
           <div className="home-card grid gap-6 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs uppercase tracking-[0.28em] text-black/50">Snapshot</p>
-                <p className="text-lg font-semibold text-black">This week</p>
+                <p className="text-xs uppercase tracking-[0.28em] text-ink/50">Snapshot</p>
+                <p className="text-lg font-semibold text-ink">This week</p>
               </div>
-              <span className="rounded-full border border-black/10 bg-white px-3 py-1 text-xs text-black/60">
+              <span className="rounded-full border border-ink/10 bg-white px-3 py-1 text-xs text-ink/60">
                 Live preview
               </span>
             </div>
             <div className="grid gap-4">
-              <div className="rounded-2xl border border-black/10 bg-white p-4">
-                <p className="text-xs uppercase tracking-[0.2em] text-black/50">Cash flow</p>
-                <p className="mt-2 text-2xl font-semibold text-black">$2,480</p>
-                <p className="text-sm text-black/60">Up 12% from last week</p>
+              <div className="rounded-2xl border border-ink/10 bg-white p-4">
+                <p className="text-xs uppercase tracking-[0.2em] text-ink/50">Cash flow</p>
+                <p className="mt-2 text-2xl font-semibold text-ink">$2,480</p>
+                <p className="text-sm text-ink/60">Up 12% from last week</p>
               </div>
-              <div className="rounded-2xl border border-black/10 bg-white p-4">
-                <p className="text-xs uppercase tracking-[0.2em] text-black/50">Upcoming bills</p>
-                <ul className="mt-3 space-y-2 text-sm text-black/70">
+              <div className="rounded-2xl border border-ink/10 bg-white p-4">
+                <p className="text-xs uppercase tracking-[0.2em] text-ink/50">Upcoming bills</p>
+                <ul className="mt-3 space-y-2 text-sm text-ink/70">
                   <li className="flex items-center justify-between">
                     <span>Rent</span>
-                    <span className="font-semibold text-black">$980</span>
+                    <span className="font-semibold text-ink">$980</span>
                   </li>
                   <li className="flex items-center justify-between">
                     <span>Utilities</span>
-                    <span className="font-semibold text-black">$140</span>
+                    <span className="font-semibold text-ink">$140</span>
                   </li>
                   <li className="flex items-center justify-between">
                     <span>Streaming</span>
-                    <span className="font-semibold text-black">$24</span>
+                    <span className="font-semibold text-ink">$24</span>
                   </li>
                 </ul>
               </div>
-              <div className="rounded-2xl border border-black/10 bg-white p-4">
-                <p className="text-xs uppercase tracking-[0.2em] text-black/50">Budget pulse</p>
-                <p className="mt-2 text-sm text-black/70">
+              <div className="rounded-2xl border border-ink/10 bg-white p-4">
+                <p className="text-xs uppercase tracking-[0.2em] text-ink/50">Budget pulse</p>
+                <p className="mt-2 text-sm text-ink/70">
                   Groceries are 8% under plan. Dining out is trending high.
                 </p>
-                <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-black/10">
-                  <div className="h-full w-[68%] rounded-full bg-gradient-to-r from-orange-400 to-blue-500" />
+                <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-ink/10">
+                  <div className="h-full w-[68%] rounded-full bg-gradient-to-r from-emerald-500 to-sky-500" />
                 </div>
               </div>
             </div>
@@ -247,14 +260,14 @@ export default function Home() {
           <div className="flex flex-wrap items-end justify-between gap-6">
             <div className="max-w-xl space-y-3">
               <p className="home-pill">Built for real life</p>
-              <h2 className="text-3xl font-semibold text-black">
+              <h2 className="text-3xl font-semibold text-ink">
                 A home page that stays clear when life gets loud.
               </h2>
-              <p className="text-black/70">
-                myMoney pairs gentle structure with clear insight so your finances feel personal again.
+              <p className="text-ink/70">
+                ArgoBucks pairs gentle structure with clear insight so your finances feel personal again.
                 Budgeting, bills, and trends all in one grounded space.
               </p>
-              <p className="text-black/70">
+              <p className="text-ink/70">
                 Everything you need is one swipe away, with just enough detail to move fast.
               </p>
             </div>
@@ -265,8 +278,8 @@ export default function Home() {
           <div className="mt-10 grid gap-6 md:grid-cols-3">
             {featureCards.map((feature) => (
               <div key={feature.title} className="home-card p-6">
-                <p className="text-lg font-semibold text-black">{feature.title}</p>
-                <p className="mt-2 text-sm text-black/70">{feature.description}</p>
+                <p className="text-lg font-semibold text-ink">{feature.title}</p>
+                <p className="mt-2 text-sm text-ink/70">{feature.description}</p>
               </div>
             ))}
           </div>
@@ -276,10 +289,10 @@ export default function Home() {
           <div className="home-card grid gap-10 p-8 md:grid-cols-[0.9fr_1.1fr]">
             <div className="space-y-4">
               <p className="home-pill">Your flow</p>
-              <h3 className="text-2xl font-semibold text-black">
+              <h3 className="text-2xl font-semibold text-ink">
                 A guided rhythm from first log-in to daily clarity.
               </h3>
-              <p className="text-sm text-black/70">
+              <p className="text-sm text-ink/70">
                 The welcome experience keeps your next step clear, whether you are setting up or
                 checking in.
               </p>
@@ -288,14 +301,14 @@ export default function Home() {
               {flowSteps.map((step, index) => (
                 <div
                   key={step.title}
-                  className="flex gap-4 rounded-2xl border border-black/10 bg-white/80 p-4"
+                  className="flex gap-4 rounded-2xl border border-ink/10 bg-white/80 p-4"
                 >
-                  <span className="flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white text-sm font-semibold text-black">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-full border border-ink/10 bg-white text-sm font-semibold text-ink">
                     {index + 1}
                   </span>
                   <div>
-                    <p className="text-base font-semibold text-black">{step.title}</p>
-                    <p className="text-sm text-black/70">{step.description}</p>
+                    <p className="text-base font-semibold text-ink">{step.title}</p>
+                    <p className="text-sm text-ink/70">{step.description}</p>
                   </div>
                 </div>
               ))}
@@ -307,8 +320,8 @@ export default function Home() {
           <div className="home-card flex flex-col items-start justify-between gap-6 p-8 md:flex-row md:items-center">
             <div className="space-y-2">
               <p className="home-pill">Ready when you are</p>
-              <h3 className="text-2xl font-semibold text-black">Bring calm to your money in minutes.</h3>
-              <p className="text-sm text-black/70">
+              <h3 className="text-2xl font-semibold text-ink">Bring calm to your money in minutes.</h3>
+              <p className="text-sm text-ink/70">
                 Your welcome page becomes a living snapshot as soon as you sign in.
               </p>
             </div>
@@ -338,10 +351,10 @@ export default function Home() {
           <div className="home-modal" onClick={(event) => event.stopPropagation()}>
             <div className="home-modal-header">
               <div>
-                <p className="text-xs uppercase tracking-[0.28em] text-black/50">
+                <p className="text-xs uppercase tracking-[0.28em] text-ink/50">
                   Sign in
                 </p>
-                <p className="text-lg font-semibold text-black">Welcome back</p>
+                <p className="text-lg font-semibold text-ink">Welcome back</p>
               </div>
               <button
                 type="button"
@@ -354,24 +367,24 @@ export default function Home() {
             </div>
             <form className="space-y-4" onSubmit={handleSignIn}>
               <div className="space-y-2">
-                <label className="text-sm text-black/80">Email</label>
+                <label className="text-sm text-ink/80">Email</label>
                 <input
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
                   type="email"
                   required
-                  className="w-full rounded-sm border border-black/10 bg-white/90 px-3 py-2 text-sm text-black focus:border-emerald-500 focus:outline-none"
+                  className="w-full rounded-sm border border-ink/10 bg-white/90 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
                   placeholder="you@example.com"
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm text-black/80">Password</label>
+                <label className="text-sm text-ink/80">Password</label>
                 <input
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
                   type="password"
                   required
-                  className="w-full rounded-sm border border-black/10 bg-white/90 px-3 py-2 text-sm text-black focus:border-emerald-500 focus:outline-none"
+                  className="w-full rounded-sm border border-ink/10 bg-white/90 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
                   placeholder="••••••••"
                 />
               </div>
@@ -383,11 +396,11 @@ export default function Home() {
               >
                 {submitting ? "Signing in..." : "Sign in"}
               </button>
-              <div className="flex items-center justify-between text-sm text-black/60">
-                <Link href="/signup" className="hover:text-black">
+              <div className="flex items-center justify-between text-sm text-ink/60">
+                <Link href="/signup" className="hover:text-ink">
                   Create account
                 </Link>
-                <Link href="/forgot" className="hover:text-black">
+                <Link href="/forgot" className="hover:text-ink">
                   Forgot password
                 </Link>
               </div>

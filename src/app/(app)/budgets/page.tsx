@@ -23,7 +23,7 @@ export default async function BudgetsPage() {
         </button>
       </div>
 
-      <div className="space-y-4 rounded-lg border border-slate-200/70 bg-white p-6 shadow-sm">
+      <div className="space-y-4 rounded-lg border border-border/80 bg-white p-6 shadow-sm">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm text-muted">Current plan</p>
@@ -43,7 +43,7 @@ export default async function BudgetsPage() {
             return (
               <div
                 key={plan.name}
-                className="rounded-md border border-slate-200/70 bg-white p-4"
+                className="rounded-md border border-border/80 bg-white p-4"
               >
                 <div className="flex items-center justify-between">
                   <p className="font-semibold text-ink">{plan.name}</p>
@@ -51,7 +51,7 @@ export default async function BudgetsPage() {
                     ${plan.used} / ${plan.allocated}
                   </p>
                 </div>
-                <div className="mt-3 h-3 overflow-hidden rounded-sm bg-slate-100">
+                <div className="mt-3 h-3 overflow-hidden rounded-sm bg-surface">
                   <div
                     className={`h-full ${
                       pct > 100

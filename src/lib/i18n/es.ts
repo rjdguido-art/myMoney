@@ -24,7 +24,7 @@ const es = {
   "welcome.viewGuide": "Ver guia",
   "welcome.footer": "Puedes actualizar esto despues en Configuracion.",
   "guide.pill": "Guia",
-  "guide.title": "Tu recorrido por myMoney",
+  "guide.title": "Tu recorrido por ArgoBucks",
   "guide.intro": "Un vistazo rapido de cada area para que configures tu flujo de dinero con confianza.",
   "guide.dashboardTitle": "Resumen del panel",
   "guide.dashboardBody": "Mira tu saldo seguro para gastar, proximo pago, gasto del mes y flujo de caja.",

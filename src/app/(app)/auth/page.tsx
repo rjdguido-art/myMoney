@@ -2,7 +2,7 @@ export default function AuthPage() {
   return (
     <div className="grid gap-8 lg:grid-cols-2">
       <div className="space-y-4">
-        <p className="pill bg-emerald-500 text-white border-transparent shadow-[0_10px_24px_rgba(34,197,143,0.32)]">
+        <p className="pill bg-emerald-500 text-white border-transparent shadow-[0_10px_24px_rgba(121,211,198,0.32)]">
           Secure sign-in
         </p>
         <h1 className="text-2xl font-semibold text-ink">
@@ -13,7 +13,7 @@ export default function AuthPage() {
         </p>
       </div>
 
-      <div className="space-y-4 rounded-lg border border-slate-200/70 bg-white p-6 shadow-sm">
+      <div className="space-y-4 rounded-lg border border-border/80 bg-white p-6 shadow-sm">
         <form className="space-y-4">
           <div className="space-y-2">
             <label className="text-sm text-ink">Email</label>
@@ -42,7 +42,7 @@ export default function AuthPage() {
           </div>
           <button
             type="button"
-            className="w-full rounded-sm bg-gradient-to-r from-emerald-500 to-sky-500 px-3 py-2 text-white shadow-[0_12px_30px_rgba(34,197,143,0.35)] hover:brightness-105"
+            className="w-full rounded-sm bg-gradient-to-r from-emerald-500 to-sky-500 px-3 py-2 text-white shadow-[0_12px_30px_rgba(121,211,198,0.35)] hover:brightness-105"
           >
             Continue
           </button>

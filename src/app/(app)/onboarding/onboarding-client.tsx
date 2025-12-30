@@ -480,14 +480,14 @@ export function OnboardingClient({
     <div className="space-y-8">
       {showSkeleton ? (
         <div className="space-y-6 animate-pulse">
-          <div className="h-6 w-40 rounded-sm bg-slate-100" />
+          <div className="h-6 w-40 rounded-sm bg-surface" />
           <div className="h-10 w-2/3 rounded bg-border/60" />
           <div className="h-4 w-1/2 rounded bg-border/60" />
           <div className="grid gap-3 md:grid-cols-2">
-            <div className="h-28 rounded-md bg-slate-100" />
-            <div className="h-28 rounded-md bg-slate-100" />
+            <div className="h-28 rounded-md bg-surface" />
+            <div className="h-28 rounded-md bg-surface" />
           </div>
-          <div className="h-64 rounded-lg bg-slate-100" />
+          <div className="h-64 rounded-lg bg-surface" />
         </div>
       ) : null}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -502,7 +502,7 @@ export function OnboardingClient({
           <p className="text-muted">{t("onboarding.intro", language)}</p>
         </div>
         <div className="flex items-center gap-3">
-          <div className="h-2 w-40 overflow-hidden rounded-sm bg-slate-100">
+          <div className="h-2 w-40 overflow-hidden rounded-sm bg-surface">
             <div
               className="h-full bg-gradient-to-r from-emerald-500 to-sky-500 transition-all"
               style={{ width: `${progress}%` }}
@@ -524,7 +524,7 @@ export function OnboardingClient({
             className={`rounded-md border px-4 py-3 text-sm ${
               idx === step
                 ? "border-emerald-500 bg-emerald-500/10"
-                : "border-slate-200/70 bg-white"
+                : "border-border/80 bg-white"
             }`}
           >
             <p className="font-semibold text-ink">{s.title}</p>
@@ -536,7 +536,7 @@ export function OnboardingClient({
       <div className={`card p-8 space-y-6 relative ${showSkeleton ? "opacity-60 pointer-events-none" : ""}`}>
         {submitting ? (
           <div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-white/90 backdrop-blur-sm">
-            <div className="flex items-center gap-3 rounded-md border border-slate-200/70 bg-white px-4 py-3 text-sm text-ink shadow-sm">
+            <div className="flex items-center gap-3 rounded-md border border-border/80 bg-white px-4 py-3 text-sm text-ink shadow-sm">
               <span className="h-4 w-4 animate-spin rounded-sm border-2 border-emerald-500 border-t-transparent" />
               {labels.saving}
             </div>
@@ -652,7 +652,7 @@ export function OnboardingClient({
               onClick={() =>
                 setDeductions((rows) => [...rows, { id: uid(), name: "", amount: "" }])
               }
-              className="pill border-slate-200/70 bg-white text-ink hover:border-emerald-500/50"
+              className="pill border-border/80 bg-white text-ink hover:border-emerald-500/50"
             >
               {labels.addDeduction}
             </button>
@@ -718,7 +718,7 @@ export function OnboardingClient({
                   { id: uid(), name: "", amount: "", dueDay: "", frequency: "MONTHLY" },
                 ])
               }
-              className="pill border-slate-200/70 bg-white text-ink hover:border-emerald-500/50"
+              className="pill border-border/80 bg-white text-ink hover:border-emerald-500/50"
             >
               {labels.addBill}
             </button>
@@ -757,7 +757,7 @@ export function OnboardingClient({
               onClick={() =>
                 setBudgets((rows) => [...rows, { id: uid(), category: "", amount: "" }])
               }
-              className="pill border-slate-200/70 bg-white text-ink hover:border-emerald-500/50"
+              className="pill border-border/80 bg-white text-ink hover:border-emerald-500/50"
             >
               {labels.addCategory}
             </button>
@@ -796,7 +796,7 @@ export function OnboardingClient({
               onClick={() =>
                 setGoals((rows) => [...rows, { id: uid(), name: "", targetAmount: "" }])
               }
-              className="pill border-slate-200/70 bg-white text-ink hover:border-emerald-500/50"
+              className="pill border-border/80 bg-white text-ink hover:border-emerald-500/50"
             >
               {labels.addGoal}
             </button>
@@ -835,7 +835,7 @@ export function OnboardingClient({
               onClick={() =>
                 setDebts((rows) => [...rows, { id: uid(), name: "", minimumPayment: "" }])
               }
-              className="pill border-slate-200/70 bg-white text-ink hover:border-emerald-500/50"
+              className="pill border-border/80 bg-white text-ink hover:border-emerald-500/50"
             >
               {labels.addDebt}
             </button>
@@ -845,7 +845,7 @@ export function OnboardingClient({
         {step === 7 && (
           <div className="space-y-4">
             <h2 className="text-lg font-semibold text-ink">{labels.summaryTitle}</h2>
-            <div className="grid gap-3 rounded-md border border-slate-200/70 bg-white p-4 text-sm text-muted">
+            <div className="grid gap-3 rounded-md border border-border/80 bg-white p-4 text-sm text-muted">
               <p>
                 {labels.language}: <span className="text-ink">{language}</span>
               </p>
@@ -915,7 +915,7 @@ export function OnboardingClient({
             type="button"
             onClick={prevStep}
             disabled={step === 0}
-            className="pill border-slate-200/70 bg-white text-ink disabled:opacity-50"
+            className="pill border-border/80 bg-white text-ink disabled:opacity-50"
           >
             {labels.back}
           </button>
@@ -933,7 +933,7 @@ export function OnboardingClient({
               <button
                 type="button"
                 onClick={nextStep}
-                className="pill bg-emerald-500 text-white border-transparent shadow-[0_12px_32px_rgba(34,197,143,0.32)] hover:brightness-105"
+                className="pill bg-emerald-500 text-white border-transparent shadow-[0_12px_32px_rgba(121,211,198,0.32)] hover:brightness-105"
               >
                 {labels.next}
               </button>
@@ -942,7 +942,7 @@ export function OnboardingClient({
                 type="button"
                 onClick={handleSubmit}
                 disabled={submitting}
-                className="pill bg-emerald-500 text-white border-transparent shadow-[0_12px_32px_rgba(34,197,143,0.32)] hover:brightness-105 disabled:opacity-70"
+                className="pill bg-emerald-500 text-white border-transparent shadow-[0_12px_32px_rgba(121,211,198,0.32)] hover:brightness-105 disabled:opacity-70"
               >
                 {submitting ? labels.saving : labels.confirm}
               </button>

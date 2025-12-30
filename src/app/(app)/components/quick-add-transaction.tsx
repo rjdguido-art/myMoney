@@ -145,7 +145,7 @@ export function QuickAddTransactionModal() {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 px-4">
-      <div className="w-full max-w-lg rounded-lg border border-slate-200/70 bg-white p-6 shadow-sm">
+      <div className="w-full max-w-lg rounded-lg border border-border/80 bg-white p-6 shadow-sm">
         <div className="flex items-start justify-between">
           <div>
             <h2 className="text-xl font-semibold text-ink">Quick add transaction</h2>
@@ -156,7 +156,7 @@ export function QuickAddTransactionModal() {
           <button
             type="button"
             onClick={closeModal}
-            className="rounded-sm border border-slate-200/70 px-3 py-1 text-sm text-ink hover:bg-card"
+            className="rounded-sm border border-border/80 px-3 py-1 text-sm text-ink hover:bg-card"
           >
             Close
           </button>
@@ -172,7 +172,7 @@ export function QuickAddTransactionModal() {
         ) : (
           <div className="mt-6 space-y-4">
             {accounts.length === 0 ? (
-              <div className="rounded-md border border-dashed border-slate-200 bg-white p-4 text-sm text-muted">
+              <div className="rounded-md border border-dashed border-border bg-white p-4 text-sm text-muted">
                 Add an account during onboarding to start recording transactions.
               </div>
             ) : null}
@@ -274,7 +274,7 @@ export function QuickAddTransactionModal() {
                 type="button"
                 onClick={handleSubmit}
                 disabled={!canSubmit || submitting}
-                className="pill bg-emerald-500 text-white border-transparent shadow-[0_12px_30px_rgba(34,197,143,0.35)] hover:brightness-105 disabled:opacity-70"
+                className="pill bg-emerald-500 text-white border-transparent shadow-[0_12px_30px_rgba(121,211,198,0.35)] hover:brightness-105 disabled:opacity-70"
               >
                 {submitting ? "Saving..." : "Save transaction"}
               </button>

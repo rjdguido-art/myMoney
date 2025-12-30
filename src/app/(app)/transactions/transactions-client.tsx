@@ -479,7 +479,7 @@ export function TransactionsClient({
         </div>
       </div>
 
-      <div className="grid gap-4 rounded-lg border border-slate-200/70 bg-white p-6 shadow-sm">
+      <div className="grid gap-4 rounded-lg border border-border/80 bg-white p-6 shadow-sm">
         <div className="grid gap-3 md:grid-cols-5">
           <div className="space-y-1">
             <label className="text-sm text-muted">From</label>
@@ -554,7 +554,7 @@ export function TransactionsClient({
         <p className="text-sm text-red-600">{error}</p>
       ) : null}
 
-      <div className="rounded-lg border border-slate-200/70 bg-white p-4 space-y-3">
+      <div className="rounded-lg border border-border/80 bg-white p-4 space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <p className="text-sm text-muted">CSV Import</p>
@@ -621,14 +621,14 @@ export function TransactionsClient({
             </div>
             <button
               onClick={buildPreview}
-              className="pill border-slate-200/70 bg-white text-sm text-ink hover:border-emerald-500/50"
+              className="pill border-border/80 bg-white text-sm text-ink hover:border-emerald-500/50"
             >
               Preview first 10 rows
             </button>
             <button
               onClick={importCsv}
               disabled={submitting}
-              className="pill bg-emerald-500 text-white text-sm border-transparent shadow-[0_10px_26px_rgba(34,197,143,0.28)] hover:brightness-105 disabled:opacity-60"
+              className="pill bg-emerald-500 text-white text-sm border-transparent shadow-[0_10px_26px_rgba(121,211,198,0.28)] hover:brightness-105 disabled:opacity-60"
             >
               {submitting ? "Importing…" : "Import CSV"}
             </button>
@@ -636,7 +636,7 @@ export function TransactionsClient({
         )}
 
         {preview.length > 0 && (
-          <div className="rounded-md border border-slate-200/70 bg-white">
+          <div className="rounded-md border border-border/80 bg-white">
             <div className="overflow-auto">
               <table className="min-w-full divide-y divide-border/70 text-sm">
                 <thead className="bg-card/80">
@@ -672,7 +672,7 @@ export function TransactionsClient({
       </div>
       </div>
 
-      <div className="overflow-hidden rounded-lg border border-slate-200/70 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-lg border border-border/80 bg-white shadow-sm">
         <div className="grid grid-cols-7 bg-surface px-6 py-3 text-sm font-medium text-muted">
           <p>Merchant</p>
           <p>Category</p>
@@ -756,7 +756,7 @@ export function TransactionsClient({
 
       {showForm ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/30 p-4 backdrop-blur">
-          <div className="w-full max-w-3xl rounded-lg border border-slate-200/70 bg-white shadow-sm p-6">
+          <div className="w-full max-w-3xl rounded-lg border border-border/80 bg-white shadow-sm p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted">
@@ -873,7 +873,7 @@ export function TransactionsClient({
               </div>
             </div>
 
-            <div className="mt-6 space-y-3 rounded-md border border-slate-200/70 bg-white p-4">
+            <div className="mt-6 space-y-3 rounded-md border border-border/80 bg-white p-4">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-semibold text-ink">Splits</p>
@@ -1001,7 +1001,7 @@ export function TransactionsClient({
                   Cancel
                 </button>
                 <button
-                  className="rounded-sm bg-gradient-to-r from-emerald-500 to-sky-500 px-4 py-2 text-sm font-semibold text-white shadow-[0_12px_30px_rgba(34,197,143,0.35)] hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-70"
+                  className="rounded-sm bg-gradient-to-r from-emerald-500 to-sky-500 px-4 py-2 text-sm font-semibold text-white shadow-[0_12px_30px_rgba(121,211,198,0.35)] hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-70"
                   onClick={() => void handleSubmit()}
                   disabled={submitting}
                 >

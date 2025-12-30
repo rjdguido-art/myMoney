@@ -82,11 +82,11 @@ async function markNotified(userId: string, type: NotificationType, key: string)
 
 function buildEmailShell(title: string, body: string) {
   return `
-    <div style="font-family: Inter, Arial, sans-serif; background: #f3fbf7; padding: 24px;">
-      <div style="max-width: 520px; margin: 0 auto; background: #ffffff; border-radius: 16px; padding: 24px; border: 1px solid #d8e5e1;">
-        <p style="text-transform: uppercase; letter-spacing: 0.18em; font-size: 12px; color: #0d5696; margin: 0 0 8px;">myMoney</p>
-        <h1 style="font-size: 20px; margin: 0 0 12px; color: #122234;">${title}</h1>
-        <div style="font-size: 14px; color: #3a4a5c; line-height: 1.6;">${body}</div>
+    <div style="font-family: Inter, Arial, sans-serif; background: #f5f0e6; padding: 24px;">
+      <div style="max-width: 520px; margin: 0 auto; background: #ffffff; border-radius: 16px; padding: 24px; border: 1px solid #e3dacb;">
+        <p style="text-transform: uppercase; letter-spacing: 0.18em; font-size: 12px; color: #0b2347; margin: 0 0 8px;">ArgoBucks</p>
+        <h1 style="font-size: 20px; margin: 0 0 12px; color: #0b2347;">${title}</h1>
+        <div style="font-size: 14px; color: #3d5978; line-height: 1.6;">${body}</div>
       </div>
     </div>
   `;
@@ -136,7 +136,7 @@ async function sendBillDueNotifications(now: Date) {
 
     const body = `
       <p>Hi ${formatName(user)}, your <strong>${bill.name}</strong> bill is due ${dayLabel}.</p>
-      <p style="margin: 12px 0; padding: 12px; background: #f7fbff; border-radius: 12px; border: 1px solid #d8e5e1;">
+      <p style="margin: 12px 0; padding: 12px; background: #fbf7f0; border-radius: 12px; border: 1px solid #e3dacb;">
         Due date: <strong>${dueLabel}</strong><br/>
         Amount: <strong>${amountLabel}</strong>
       </p>
@@ -342,7 +342,7 @@ async function sendWeeklySummaries(now: Date) {
 
     const body = `
       <p>Hi ${formatName(user)}, here is your weekly snapshot.</p>
-      <p style="margin: 12px 0; padding: 12px; background: #f7fbff; border-radius: 12px; border: 1px solid #d8e5e1;">
+      <p style="margin: 12px 0; padding: 12px; background: #fbf7f0; border-radius: 12px; border: 1px solid #e3dacb;">
         Total spent: <strong>${formatCurrency(totalSpent, user.currency, localeCode)}</strong>
       </p>
       ${
@@ -416,7 +416,7 @@ async function sendOnboardingReminders(now: Date) {
 
     await sendEmail({
       to: user.email,
-      subject: "Finish your myMoney setup",
+      subject: "Finish your ArgoBucks setup",
       html: buildEmailShell("Quick onboarding reminder", body),
     });
     await markNotified(user.id, NotificationType.ONBOARDING_REMINDER, key);

@@ -19,13 +19,13 @@ export default async function SettingsPage() {
           <h1 className="text-2xl font-semibold text-ink">{t("settings.title", locale)}</h1>
           <p className="text-muted">{t("settings.intro", locale)}</p>
         </div>
-        <button className="pill bg-emerald-500 text-white border-transparent shadow-[0_10px_24px_rgba(34,197,143,0.32)] hover:brightness-105">
+        <button className="pill bg-emerald-500 text-white border-transparent shadow-[0_10px_24px_rgba(121,211,198,0.32)] hover:brightness-105">
           {t("settings.save", locale)}
         </button>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <section className="space-y-4 rounded-lg border border-slate-200/70 bg-white p-6 shadow-sm">
+        <section className="space-y-4 rounded-lg border border-border/80 bg-white p-6 shadow-sm">
           <div>
             <p className="pill bg-white/80 text-emerald-700 border-emerald-500/30">
               {t("settings.profilePill", locale)}
@@ -70,7 +70,7 @@ export default async function SettingsPage() {
           </form>
         </section>
 
-        <section className="space-y-4 rounded-lg border border-slate-200/70 bg-white p-6 shadow-sm">
+        <section className="space-y-4 rounded-lg border border-border/80 bg-white p-6 shadow-sm">
           <div>
             <p className="pill bg-white/80 text-emerald-700 border-emerald-500/30">
               {t("settings.languageTitle", locale)}
@@ -86,7 +86,7 @@ export default async function SettingsPage() {
           </div>
         </section>
 
-        <section className="space-y-4 rounded-lg border border-slate-200/70 bg-white p-6 shadow-sm">
+        <section className="space-y-4 rounded-lg border border-border/80 bg-white p-6 shadow-sm">
           <div>
             <p className="pill bg-white/80 text-navy-700 border-navy-500/30">
               {t("settings.notificationsPill", locale)}
@@ -100,7 +100,7 @@ export default async function SettingsPage() {
             {notifications.map((item) => (
               <label
                 key={item}
-                className="flex items-center justify-between rounded-md border border-slate-200/70 bg-white px-4 py-3 text-sm text-ink"
+                className="flex items-center justify-between rounded-md border border-border/80 bg-white px-4 py-3 text-sm text-ink"
               >
                 <span>{item}</span>
                 <input type="checkbox" defaultChecked className="h-4 w-4" />
@@ -109,7 +109,7 @@ export default async function SettingsPage() {
           </div>
         </section>
 
-        <section className="space-y-4 rounded-lg border border-slate-200/70 bg-white p-6 shadow-sm lg:col-span-2">
+        <section className="space-y-4 rounded-lg border border-border/80 bg-white p-6 shadow-sm lg:col-span-2">
           <div>
             <p className="pill bg-white/80 text-emerald-700 border-emerald-500/30">
               {t("settings.navGuidePill", locale)}
@@ -123,7 +123,7 @@ export default async function SettingsPage() {
             {navCards.map((item) => (
               <div
                 key={item.title}
-                className="rounded-md border border-slate-200/70 bg-white p-4 text-sm"
+                className="rounded-md border border-border/80 bg-white p-4 text-sm"
               >
                 <p className="font-semibold text-ink">{item.title}</p>
                 <p className="text-muted">{item.detail}</p>

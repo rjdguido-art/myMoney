@@ -235,7 +235,7 @@ export function BillsClient({
           </p>
         </div>
         <button
-          className="pill bg-emerald-500 text-white border-transparent shadow-[0_10px_28px_rgba(34,197,143,0.35)] hover:brightness-105"
+          className="pill bg-emerald-500 text-white border-transparent shadow-[0_10px_28px_rgba(121,211,198,0.35)] hover:brightness-105"
           onClick={startCreate}
         >
           Add bill
@@ -244,7 +244,7 @@ export function BillsClient({
 
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
 
-      <div className="overflow-hidden rounded-lg border border-slate-200/70 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-lg border border-border/80 bg-white shadow-sm">
         <div className="grid grid-cols-7 bg-surface px-6 py-3 text-sm font-medium text-muted">
           <p>Name</p>
           <p>Due date</p>
@@ -313,7 +313,7 @@ export function BillsClient({
 
       {showForm ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/30 p-4 backdrop-blur">
-          <div className="w-full max-w-3xl rounded-lg border border-slate-200/70 bg-white p-6 shadow-sm">
+          <div className="w-full max-w-3xl rounded-lg border border-border/80 bg-white p-6 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted">
@@ -498,7 +498,7 @@ export function BillsClient({
                   Cancel
                 </button>
                 <button
-                  className="rounded-sm bg-gradient-to-r from-emerald-500 to-sky-500 px-4 py-2 text-sm font-semibold text-white shadow-[0_12px_30px_rgba(34,197,143,0.35)] hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-70"
+                  className="rounded-sm bg-gradient-to-r from-emerald-500 to-sky-500 px-4 py-2 text-sm font-semibold text-white shadow-[0_12px_30px_rgba(121,211,198,0.35)] hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-70"
                   onClick={() => void handleSubmit()}
                   disabled={submitting}
                 >
