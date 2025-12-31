@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { TransactionStatus } from "@prisma/client";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { resolveCategoryRule } from "@/lib/rules";
@@ -68,8 +69,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: firstError.error }, { status: 400 });
   }
 
+  const validRows = baseRows.filter(
+    (row): row is { row: (typeof rows)[number]; accountId: string } =>
+      !("error" in row),
+  );
+
   const resolvedRows = await Promise.all(
-    baseRows.map(async ({ row, accountId }) => {
+    validRows.map(async ({ row, accountId }) => {
       const categoryId = await resolveCategoryRule({
         userId: session.user.id,
         description: row.description,
@@ -85,7 +91,7 @@ export async function POST(request: Request) {
     notes: row.notes ?? null,
     amount: row.amount,
     postedAt: row.postedAt,
-    status: "CLEARED",
+    status: TransactionStatus.CLEARED,
     accountId,
     categoryId,
   }));
