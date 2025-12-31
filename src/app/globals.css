@@ -27,11 +27,20 @@
   --blue-900: 11 35 71;
   --blue-700: 30 65 106;
   --blue-500: 212 162 59;
-  --surface: 245 240 230;
+  --surface: 248 249 250;
   --card: 255 255 255;
-  --ink: 11 35 71;
+  --ink: 10 25 47;
   --muted: 61 89 120;
   --border: 227 218 203;
+  --primary: 46 156 147;
+  --accent: 212 162 59;
+  --success: 27 109 103;
+  --warning: 212 162 59;
+  --on-primary: 255 255 255;
+  --radius-card: 28px;
+  --radius-pill: 999px;
+  --shadow-soft: 0 12px 30px rgba(11, 35, 71, 0.08);
+  --shadow-card: 0 18px 40px rgba(11, 35, 71, 0.12);
   --token-b086004c-f114-4ac9-8804-61c670031bc0: #5b3f10;
   --token-91b085f6-f83f-4107-a271-57ff605cb9fa: #f5f0e6;
   --token-edbd19a8-14d1-4b6a-b511-3fd28480302a: #d4a23b;
@@ -53,6 +62,11 @@
   --color-ink: rgb(var(--ink));
   --color-muted: rgb(var(--muted));
   --color-border: rgb(var(--border));
+  --color-primary: rgb(var(--primary));
+  --color-accent: rgb(var(--accent));
+  --color-success: rgb(var(--success));
+  --color-warning: rgb(var(--warning));
+  --color-on-primary: rgb(var(--on-primary));
   --color-emerald-500: rgb(var(--green-500));
   --color-emerald-700: rgb(var(--green-700));
   --color-emerald-900: rgb(var(--green-900));
@@ -70,11 +84,11 @@
 
 body {
   background: radial-gradient(
-      circle at 20% 20%,
-      rgba(121, 211, 198, 0.12),
-      transparent 40%
+      circle at 18% 18%,
+      rgba(121, 211, 198, 0.05),
+      transparent 42%
     ),
-    radial-gradient(circle at 80% 0%, rgba(212, 162, 59, 0.1), transparent 35%),
+    radial-gradient(circle at 82% 4%, rgba(212, 162, 59, 0.04), transparent 38%),
     var(--color-surface);
   color: var(--color-ink);
   font-family: "Inter", system-ui, -apple-system, sans-serif;
@@ -198,6 +212,29 @@ button > *,
 .nav-menu {
   animation: navMenuIn 180ms ease-out;
   transform-origin: top right;
+}
+
+.bg-aurora {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(1200px 700px at 15% 20%, rgba(116, 199, 195, 0.45), transparent 60%),
+    radial-gradient(900px 600px at 80% 10%, rgba(201, 162, 39, 0.3), transparent 55%),
+    radial-gradient(1000px 800px at 65% 85%, rgba(11, 27, 51, 0.24), transparent 60%),
+    linear-gradient(180deg, rgba(255, 255, 255, 1), rgba(245, 247, 250, 1));
+  background-repeat: no-repeat;
+  background-color: rgb(var(--surface));
+}
+
+.bg-aurora::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.045;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.45'/%3E%3C/svg%3E");
+  mix-blend-mode: multiply;
+  z-index: 0;
 }
 
 .nav-menu-item {
