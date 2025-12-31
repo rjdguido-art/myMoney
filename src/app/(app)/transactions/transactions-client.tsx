@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { SerializableTransaction } from "@/lib/transactions";
+import { useMediaQuery } from "@/lib/use-media-query";
 
 type AccountOption = { id: string; name: string; currency?: string };
 type CategoryOption = { id: string; name: string; type: string };
@@ -105,6 +106,7 @@ export function TransactionsClient({
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<SerializableTransaction | null>(null);
+  const isDesktop = useMediaQuery("(min-width: 1024px)");
   const [formState, setFormState] = useState<FormState>(
     emptyForm(initialAccounts[0]?.id),
   );
@@ -672,87 +674,153 @@ export function TransactionsClient({
       </div>
       </div>
 
-      <div className="overflow-hidden rounded-lg border border-border/80 bg-white shadow-sm">
-        <div className="grid grid-cols-7 bg-surface px-6 py-3 text-sm font-medium text-muted">
-          <p>Merchant</p>
-          <p>Category</p>
-          <p className="text-right">Amount</p>
-          <p>Account</p>
-          <p>Date</p>
-          <p className="text-right">Status</p>
-          <p className="text-right">Actions</p>
+      {isDesktop ? (
+        <div className="overflow-hidden rounded-lg border border-border/80 bg-white shadow-sm">
+          <div className="grid grid-cols-7 bg-surface px-6 py-3 text-sm font-medium text-muted">
+            <p>Merchant</p>
+            <p>Category</p>
+            <p className="text-right">Amount</p>
+            <p>Account</p>
+            <p>Date</p>
+            <p className="text-right">Status</p>
+            <p className="text-right">Actions</p>
+          </div>
+          <div className="divide-y divide-border/70">
+            {transactions.length === 0 ? (
+              <div className="px-6 py-6 text-sm text-muted">
+                No transactions match these filters.
+              </div>
+            ) : (
+              transactions.map((tx) => (
+                <div
+                  key={tx.id}
+                  className="grid grid-cols-7 items-start gap-2 px-6 py-4 text-sm"
+                >
+                  <div>
+                    <p className="font-semibold text-ink">
+                      {tx.description || "Untitled"}
+                    </p>
+                    {tx.notes ? (
+                      <p className="text-xs text-muted">Note: {tx.notes}</p>
+                    ) : null}
+                  </div>
+                  <div>
+                    <p className="text-muted">
+                      {tx.splits.length
+                        ? `Split across ${tx.splits.length} categories`
+                        : tx.category?.name ?? "Uncategorized"}
+                    </p>
+                    {tx.splits.length ? (
+                      <p className="text-xs text-muted">
+                        {tx.splits
+                          .map((split) => {
+                            const name = split.category?.name ?? "Uncategorized";
+                            return `${name} (${formatAmount(split.amount, tx.currency)})`;
+                          })
+                          .join(", ")}
+                      </p>
+                    ) : null}
+                  </div>
+                  <p className="text-right font-semibold text-ink">
+                    {formatAmount(tx.amount, tx.currency)}
+                  </p>
+                  <p className="text-muted">{tx.account.name}</p>
+                  <p className="text-muted">{formatDate(tx.postedAt)}</p>
+                  <div className="flex justify-end">
+                    <span
+                      className={`pill border ${statusTone[tx.status] ?? ""} text-xs font-semibold`}
+                    >
+                      {tx.status.toLowerCase()}
+                    </span>
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <button
+                      className="rounded-sm border border-border/80 px-3 py-1 text-xs text-ink hover:border-emerald-500/50"
+                      onClick={() => startEdit(tx)}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      className="rounded-sm border border-red-200 px-3 py-1 text-xs text-red-700 hover:border-red-400"
+                      onClick={() => void handleDelete(tx.id)}
+                      disabled={submitting}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+          {loading ? (
+            <div className="px-6 py-3 text-sm text-muted">Loading...</div>
+          ) : null}
         </div>
-        <div className="divide-y divide-border/70">
+      ) : (
+        <div className="space-y-3">
           {transactions.length === 0 ? (
-            <div className="px-6 py-6 text-sm text-muted">
+            <div className="rounded-lg border border-border/80 bg-white p-4 text-sm text-muted shadow-sm">
               No transactions match these filters.
             </div>
           ) : (
             transactions.map((tx) => (
               <div
                 key={tx.id}
-                className="grid grid-cols-7 items-start gap-2 px-6 py-4 text-sm"
+                className="rounded-lg border border-border/80 bg-white p-4 shadow-sm"
               >
-                <div>
-                  <p className="font-semibold text-ink">
-                    {tx.description || "Untitled"}
-                  </p>
-                  {tx.notes ? (
-                    <p className="text-xs text-muted">Note: {tx.notes}</p>
-                  ) : null}
-                </div>
-                <div>
-                  <p className="text-muted">
-                    {tx.splits.length
-                      ? `Split across ${tx.splits.length} categories`
-                      : tx.category?.name ?? "Uncategorized"}
-                  </p>
-                  {tx.splits.length ? (
-                    <p className="text-xs text-muted">
-                      {tx.splits
-                        .map((split) => {
-                          const name = split.category?.name ?? "Uncategorized";
-                          return `${name} (${formatAmount(split.amount, tx.currency)})`;
-                        })
-                        .join(", ")}
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-base font-semibold text-ink">
+                      {tx.description || "Untitled"}
                     </p>
-                  ) : null}
+                    <p className="text-xs text-muted">
+                      {formatDate(tx.postedAt)} · {tx.account.name}
+                    </p>
+                  </div>
+                  <p className="text-right text-base font-semibold text-ink">
+                    {formatAmount(tx.amount, tx.currency)}
+                  </p>
                 </div>
-                <p className="text-right font-semibold text-ink">
-                  {formatAmount(tx.amount, tx.currency)}
-                </p>
-                <p className="text-muted">{tx.account.name}</p>
-                <p className="text-muted">{formatDate(tx.postedAt)}</p>
-                <div className="flex justify-end">
+                <div className="mt-2 text-sm text-muted">
+                  {tx.splits.length
+                    ? `Split across ${tx.splits.length} categories`
+                    : tx.category?.name ?? "Uncategorized"}
+                </div>
+                {tx.notes ? (
+                  <p className="mt-1 text-xs text-muted">Note: {tx.notes}</p>
+                ) : null}
+                <div className="mt-3 flex items-center justify-between gap-2">
                   <span
                     className={`pill border ${statusTone[tx.status] ?? ""} text-xs font-semibold`}
                   >
                     {tx.status.toLowerCase()}
                   </span>
-                </div>
-                <div className="flex justify-end gap-2">
-                  <button
-                    className="rounded-sm border border-border/80 px-3 py-1 text-xs text-ink hover:border-emerald-500/50"
-                    onClick={() => startEdit(tx)}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    className="rounded-sm border border-red-200 px-3 py-1 text-xs text-red-700 hover:border-red-400"
-                    onClick={() => void handleDelete(tx.id)}
-                    disabled={submitting}
-                  >
-                    Delete
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      className="rounded-sm border border-border/80 px-3 py-1 text-xs text-ink hover:border-emerald-500/50"
+                      onClick={() => startEdit(tx)}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      className="rounded-sm border border-red-200 px-3 py-1 text-xs text-red-700 hover:border-red-400"
+                      onClick={() => void handleDelete(tx.id)}
+                      disabled={submitting}
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
               </div>
             ))
           )}
+          {loading ? (
+            <div className="rounded-lg border border-border/80 bg-white p-4 text-sm text-muted shadow-sm">
+              Loading...
+            </div>
+          ) : null}
         </div>
-        {loading ? (
-          <div className="px-6 py-3 text-sm text-muted">Loading...</div>
-        ) : null}
-      </div>
+      )}
 
       {showForm ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/30 p-4 backdrop-blur">

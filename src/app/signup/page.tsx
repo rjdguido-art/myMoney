@@ -46,6 +46,12 @@ function SignupPageContent() {
     }
 
     try {
+      window.sessionStorage.setItem("argo-login-transition", "1");
+    } catch {
+      // Transition is optional.
+    }
+
+    try {
       const res = await fetch("/api/onboarding");
       if (res.ok) {
         const data = await res.json();

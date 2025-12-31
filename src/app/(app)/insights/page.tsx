@@ -259,7 +259,7 @@ export default async function InsightsPage() {
             </span>
           </div>
           {weeklySeries.length ? (
-            <div className="grid grid-cols-6 gap-2">
+            <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
               {weeklySeries.map((bucket) => {
                 const incomeHeight = maxWeekly ? Math.round((bucket.income / maxWeekly) * 100) : 0;
                 const expenseHeight = maxWeekly ? Math.round((bucket.expense / maxWeekly) * 100) : 0;
@@ -287,7 +287,7 @@ export default async function InsightsPage() {
               Cashflow data will appear once you have posted transactions in the last six weeks.
             </div>
           )}
-          <div className="grid grid-cols-2 gap-3 text-sm">
+          <div className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
             <div className="rounded-md border border-border/80 bg-white p-3">
               <p className="text-xs text-muted">Avg weekly income</p>
               <p className="text-base font-semibold text-ink">

@@ -2,6 +2,7 @@
 
 import { useCallback, useMemo, useState } from "react";
 import type { BillStatus, Frequency } from "@prisma/client";
+import { useMediaQuery } from "@/lib/use-media-query";
 
 type AccountOption = { id: string; name: string; currency?: string };
 type CategoryOption = { id: string; name: string; type: string };
@@ -100,6 +101,7 @@ export function BillsClient({
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
+  const isDesktop = useMediaQuery("(min-width: 1024px)");
 
   const selectedAccount = useMemo(
     () => accounts.find((a) => a.id === formState.accountId),
@@ -244,72 +246,140 @@ export function BillsClient({
 
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
 
-      <div className="overflow-hidden rounded-lg border border-border/80 bg-white shadow-sm">
-        <div className="grid grid-cols-7 bg-surface px-6 py-3 text-sm font-medium text-muted">
-          <p>Name</p>
-          <p>Due date</p>
-          <p className="text-right">Amount</p>
-          <p>Frequency</p>
-          <p>Reminder</p>
-          <p>Autopay</p>
-          <p className="text-right">Actions</p>
+      {isDesktop ? (
+        <div className="overflow-hidden rounded-lg border border-border/80 bg-white shadow-sm">
+          <div className="grid grid-cols-7 bg-surface px-6 py-3 text-sm font-medium text-muted">
+            <p>Name</p>
+            <p>Due date</p>
+            <p className="text-right">Amount</p>
+            <p>Frequency</p>
+            <p>Reminder</p>
+            <p>Autopay</p>
+            <p className="text-right">Actions</p>
+          </div>
+          <div className="divide-y divide-border/70">
+            {bills.length === 0 ? (
+              <div className="px-6 py-6 text-sm text-muted">
+                No bills added yet. Create one to get reminders.
+              </div>
+            ) : (
+              bills.map((bill) => (
+                <div
+                  key={bill.id}
+                  className="grid grid-cols-7 items-center gap-2 px-6 py-4 text-sm"
+                >
+                  <div>
+                    <p className="font-semibold text-ink">{bill.name}</p>
+                    <p className="text-xs text-muted">
+                      {bill.category?.name ?? "Uncategorized"}
+                    </p>
+                  </div>
+                  <p className="text-muted">{formatDate(bill.dueDate)}</p>
+                  <p className="text-right font-semibold text-ink">
+                    {formatMoney(bill.amount, bill.currency)}
+                  </p>
+                  <p className="text-muted">{bill.frequency}</p>
+                  <p className="text-muted">{bill.reminderDays} days before</p>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-muted">
+                      {bill.autopay ? "Enabled" : "Manual"}
+                    </span>
+                    <span
+                      className={`pill border text-xs font-semibold ${statusTone[bill.status]}`}
+                    >
+                      {bill.status.toLowerCase()}
+                    </span>
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <button
+                      className="rounded-sm border border-border/80 px-3 py-1 text-xs text-ink hover:border-emerald-500/50"
+                      onClick={() => startEdit(bill)}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      className="rounded-sm border border-red-200 px-3 py-1 text-xs text-red-700 hover:border-red-400"
+                      onClick={() => void handleDelete(bill.id)}
+                      disabled={submitting}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+          {loading ? (
+            <div className="px-6 py-3 text-sm text-muted">Loading...</div>
+          ) : null}
         </div>
-        <div className="divide-y divide-border/70">
+      ) : (
+        <div className="space-y-3">
           {bills.length === 0 ? (
-            <div className="px-6 py-6 text-sm text-muted">
+            <div className="rounded-lg border border-border/80 bg-white p-4 text-sm text-muted shadow-sm">
               No bills added yet. Create one to get reminders.
             </div>
           ) : (
             bills.map((bill) => (
               <div
                 key={bill.id}
-                className="grid grid-cols-7 items-center gap-2 px-6 py-4 text-sm"
+                className="rounded-lg border border-border/80 bg-white p-4 shadow-sm"
               >
-                <div>
-                  <p className="font-semibold text-ink">{bill.name}</p>
-                  <p className="text-xs text-muted">
-                    {bill.category?.name ?? "Uncategorized"}
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-base font-semibold text-ink">{bill.name}</p>
+                    <p className="text-xs text-muted">
+                      {bill.category?.name ?? "Uncategorized"}
+                    </p>
+                  </div>
+                  <p className="text-right text-base font-semibold text-ink">
+                    {formatMoney(bill.amount, bill.currency)}
                   </p>
                 </div>
-                <p className="text-muted">{formatDate(bill.dueDate)}</p>
-                <p className="text-right font-semibold text-ink">
-                  {formatMoney(bill.amount, bill.currency)}
-                </p>
-                <p className="text-muted">{bill.frequency}</p>
-                <p className="text-muted">{bill.reminderDays} days before</p>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted">
-                    {bill.autopay ? "Enabled" : "Manual"}
-                  </span>
-                  <span
-                    className={`pill border text-xs font-semibold ${statusTone[bill.status]}`}
-                  >
-                    {bill.status.toLowerCase()}
-                  </span>
+                <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted">
+                  <span>Due {formatDate(bill.dueDate)}</span>
+                  <span>•</span>
+                  <span>{bill.frequency}</span>
+                  <span>•</span>
+                  <span>{bill.reminderDays} days reminder</span>
                 </div>
-                <div className="flex justify-end gap-2">
-                  <button
-                    className="rounded-sm border border-border/80 px-3 py-1 text-xs text-ink hover:border-emerald-500/50"
-                    onClick={() => startEdit(bill)}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    className="rounded-sm border border-red-200 px-3 py-1 text-xs text-red-700 hover:border-red-400"
-                    onClick={() => void handleDelete(bill.id)}
-                    disabled={submitting}
-                  >
-                    Delete
-                  </button>
+                <div className="mt-3 flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-muted">
+                      {bill.autopay ? "Autopay" : "Manual"}
+                    </span>
+                    <span
+                      className={`pill border text-xs font-semibold ${statusTone[bill.status]}`}
+                    >
+                      {bill.status.toLowerCase()}
+                    </span>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      className="rounded-sm border border-border/80 px-3 py-1 text-xs text-ink hover:border-emerald-500/50"
+                      onClick={() => startEdit(bill)}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      className="rounded-sm border border-red-200 px-3 py-1 text-xs text-red-700 hover:border-red-400"
+                      onClick={() => void handleDelete(bill.id)}
+                      disabled={submitting}
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
               </div>
             ))
           )}
+          {loading ? (
+            <div className="rounded-lg border border-border/80 bg-white p-4 text-sm text-muted shadow-sm">
+              Loading...
+            </div>
+          ) : null}
         </div>
-        {loading ? (
-          <div className="px-6 py-3 text-sm text-muted">Loading...</div>
-        ) : null}
-      </div>
+      )}
 
       {showForm ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/30 p-4 backdrop-blur">
