@@ -144,9 +144,10 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-8 sm:space-y-10">
       <header className="grid gap-4 rounded-2xl border border-border/60 bg-white/95 p-5 shadow-[0_18px_45px_rgba(11,35,71,0.12)] sm:p-8">
-        <p className="pill inline-flex w-fit items-center gap-2 border-emerald-500/40 bg-white/80 text-emerald-700">
-          {t("dashboard.forecastLive", locale)}
-        </p>
+        <span className="inline-flex h-3 w-3 items-center justify-center">
+          <span className="h-2.5 w-2.5 rounded-full bg-emerald-500/80 shadow-[0_0_0_4px_rgba(46,156,147,0.18)] animate-pulse" />
+          <span className="sr-only">{t("dashboard.forecastLive", locale)}</span>
+        </span>
         <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
           <div>
             <h1 className="text-2xl font-semibold text-ink sm:text-3xl">
@@ -181,7 +182,7 @@ export default async function DashboardPage() {
       </header>
 
       <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <div className="rounded-2xl border border-border/60 bg-white/95 p-4 shadow-[0_12px_30px_rgba(11,35,71,0.08)] sm:p-5">
+        <div className="rounded-2xl border border-border/60 bg-white/95 p-6 shadow-[0_10px_24px_rgba(11,35,71,0.08)] sm:p-8">
           <p className="text-xs uppercase tracking-[0.14em] text-muted sm:text-sm">
             {t("dashboard.monthSpent", locale)}
           </p>
@@ -193,7 +194,7 @@ export default async function DashboardPage() {
           </p>
         </div>
 
-        <div className="rounded-2xl border border-border/60 bg-white/95 p-4 shadow-[0_12px_30px_rgba(11,35,71,0.08)] sm:p-5">
+        <div className="rounded-2xl border border-border/60 bg-white/95 p-6 shadow-[0_10px_24px_rgba(11,35,71,0.08)] sm:p-8">
           <p className="text-xs uppercase tracking-[0.14em] text-muted sm:text-sm">
             {t("dashboard.remainingBudget", locale)}
           </p>
@@ -222,14 +223,14 @@ export default async function DashboardPage() {
           </p>
         </div>
 
-        <div className="rounded-2xl border border-border/60 bg-white/95 p-4 shadow-[0_12px_30px_rgba(11,35,71,0.08)] sm:p-5">
-          <p className="text-xs uppercase tracking-[0.14em] text-muted sm:text-sm">
+        <div className="rounded-2xl border border-navy-700/40 bg-gradient-to-br from-navy-700 via-navy-500 to-emerald-700 p-5 text-white shadow-[0_20px_45px_rgba(11,35,71,0.25)] sm:p-6">
+          <p className="text-xs uppercase tracking-[0.14em] text-white/80 sm:text-sm">
             {t("dashboard.safeToSpend", locale)}
           </p>
-          <p className="mt-2 text-2xl font-semibold text-ink sm:text-3xl">
+          <p className="mt-3 text-3xl font-semibold text-white sm:text-4xl">
             {formatCurrency(forecast.safeToSpend, currency, localeCode)}
           </p>
-          <p className="mt-2 text-xs text-muted">
+          <p className="mt-2 text-xs text-white/75">
             {t("dashboard.safeToSpendBody", locale, {
               netPay: formatCurrency(forecast.netPay, currency, localeCode),
             })}

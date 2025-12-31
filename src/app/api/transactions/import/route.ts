@@ -51,39 +51,56 @@ export async function POST(request: Request) {
   });
   const accountByName = new Map(accounts.map((a) => [a.name.toLowerCase(), a.id]));
 
-  const results = [];
-  for (const row of rows) {
+  const baseRows = rows.map((row) => {
     const accountId =
       row.accountId ??
       (row.accountName ? accountByName.get(row.accountName.toLowerCase()) : undefined) ??
       fallbackAccountId;
     if (!accountId) {
-      return NextResponse.json(
-        { error: `Account not found for row "${row.description}"` },
-        { status: 400 },
-      );
+      return { row, error: `Account not found for row "${row.description}"` };
     }
 
-    const categoryId = await resolveCategoryRule({
-      userId: session.user.id,
-      description: row.description,
-    });
+    return { row, accountId };
+  });
 
-    const tx = await prisma.transaction.create({
-      data: {
-        userId: session.user.id,
-        description: row.description,
-        notes: row.notes ?? null,
-        amount: row.amount,
-        postedAt: row.postedAt,
-        status: "CLEARED",
-        accountId,
-        categoryId,
-      },
-      include: transactionInclude,
-    });
-    results.push(serializeTransaction(tx));
+  const firstError = baseRows.find((row) => "error" in row);
+  if (firstError && "error" in firstError) {
+    return NextResponse.json({ error: firstError.error }, { status: 400 });
   }
 
-  return NextResponse.json({ imported: results.length, transactions: results });
+  const resolvedRows = await Promise.all(
+    baseRows.map(async ({ row, accountId }) => {
+      const categoryId = await resolveCategoryRule({
+        userId: session.user.id,
+        description: row.description,
+      });
+
+      return { row, accountId, categoryId };
+    }),
+  );
+
+  const data = resolvedRows.map(({ row, accountId, categoryId }) => ({
+    userId: session.user.id,
+    description: row.description,
+    notes: row.notes ?? null,
+    amount: row.amount,
+    postedAt: row.postedAt,
+    status: "CLEARED",
+    accountId,
+    categoryId,
+  }));
+
+  const results = await Promise.all(
+    data.map((transaction) =>
+      prisma.transaction.create({
+        data: transaction,
+        include: transactionInclude,
+      }),
+    ),
+  );
+
+  return NextResponse.json({
+    imported: results.length,
+    transactions: results.map(serializeTransaction),
+  });
 }

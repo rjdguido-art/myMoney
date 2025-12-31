@@ -71,6 +71,19 @@ function formatDate(value: string) {
   });
 }
 
+function resolveDateLabel(value: string) {
+  const date = new Date(value);
+  const today = new Date();
+  const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const startOfDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const diffDays = Math.round(
+    (startOfToday.getTime() - startOfDate.getTime()) / (1000 * 60 * 60 * 24),
+  );
+  if (diffDays === 0) return "Today";
+  if (diffDays === 1) return "Yesterday";
+  return formatDate(value);
+}
+
 function emptyForm(defaultAccount?: string): FormState {
   return {
     description: "",
@@ -127,6 +140,50 @@ export function TransactionsClient({
   const [fallbackAccountId, setFallbackAccountId] = useState(
     initialAccounts[0]?.id ?? "",
   );
+
+  const groupedTransactions = useMemo(() => {
+    const groups: Array<{
+      key: string;
+      label: string;
+      items: SerializableTransaction[];
+    }> = [];
+    const indexByKey = new Map<string, number>();
+    transactions.forEach((tx) => {
+      const date = new Date(tx.postedAt);
+      const key = date.toISOString().slice(0, 10);
+      const label = resolveDateLabel(tx.postedAt);
+      const existingIndex = indexByKey.get(key);
+      if (existingIndex === undefined) {
+        indexByKey.set(key, groups.length);
+        groups.push({ key, label, items: [tx] });
+      } else {
+        groups[existingIndex].items.push(tx);
+      }
+    });
+    return groups;
+  }, [transactions]);
+
+  const renderCategoryIcon = (tx: SerializableTransaction) => {
+    const label = tx.splits.length
+      ? "Split"
+      : tx.category?.name ?? "Uncategorized";
+    const initial = label.charAt(0).toUpperCase();
+    return (
+      <div className="flex flex-col items-center gap-1" title={label}>
+        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-surface text-sm font-semibold text-ink">
+          {initial}
+        </div>
+        {tx.splits.length ? (
+          <span className="text-[10px] uppercase tracking-[0.16em] text-muted">
+            Split
+          </span>
+        ) : null}
+      </div>
+    );
+  };
+
+  const amountTone = (amount: number) =>
+    amount > 0 ? "text-emerald-700" : "text-ink";
 
   const splitTotal = useMemo(
     () =>
@@ -686,68 +743,65 @@ export function TransactionsClient({
             <p className="text-right">Actions</p>
           </div>
           <div className="divide-y divide-border/70">
-            {transactions.length === 0 ? (
+            {groupedTransactions.length === 0 ? (
               <div className="px-6 py-6 text-sm text-muted">
                 No transactions match these filters.
               </div>
             ) : (
-              transactions.map((tx) => (
-                <div
-                  key={tx.id}
-                  className="grid grid-cols-7 items-start gap-2 px-6 py-4 text-sm"
-                >
-                  <div>
-                    <p className="font-semibold text-ink">
-                      {tx.description || "Untitled"}
-                    </p>
-                    {tx.notes ? (
-                      <p className="text-xs text-muted">Note: {tx.notes}</p>
-                    ) : null}
+              groupedTransactions.map((group) => (
+                <div key={group.key}>
+                  <div className="bg-white/90 px-6 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-muted">
+                    {group.label}
                   </div>
-                  <div>
-                    <p className="text-muted">
-                      {tx.splits.length
-                        ? `Split across ${tx.splits.length} categories`
-                        : tx.category?.name ?? "Uncategorized"}
-                    </p>
-                    {tx.splits.length ? (
-                      <p className="text-xs text-muted">
-                        {tx.splits
-                          .map((split) => {
-                            const name = split.category?.name ?? "Uncategorized";
-                            return `${name} (${formatAmount(split.amount, tx.currency)})`;
-                          })
-                          .join(", ")}
+                  {group.items.map((tx) => (
+                    <div
+                      key={tx.id}
+                      className="grid grid-cols-7 items-start gap-2 px-6 py-4 text-sm"
+                    >
+                      <div>
+                        <p className="font-semibold text-ink">
+                          {tx.description || "Untitled"}
+                        </p>
+                        {tx.notes ? (
+                          <p className="text-xs text-muted">Note: {tx.notes}</p>
+                        ) : null}
+                      </div>
+                      <div className="flex items-start gap-3">
+                        {renderCategoryIcon(tx)}
+                      </div>
+                      <p className={`text-right font-semibold ${amountTone(tx.amount)}`}>
+                        {formatAmount(tx.amount, tx.currency)}
                       </p>
-                    ) : null}
-                  </div>
-                  <p className="text-right font-semibold text-ink">
-                    {formatAmount(tx.amount, tx.currency)}
-                  </p>
-                  <p className="text-muted">{tx.account.name}</p>
-                  <p className="text-muted">{formatDate(tx.postedAt)}</p>
-                  <div className="flex justify-end">
-                    <span
-                      className={`pill border ${statusTone[tx.status] ?? ""} text-xs font-semibold`}
-                    >
-                      {tx.status.toLowerCase()}
-                    </span>
-                  </div>
-                  <div className="flex justify-end gap-2">
-                    <button
-                      className="rounded-sm border border-border/80 px-3 py-1 text-xs text-ink hover:border-emerald-500/50"
-                      onClick={() => startEdit(tx)}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      className="rounded-sm border border-red-200 px-3 py-1 text-xs text-red-700 hover:border-red-400"
-                      onClick={() => void handleDelete(tx.id)}
-                      disabled={submitting}
-                    >
-                      Delete
-                    </button>
-                  </div>
+                      <p className="text-muted">{tx.account.name}</p>
+                      <p className="text-muted">{formatDate(tx.postedAt)}</p>
+                      <div className="flex justify-end">
+                        {tx.status === "PENDING" ? (
+                          <span
+                            className={`pill border ${
+                              statusTone.PENDING
+                            } text-xs font-semibold`}
+                          >
+                            pending
+                          </span>
+                        ) : null}
+                      </div>
+                      <div className="flex justify-end gap-2">
+                        <button
+                          className="rounded-sm border border-border/80 px-3 py-1 text-xs text-ink hover:border-emerald-500/50"
+                          onClick={() => startEdit(tx)}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          className="rounded-sm border border-red-200 px-3 py-1 text-xs text-red-700 hover:border-red-400"
+                          onClick={() => void handleDelete(tx.id)}
+                          disabled={submitting}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               ))
             )}
@@ -758,59 +812,77 @@ export function TransactionsClient({
         </div>
       ) : (
         <div className="space-y-3">
-          {transactions.length === 0 ? (
+          {groupedTransactions.length === 0 ? (
             <div className="rounded-lg border border-border/80 bg-white p-4 text-sm text-muted shadow-sm">
               No transactions match these filters.
             </div>
           ) : (
-            transactions.map((tx) => (
-              <div
-                key={tx.id}
-                className="rounded-lg border border-border/80 bg-white p-4 shadow-sm"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="text-base font-semibold text-ink">
-                      {tx.description || "Untitled"}
-                    </p>
-                    <p className="text-xs text-muted">
-                      {formatDate(tx.postedAt)} · {tx.account.name}
-                    </p>
-                  </div>
-                  <p className="text-right text-base font-semibold text-ink">
-                    {formatAmount(tx.amount, tx.currency)}
-                  </p>
+            groupedTransactions.map((group) => (
+              <div key={group.key} className="space-y-3">
+                <div className="px-2 text-xs font-semibold uppercase tracking-[0.14em] text-muted">
+                  {group.label}
                 </div>
-                <div className="mt-2 text-sm text-muted">
-                  {tx.splits.length
-                    ? `Split across ${tx.splits.length} categories`
-                    : tx.category?.name ?? "Uncategorized"}
-                </div>
-                {tx.notes ? (
-                  <p className="mt-1 text-xs text-muted">Note: {tx.notes}</p>
-                ) : null}
-                <div className="mt-3 flex items-center justify-between gap-2">
-                  <span
-                    className={`pill border ${statusTone[tx.status] ?? ""} text-xs font-semibold`}
+                {group.items.map((tx) => (
+                  <div
+                    key={tx.id}
+                    className="rounded-lg border border-border/80 bg-white p-4 shadow-sm"
                   >
-                    {tx.status.toLowerCase()}
-                  </span>
-                  <div className="flex gap-2">
-                    <button
-                      className="rounded-sm border border-border/80 px-3 py-1 text-xs text-ink hover:border-emerald-500/50"
-                      onClick={() => startEdit(tx)}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      className="rounded-sm border border-red-200 px-3 py-1 text-xs text-red-700 hover:border-red-400"
-                      onClick={() => void handleDelete(tx.id)}
-                      disabled={submitting}
-                    >
-                      Delete
-                    </button>
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-start gap-3">
+                        {renderCategoryIcon(tx)}
+                        <div>
+                          <p className="text-base font-semibold text-ink">
+                            {tx.description || "Untitled"}
+                          </p>
+                          <p className="text-xs text-muted">
+                            {formatDate(tx.postedAt)} · {tx.account.name}
+                          </p>
+                        </div>
+                      </div>
+                      <p
+                        className={`text-right text-base font-semibold ${amountTone(
+                          tx.amount,
+                        )}`}
+                      >
+                        {formatAmount(tx.amount, tx.currency)}
+                      </p>
+                    </div>
+                    {tx.splits.length ? (
+                      <div className="mt-2 text-xs text-muted">
+                        Split across {tx.splits.length} categories
+                      </div>
+                    ) : null}
+                    {tx.notes ? (
+                      <p className="mt-1 text-xs text-muted">Note: {tx.notes}</p>
+                    ) : null}
+                    <div className="mt-3 flex items-center justify-between gap-2">
+                      {tx.status === "PENDING" ? (
+                        <span
+                          className={`pill border ${
+                            statusTone.PENDING
+                          } text-xs font-semibold`}
+                        >
+                          pending
+                        </span>
+                      ) : null}
+                      <div className="flex gap-2">
+                        <button
+                          className="rounded-sm border border-border/80 px-3 py-1 text-xs text-ink hover:border-emerald-500/50"
+                          onClick={() => startEdit(tx)}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          className="rounded-sm border border-red-200 px-3 py-1 text-xs text-red-700 hover:border-red-400"
+                          onClick={() => void handleDelete(tx.id)}
+                          disabled={submitting}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                </div>
+                ))}
               </div>
             ))
           )}
@@ -823,8 +895,18 @@ export function TransactionsClient({
       )}
 
       {showForm ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/30 p-4 backdrop-blur">
-          <div className="w-full max-w-3xl rounded-lg border border-border/80 bg-white shadow-sm p-6">
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-end bg-ink/30 backdrop-blur sm:items-stretch"
+          onClick={() => {
+            setShowForm(false);
+            setEditing(null);
+            setFormState(emptyForm(accounts[0]?.id));
+          }}
+        >
+          <div
+            className="h-full w-full max-w-3xl overflow-y-auto rounded-t-2xl border border-border/80 bg-white p-6 shadow-[0_18px_50px_rgba(11,35,71,0.22)] sm:rounded-none sm:rounded-l-2xl"
+            onClick={(event) => event.stopPropagation()}
+          >
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted">

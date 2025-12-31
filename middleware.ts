@@ -44,32 +44,11 @@ export async function middleware(request: NextRequest) {
       return NextResponse.next();
     }
 
-    try {
-      const onboardingUrl = new URL("/api/onboarding", request.url);
-      const onboardingRes = await fetch(onboardingUrl, {
-        headers: {
-          cookie: request.headers.get("cookie") ?? "",
-        },
-      });
-
-      if (onboardingRes.status === 401) {
-        const loginUrl = request.nextUrl.clone();
-        loginUrl.pathname = "/login";
-        loginUrl.searchParams.set("callbackUrl", `${pathname}${search}`);
-        return NextResponse.redirect(loginUrl);
-      }
-
-      if (onboardingRes.ok) {
-        const data = await onboardingRes.json();
-        if (!data.onboarded) {
-          const welcomeUrl = request.nextUrl.clone();
-          welcomeUrl.pathname = "/welcome";
-          welcomeUrl.search = "";
-          return NextResponse.redirect(welcomeUrl);
-        }
-      }
-    } catch {
-      // Allow navigation if onboarding status can't be checked.
+    if (!token.onboarded) {
+      const welcomeUrl = request.nextUrl.clone();
+      welcomeUrl.pathname = "/welcome";
+      welcomeUrl.search = "";
+      return NextResponse.redirect(welcomeUrl);
     }
 
     return NextResponse.next();

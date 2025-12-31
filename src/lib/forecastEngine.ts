@@ -4,9 +4,14 @@ import { prisma as defaultPrisma } from "./prisma";
 
 const MS_PER_DAY = 1000 * 60 * 60 * 24;
 
-function toNumber(value: unknown) {
+function toCents(value: unknown) {
   const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : 0;
+  if (!Number.isFinite(parsed)) return 0;
+  return Math.round(parsed * 100);
+}
+
+function centsToNumber(value: number) {
+  return Number((value / 100).toFixed(2));
 }
 
 function shiftDate(base: Date, cadence: Frequency, interval = 1) {
@@ -110,6 +115,7 @@ function billOccurrences(
   const upcoming: UpcomingBill[] = [];
   let pointer = new Date(bill.dueDate);
   let safety = 0;
+  const amount = centsToNumber(toCents(bill.amount));
 
   while (pointer < from && safety < 48) {
     pointer = shiftDate(pointer, bill.frequency, 1);
@@ -120,7 +126,7 @@ function billOccurrences(
     upcoming.push({
       id: bill.id,
       name: bill.name,
-      amount: toNumber(bill.amount),
+      amount,
       dueDate: new Date(pointer),
     });
     pointer = shiftDate(pointer, bill.frequency, 1);
@@ -130,12 +136,9 @@ function billOccurrences(
   return upcoming;
 }
 
-function signedAmount(amount: unknown, type?: CategoryType | null) {
-  const value = toNumber(amount);
-  if (type === CategoryType.INCOME) {
-    return -value;
-  }
-  return value;
+function signedAmountCents(amount: unknown, type?: CategoryType | null) {
+  const value = toCents(amount);
+  return type === CategoryType.INCOME ? -value : value;
 }
 
 export async function buildForecast({
@@ -164,7 +167,7 @@ export async function buildForecast({
       );
       return {
         scheduleId: schedule.id,
-        netPay: toNumber(schedule.netPay),
+        netPayCents: toCents(schedule.netPay),
         nextPayDate,
         previousPayDate,
         cadence: schedule.cadence,
@@ -225,9 +228,12 @@ export async function buildForecast({
   ]);
 
   const billsDue = bills.flatMap((bill) => billOccurrences(bill, now, horizon));
-  const billsTotal = billsDue.reduce((sum, bill) => sum + bill.amount, 0);
+  const billsTotalCents = billsDue.reduce(
+    (sum, bill) => sum + toCents(bill.amount),
+    0,
+  );
 
-  let recurringTotal = 0;
+  let recurringTotalCents = 0;
   for (const rule of recurringRules) {
     let pointer = rule.nextRunAt ?? rule.nextRun ?? rule.startDate;
     let safety = 0;
@@ -240,7 +246,10 @@ export async function buildForecast({
     }
 
     while (pointer && pointer <= horizon && safety < 240) {
-      recurringTotal += signedAmount(rule.amount, rule.category?.type ?? null);
+      recurringTotalCents += signedAmountCents(
+        rule.amount,
+        rule.category?.type ?? null,
+      );
       const next = computeNextRunAt(rule, pointer);
       if (!next || next.getTime() === pointer.getTime()) break;
       pointer = next;
@@ -260,30 +269,35 @@ export async function buildForecast({
         return (
           sum +
           tx.splits.reduce(
-            (inner, split) => inner + signedAmount(split.amount, split.category?.type),
+            (inner, split) =>
+              inner + signedAmountCents(split.amount, split.category?.type),
             0,
           )
         );
       }
-      return sum + signedAmount(tx.amount, tx.category?.type ?? null);
+      return sum + signedAmountCents(tx.amount, tx.category?.type ?? null);
     }, 0);
   };
 
-  const spentThisCycle = sumTransactions(cycleTransactions);
-  const pendingFuture = sumTransactions(futureTransactions);
+  const spentThisCycleCents = sumTransactions(cycleTransactions);
+  const pendingFutureCents = sumTransactions(futureTransactions);
 
-  const rawSafeToSpend =
-    primary.netPay - billsTotal - recurringTotal - pendingFuture - spentThisCycle;
+  const rawSafeToSpendCents =
+    primary.netPayCents -
+    billsTotalCents -
+    recurringTotalCents -
+    pendingFutureCents -
+    spentThisCycleCents;
 
   const daysUntilPay = Math.max(
     1,
     Math.ceil((horizon.getTime() - now.getTime()) / MS_PER_DAY),
   );
 
-  const safeToSpend = Math.max(0, Number(rawSafeToSpend.toFixed(2)));
-  const dailyAllowance = Math.max(
+  const safeToSpendCents = Math.max(0, rawSafeToSpendCents);
+  const dailyAllowanceCents = Math.max(
     0,
-    Number((safeToSpend / daysUntilPay).toFixed(2)),
+    Math.round(safeToSpendCents / daysUntilPay),
   );
 
   return {
@@ -291,16 +305,16 @@ export async function buildForecast({
     periodEnd: horizon,
     nextPayDate: horizon,
     daysUntilPay,
-    netPay: primary.netPay,
+    netPay: centsToNumber(primary.netPayCents),
     billsDue,
     totals: {
-      bills: Number(billsTotal.toFixed(2)),
-      recurring: Number(recurringTotal.toFixed(2)),
-      pending: Number(pendingFuture.toFixed(2)),
-      spent: Number(spentThisCycle.toFixed(2)),
+      bills: centsToNumber(billsTotalCents),
+      recurring: centsToNumber(recurringTotalCents),
+      pending: centsToNumber(pendingFutureCents),
+      spent: centsToNumber(spentThisCycleCents),
     },
-    safeToSpend,
-    dailyAllowance,
+    safeToSpend: centsToNumber(safeToSpendCents),
+    dailyAllowance: centsToNumber(dailyAllowanceCents),
   };
 }
 

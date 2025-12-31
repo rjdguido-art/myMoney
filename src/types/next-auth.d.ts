@@ -7,6 +7,14 @@ declare module "next-auth" {
       email?: string | null;
       name?: string | null;
       locale?: string | null;
+      onboarded?: boolean;
     };
+  }
+}
+
+declare module "next-auth/jwt" {
+  interface JWT {
+    locale?: string | null;
+    onboarded?: boolean;
   }
 }

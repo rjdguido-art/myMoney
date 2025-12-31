@@ -1,9 +1,13 @@
 import { BudgetMode, BillInput, BudgetEngineInput, ComputedBudget } from "./budgetEngine.types";
 import { PrismaClient, CategoryType } from "@prisma/client";
 
-function clampNumber(value: number) {
-  if (Number.isNaN(value) || value < 0) return 0;
-  return value;
+function clampCents(value: number) {
+  if (!Number.isFinite(value) || value < 0) return 0;
+  return Math.round(value * 100);
+}
+
+function centsToNumber(value: number) {
+  return Number((value / 100).toFixed(2));
 }
 
 function monthlyMultiplier(cadence: string) {
@@ -33,51 +37,98 @@ export function computeBudget(input: BudgetEngineInput): ComputedBudget {
     end.setDate(end.getDate() + 13);
   }
 
-  const netPay = clampNumber(input.paySchedule.netPay);
-  const pool =
+  const netPayCents = clampCents(input.paySchedule.netPay);
+  const poolCents =
     input.mode === "MONTHLY"
-      ? netPay * monthlyMultiplier(input.paySchedule.cadence)
-      : netPay;
+      ? Math.round(netPayCents * monthlyMultiplier(input.paySchedule.cadence))
+      : netPayCents;
 
-  const billTotal = input.bills.reduce(
-    (sum, bill) => sum + clampNumber(bill.amount),
+  const billTotalCents = input.bills.reduce(
+    (sum, bill) => sum + clampCents(bill.amount),
     0,
   );
 
-  let remaining = pool - billTotal;
-  if (remaining < 0) remaining = 0;
+  let remainingCents = poolCents - billTotalCents;
+  if (remainingCents < 0) remainingCents = 0;
 
   const goalAllocations = input.goals.map((goal) => {
-    let amount = 0;
+    let amountCents = 0;
     if (goal.allocationType === "PERCENT") {
-      amount = (goal.allocationValue / 100) * remaining;
+      amountCents = Math.round((goal.allocationValue / 100) * remainingCents);
     } else {
-      amount = goal.allocationValue;
+      amountCents = clampCents(goal.allocationValue);
     }
-    amount = Math.min(amount, remaining);
-    remaining -= amount;
-    return { name: goal.name, amount, category: goal.categoryName ?? goal.name, bucket: goal.type };
+    amountCents = Math.min(amountCents, remainingCents);
+    remainingCents -= amountCents;
+    return {
+      name: goal.name,
+      amount: centsToNumber(amountCents),
+      category: goal.categoryName ?? goal.name,
+      bucket: goal.type,
+    };
   });
 
-  const variableTotal = input.variableEstimates.reduce(
-    (sum, v) => sum + clampNumber(v.amount),
+  const variableTotalCents = input.variableEstimates.reduce(
+    (sum, v) => sum + clampCents(v.amount),
     0,
   );
-  const scale =
-    variableTotal > 0 && remaining > 0 ? Math.min(1, remaining / variableTotal) : 0;
+  const variableAllocations = (() => {
+    if (variableTotalCents <= 0 || remainingCents <= 0) {
+      return input.variableEstimates.map((v) => ({
+        name: v.category,
+        category: v.category,
+        bucket: "VARIABLE" as const,
+        amount: 0,
+      }));
+    }
 
-  const variableAllocations = input.variableEstimates.map((v) => ({
-    name: v.category,
-    category: v.category,
-    bucket: "VARIABLE" as const,
-    amount: Number((clampNumber(v.amount) * scale).toFixed(2)),
-  }));
+    if (remainingCents >= variableTotalCents) {
+      return input.variableEstimates.map((v) => ({
+        name: v.category,
+        category: v.category,
+        bucket: "VARIABLE" as const,
+        amount: centsToNumber(clampCents(v.amount)),
+      }));
+    }
+
+    const allocations = input.variableEstimates.map((v, index) => {
+      const amountCents = clampCents(v.amount);
+      const numerator = amountCents * remainingCents;
+      const base = Math.floor(numerator / variableTotalCents);
+      const remainder = numerator % variableTotalCents;
+      return {
+        index,
+        name: v.category,
+        category: v.category,
+        bucket: "VARIABLE" as const,
+        base,
+        remainder,
+      };
+    });
+
+    let distributed = allocations.reduce((sum, item) => sum + item.base, 0);
+    let toDistribute = remainingCents - distributed;
+
+    allocations.sort((a, b) => b.remainder - a.remainder);
+    for (let i = 0; i < allocations.length && toDistribute > 0; i += 1) {
+      allocations[i].base += 1;
+      toDistribute -= 1;
+    }
+
+    allocations.sort((a, b) => a.index - b.index);
+    return allocations.map((item) => ({
+      name: item.name,
+      category: item.category,
+      bucket: item.bucket,
+      amount: centsToNumber(item.base),
+    }));
+  })();
 
   const billAllocations = input.bills.map((bill: BillInput) => ({
     name: bill.name,
     category: bill.categoryName ?? bill.name,
     bucket: "BILL" as const,
-    amount: clampNumber(bill.amount),
+    amount: centsToNumber(clampCents(bill.amount)),
   }));
 
   const items = [...billAllocations, ...goalAllocations, ...variableAllocations];
@@ -85,7 +136,7 @@ export function computeBudget(input: BudgetEngineInput): ComputedBudget {
   return {
     periodStart: start,
     periodEnd: end,
-    totalAvailable: pool,
+    totalAvailable: centsToNumber(poolCents),
     items,
   };
 }

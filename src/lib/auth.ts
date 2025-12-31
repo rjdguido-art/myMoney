@@ -58,17 +58,22 @@ export const authOptions: NextAuthOptions = {
     session: async ({ session, token }) => {
       if (session.user && token.sub) {
         session.user.id = token.sub;
-        const user = await prisma.user.findUnique({
-          where: { id: token.sub },
-          select: { locale: true },
-        });
-        session.user.locale = user?.locale ?? "en";
+        session.user.locale = token.locale ?? "en";
+        session.user.onboarded = token.onboarded ?? false;
       }
       return session;
     },
     jwt: async ({ token, user }) => {
       if (user) {
         token.sub = user.id;
+      }
+      if (token.sub) {
+        const userRecord = await prisma.user.findUnique({
+          where: { id: token.sub },
+          select: { locale: true, onboarded: true },
+        });
+        token.locale = userRecord?.locale ?? "en";
+        token.onboarded = userRecord?.onboarded ?? false;
       }
       return token;
     },
