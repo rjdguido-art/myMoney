@@ -90,7 +90,8 @@ export function Nav() {
 
   if (!isDesktop) {
     return (
-      <nav className="rounded-lg border border-border/80 bg-white/80 px-4 py-3 shadow-sm backdrop-blur-sm">
+      <div className="sticky top-0 z-30 bg-white/80 backdrop-blur">
+        <nav className="border-b border-border/70 px-4 py-3">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-md bg-gradient-to-br from-emerald-500 to-navy-500 text-white shadow-[0_10px_30px_rgba(11,35,71,0.35)]">
@@ -168,123 +169,126 @@ export function Nav() {
             </div>
           </div>
         ) : null}
-      </nav>
+        </nav>
+      </div>
     );
   }
 
   return (
-    <nav className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border/80 bg-white/70 px-4 py-3 shadow-sm backdrop-blur-sm transition-shadow duration-300 ease-out hover:shadow-md">
-      <div className="flex items-center gap-3">
-        <div className="flex h-11 w-11 items-center justify-center rounded-md bg-gradient-to-br from-emerald-500 to-navy-500 text-white shadow-[0_10px_30px_rgba(11,35,71,0.35)]">
-          <span className="text-lg font-semibold">AB</span>
+    <div className="sticky top-0 z-30 bg-white/90 backdrop-blur">
+      <nav className="flex flex-wrap items-center justify-between gap-3 border-b border-border/70 px-6 py-4 lg:px-10">
+        <div className="flex items-center gap-3">
+          <div className="flex h-11 w-11 items-center justify-center rounded-md bg-gradient-to-br from-emerald-500 to-navy-500 text-white shadow-[0_10px_30px_rgba(11,35,71,0.35)]">
+            <span className="text-lg font-semibold">AB</span>
+          </div>
+          <div>
+            <p className="text-sm uppercase tracking-[0.12em] text-muted">ArgoBucks</p>
+            <p className="text-base font-semibold text-ink">
+              {String(t("nav.brandTagline", locale))}
+            </p>
+          </div>
         </div>
-        <div>
-          <p className="text-sm uppercase tracking-[0.12em] text-muted">ArgoBucks</p>
-          <p className="text-base font-semibold text-ink">
-            {String(t("nav.brandTagline", locale))}
-          </p>
-        </div>
-      </div>
-      <div className="flex flex-wrap items-center gap-2">
-        {primaryLinks.map((link) => {
-          const isActive =
-            pathname === link.href ||
-            (link.href !== "/dashboard" && pathname.startsWith(link.href));
-          const isDisabled = !onboarded && disabledLinks.has(link.href);
-          const linkClass = [
-            "rounded-sm px-3 py-2 text-sm font-medium transition-all duration-200 ease-out",
-            isActive
-              ? "bg-emerald-500/10 text-emerald-700 border border-emerald-500/30"
-              : "text-ink/80 hover:bg-card hover:text-ink border border-transparent hover:border-border/80",
-          ].join(" ");
+        <div className="flex flex-wrap items-center gap-2">
+          {primaryLinks.map((link) => {
+            const isActive =
+              pathname === link.href ||
+              (link.href !== "/dashboard" && pathname.startsWith(link.href));
+            const isDisabled = !onboarded && disabledLinks.has(link.href);
+            const linkClass = [
+              "rounded-full px-4 py-2 text-sm font-medium transition-all duration-200 ease-out",
+              isActive
+                ? "bg-emerald-500/12 text-emerald-700"
+                : "text-ink/80 hover:bg-card hover:text-ink",
+            ].join(" ");
 
-          if (isDisabled) {
+            if (isDisabled) {
+              return (
+                <span
+                  key={link.href}
+                  className="rounded-full px-4 py-2 text-sm font-medium text-muted/70 border border-dashed border-border/70 cursor-not-allowed"
+                  title="Complete onboarding first"
+                  aria-disabled="true"
+                >
+                  {String(t(link.labelKey, locale))}
+                </span>
+              );
+            }
             return (
-              <span
-                key={link.href}
-                className="rounded-sm px-3 py-2 text-sm font-medium text-muted/70 border border-dashed border-border/70 cursor-not-allowed"
-                title="Complete onboarding first"
-                aria-disabled="true"
-              >
+              <Link key={link.href} href={link.href} className={linkClass}>
                 {String(t(link.labelKey, locale))}
-              </span>
+              </Link>
             );
-          }
-          return (
-            <Link key={link.href} href={link.href} className={linkClass}>
-              {String(t(link.labelKey, locale))}
-            </Link>
-          );
-        })}
-        <div ref={overflowRef} className="relative">
+          })}
+          <div ref={overflowRef} className="relative">
+            <button
+              type="button"
+              onClick={() => setOverflowOpen((prev) => !prev)}
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border/80 bg-white text-ink/70 transition-all duration-200 ease-out hover:bg-card hover:text-ink hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60"
+              aria-haspopup="menu"
+              aria-expanded={overflowOpen}
+              aria-label="More navigation"
+            >
+              <span className="text-lg font-semibold tracking-[0.2em]">...</span>
+            </button>
+            {overflowOpen ? (
+              <div
+                className="nav-menu absolute right-0 top-12 z-20 w-48 rounded-md border border-border/80 bg-white/95 p-2 shadow-md backdrop-blur-sm"
+                role="menu"
+              >
+                {extraLinks.map((link) => {
+                  const isActive =
+                    pathname === link.href ||
+                    (link.href !== "/dashboard" && pathname.startsWith(link.href));
+                  const isDisabled = !onboarded && disabledLinks.has(link.href);
+                  const linkClass = [
+                    "nav-menu-item flex w-full items-center rounded-sm px-3 py-2 text-sm font-medium transition-all duration-200 ease-out",
+                    isActive
+                      ? "bg-emerald-500/10 text-emerald-700 border border-emerald-500/30"
+                      : "text-ink/80 hover:bg-card hover:text-ink border border-transparent hover:border-border/80",
+                  ].join(" ");
+
+                  if (isDisabled) {
+                    return (
+                      <span
+                        key={link.href}
+                        className="nav-menu-item rounded-sm px-3 py-2 text-sm font-medium text-muted/70 border border-dashed border-border/70 cursor-not-allowed"
+                        title="Complete onboarding first"
+                        aria-disabled="true"
+                        role="menuitem"
+                      >
+                        {String(t(link.labelKey, locale))}
+                      </span>
+                    );
+                  }
+                  return (
+                    <Link key={link.href} href={link.href} className={linkClass} role="menuitem">
+                      {String(t(link.labelKey, locale))}
+                    </Link>
+                  );
+                })}
+              </div>
+            ) : null}
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <LanguageToggle locale={locale} variant="compact" />
           <button
             type="button"
-            onClick={() => setOverflowOpen((prev) => !prev)}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-sm border border-border/80 bg-white text-ink/70 transition-all duration-200 ease-out hover:bg-card hover:text-ink hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60"
-            aria-haspopup="menu"
-            aria-expanded={overflowOpen}
-            aria-label="More navigation"
+            onClick={openQuickAddTransaction}
+            className="pill inline-flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-sky-500 text-white border-transparent shadow-[0_12px_32px_rgba(121,211,198,0.35)] hover:brightness-105 transition"
+            title="Quick add a transaction without leaving this page."
           >
-            <span className="text-lg font-semibold tracking-[0.2em]">...</span>
+            {String(t("nav.newTransaction", locale))}
           </button>
-          {overflowOpen ? (
-            <div
-              className="nav-menu absolute right-0 top-12 z-20 w-48 rounded-md border border-border/80 bg-white/95 p-2 shadow-md backdrop-blur-sm"
-              role="menu"
-            >
-              {extraLinks.map((link) => {
-                const isActive =
-                  pathname === link.href ||
-                  (link.href !== "/dashboard" && pathname.startsWith(link.href));
-                const isDisabled = !onboarded && disabledLinks.has(link.href);
-                const linkClass = [
-                  "nav-menu-item flex w-full items-center rounded-sm px-3 py-2 text-sm font-medium transition-all duration-200 ease-out",
-                  isActive
-                    ? "bg-emerald-500/10 text-emerald-700 border border-emerald-500/30"
-                    : "text-ink/80 hover:bg-card hover:text-ink border border-transparent hover:border-border/80",
-                ].join(" ");
-
-                if (isDisabled) {
-                  return (
-                    <span
-                      key={link.href}
-                      className="nav-menu-item rounded-sm px-3 py-2 text-sm font-medium text-muted/70 border border-dashed border-border/70 cursor-not-allowed"
-                      title="Complete onboarding first"
-                      aria-disabled="true"
-                      role="menuitem"
-                    >
-                      {String(t(link.labelKey, locale))}
-                    </span>
-                  );
-                }
-                return (
-                  <Link key={link.href} href={link.href} className={linkClass} role="menuitem">
-                    {String(t(link.labelKey, locale))}
-                  </Link>
-                );
-              })}
-            </div>
-          ) : null}
+          <button
+            type="button"
+            onClick={() => signOut({ callbackUrl: "/login" })}
+            className="pill inline-flex items-center gap-2 border border-border/80 bg-white/80 text-ink hover:bg-card"
+          >
+            {String(t("nav.logOut", locale))}
+          </button>
         </div>
-      </div>
-      <div className="flex items-center gap-2">
-        <LanguageToggle locale={locale} variant="compact" />
-        <button
-          type="button"
-          onClick={openQuickAddTransaction}
-          className="pill inline-flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-sky-500 text-white border-transparent shadow-[0_12px_32px_rgba(121,211,198,0.35)] hover:brightness-105 transition"
-          title="Quick add a transaction without leaving this page."
-        >
-          {String(t("nav.newTransaction", locale))}
-        </button>
-        <button
-          type="button"
-          onClick={() => signOut({ callbackUrl: "/login" })}
-          className="pill inline-flex items-center gap-2 border border-border/80 bg-white/80 text-ink hover:bg-card"
-        >
-          {String(t("nav.logOut", locale))}
-        </button>
-      </div>
-    </nav>
+      </nav>
+    </div>
   );
 }
