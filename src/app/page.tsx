@@ -146,7 +146,7 @@ export default function Home() {
           </Link>
         </header>
 
-        <section className="mx-auto grid max-w-6xl gap-10 px-6 pb-16 pt-6 lg:grid-cols-[1.1fr_0.9fr]">
+        <section className="mx-auto grid max-w-6xl gap-12 px-6 pb-16 pt-6 lg:grid-cols-[1.1fr_0.9fr]">
           <div className="space-y-8">
             <p className="home-pill">Welcome to a calmer ledger</p>
             <div className="home-hero-title">
