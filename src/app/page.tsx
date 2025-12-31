@@ -14,7 +14,8 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const headlineLines = ["Make money feel", "local, clear, calm."];
   const stats = [
-    { label: "Weekly check-in", value: "5 min" },
+    { label: "Views to explore", value: "3" },
+    { label: "Weekly touchpoints", value: "5 min" },
     { label: "Bills tracked", value: "Unlimited" },
   ];
   let letterIndex = 0;
@@ -176,34 +177,48 @@ export default function Home() {
               ))}
             </div>
           </div>
-          <div className="home-card grid gap-4 p-6">
+          <div className="home-card grid gap-6 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs uppercase tracking-[0.28em] text-ink/50">Preview</p>
-                <p className="text-lg font-semibold text-ink">Inside ArgoBucks</p>
+                <p className="text-xs uppercase tracking-[0.28em] text-ink/50">Snapshot</p>
+                <p className="text-lg font-semibold text-ink">This week</p>
               </div>
+              <span className="rounded-full border border-ink/10 bg-white px-3 py-1 text-xs text-ink/60">
+                Live preview
+              </span>
             </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <img
-                src="/login/feature-1.png"
-                alt="Dashboard snapshot"
-                className="h-40 w-full rounded-2xl border border-ink/10 bg-white object-cover"
-              />
-              <img
-                src="/login/feature-2.png"
-                alt="Transactions snapshot"
-                className="h-40 w-full rounded-2xl border border-ink/10 bg-white object-cover"
-              />
-              <img
-                src="/login/feature-3.png"
-                alt="Budgeting snapshot"
-                className="h-40 w-full rounded-2xl border border-ink/10 bg-white object-cover"
-              />
-              <img
-                src="/login/feature-4.png"
-                alt="Insights snapshot"
-                className="h-40 w-full rounded-2xl border border-ink/10 bg-white object-cover"
-              />
+            <div className="grid gap-4">
+              <div className="rounded-2xl border border-ink/10 bg-white p-4">
+                <p className="text-xs uppercase tracking-[0.2em] text-ink/50">Cash flow</p>
+                <p className="mt-2 text-2xl font-semibold text-ink">$2,480</p>
+                <p className="text-sm text-ink/60">Up 12% from last week</p>
+              </div>
+              <div className="rounded-2xl border border-ink/10 bg-white p-4">
+                <p className="text-xs uppercase tracking-[0.2em] text-ink/50">Upcoming bills</p>
+                <ul className="mt-3 space-y-2 text-sm text-ink/70">
+                  <li className="flex items-center justify-between">
+                    <span>Rent</span>
+                    <span className="font-semibold text-ink">$980</span>
+                  </li>
+                  <li className="flex items-center justify-between">
+                    <span>Utilities</span>
+                    <span className="font-semibold text-ink">$140</span>
+                  </li>
+                  <li className="flex items-center justify-between">
+                    <span>Streaming</span>
+                    <span className="font-semibold text-ink">$24</span>
+                  </li>
+                </ul>
+              </div>
+              <div className="rounded-2xl border border-ink/10 bg-white p-4">
+                <p className="text-xs uppercase tracking-[0.2em] text-ink/50">Budget pulse</p>
+                <p className="mt-2 text-sm text-ink/70">
+                  Groceries are 8% under plan. Dining out is trending high.
+                </p>
+                <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-ink/10">
+                  <div className="h-full w-[68%] rounded-full bg-gradient-to-r from-emerald-500 to-sky-500" />
+                </div>
+              </div>
             </div>
           </div>
         </section>
