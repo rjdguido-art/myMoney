@@ -13,37 +13,8 @@ export default function Home() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const headlineLines = ["Make money feel", "local, clear, calm."];
-  const featureCards = [
-    {
-      title: "Local budgets",
-      description: "Shape plans around weekly, bi-weekly, or monthly rhythms instead of rigid rules.",
-    },
-    {
-      title: "Bill radar",
-      description: "Keep due dates in a soft timeline that highlights what needs attention now.",
-    },
-    {
-      title: "Insight stories",
-      description: "Translate trends into plain language so you know what changed and why.",
-    },
-  ];
-  const flowSteps = [
-    {
-      title: "Set the tone",
-      description: "Pick goals, add guardrails, and choose how you want to track progress.",
-    },
-    {
-      title: "Stay in rhythm",
-      description: "Review upcoming bills and adjust budgets with quick, focused check-ins.",
-    },
-    {
-      title: "Act with confidence",
-      description: "Spot leaks early and celebrate the wins that build momentum.",
-    },
-  ];
   const stats = [
-    { label: "Views to explore", value: "3" },
-    { label: "Weekly touchpoints", value: "5 min" },
+    { label: "Weekly check-in", value: "5 min" },
     { label: "Bills tracked", value: "Unlimited" },
   ];
   let letterIndex = 0;
@@ -142,9 +113,9 @@ export default function Home() {
         <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-8">
           <div className="flex items-center gap-3">
             <img
-              src="/icon.svg"
+              src="/argo-logo.png"
               alt="ArgoBucks logo"
-              className="h-10 w-10 rounded-md border border-ink/10 bg-white/80 p-1"
+              className="h-12 w-12 rounded-full object-cover scale-[1.08]"
             />
             <div>
               <p className="text-xs uppercase tracking-[0.3em] text-ink/60">ArgoBucks</p>
@@ -194,16 +165,6 @@ export default function Home() {
               <Link href="/signup" className="home-button home-button--primary">
                 Create your home view
               </Link>
-              <button
-                type="button"
-                className="home-button home-button--ghost"
-                onClick={openSignIn}
-              >
-                Sign in
-              </button>
-              <span className="text-sm text-ink/60">
-                No credit card needed.
-              </span>
             </div>
             <div className="home-divider" />
             <div className="flex flex-wrap gap-6 text-sm text-ink/70">
@@ -215,133 +176,34 @@ export default function Home() {
               ))}
             </div>
           </div>
-
-          <div className="home-card grid gap-6 p-6">
+          <div className="home-card grid gap-4 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs uppercase tracking-[0.28em] text-ink/50">Snapshot</p>
-                <p className="text-lg font-semibold text-ink">This week</p>
-              </div>
-              <span className="rounded-full border border-ink/10 bg-white px-3 py-1 text-xs text-ink/60">
-                Live preview
-              </span>
-            </div>
-            <div className="grid gap-4">
-              <div className="rounded-2xl border border-ink/10 bg-white p-4">
-                <p className="text-xs uppercase tracking-[0.2em] text-ink/50">Cash flow</p>
-                <p className="mt-2 text-2xl font-semibold text-ink">$2,480</p>
-                <p className="text-sm text-ink/60">Up 12% from last week</p>
-              </div>
-              <div className="rounded-2xl border border-ink/10 bg-white p-4">
-                <p className="text-xs uppercase tracking-[0.2em] text-ink/50">Upcoming bills</p>
-                <ul className="mt-3 space-y-2 text-sm text-ink/70">
-                  <li className="flex items-center justify-between">
-                    <span>Rent</span>
-                    <span className="font-semibold text-ink">$980</span>
-                  </li>
-                  <li className="flex items-center justify-between">
-                    <span>Utilities</span>
-                    <span className="font-semibold text-ink">$140</span>
-                  </li>
-                  <li className="flex items-center justify-between">
-                    <span>Streaming</span>
-                    <span className="font-semibold text-ink">$24</span>
-                  </li>
-                </ul>
-              </div>
-              <div className="rounded-2xl border border-ink/10 bg-white p-4">
-                <p className="text-xs uppercase tracking-[0.2em] text-ink/50">Budget pulse</p>
-                <p className="mt-2 text-sm text-ink/70">
-                  Groceries are 8% under plan. Dining out is trending high.
-                </p>
-                <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-ink/10">
-                  <div className="h-full w-[68%] rounded-full bg-gradient-to-r from-emerald-500 to-sky-500" />
-                </div>
+                <p className="text-xs uppercase tracking-[0.28em] text-ink/50">Preview</p>
+                <p className="text-lg font-semibold text-ink">Inside ArgoBucks</p>
               </div>
             </div>
-          </div>
-        </section>
-
-        <section id="features" className="mx-auto max-w-6xl px-6 pb-16">
-          <div className="flex flex-wrap items-end justify-between gap-6">
-            <div className="max-w-xl space-y-3">
-              <p className="home-pill">Built for real life</p>
-              <h2 className="text-3xl font-semibold text-ink">
-                A home page that stays clear when life gets loud.
-              </h2>
-              <p className="text-ink/70">
-                ArgoBucks pairs gentle structure with clear insight so your finances feel personal again.
-                Budgeting, bills, and trends all in one grounded space.
-              </p>
-              <p className="text-ink/70">
-                Everything you need is one swipe away, with just enough detail to move fast.
-              </p>
-            </div>
-            <Link href="/signup" className="home-button home-button--ghost">
-              Start exploring
-            </Link>
-          </div>
-          <div className="mt-10 grid gap-6 md:grid-cols-3">
-            {featureCards.map((feature) => (
-              <div key={feature.title} className="home-card p-6">
-                <p className="text-lg font-semibold text-ink">{feature.title}</p>
-                <p className="mt-2 text-sm text-ink/70">{feature.description}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section id="flow" className="mx-auto max-w-6xl px-6 pb-16">
-          <div className="home-card grid gap-10 p-8 md:grid-cols-[0.9fr_1.1fr]">
-            <div className="space-y-4">
-              <p className="home-pill">Your flow</p>
-              <h3 className="text-2xl font-semibold text-ink">
-                A guided rhythm from first log-in to daily clarity.
-              </h3>
-              <p className="text-sm text-ink/70">
-                The welcome experience keeps your next step clear, whether you are setting up or
-                checking in.
-              </p>
-            </div>
-            <div className="grid gap-4">
-              {flowSteps.map((step, index) => (
-                <div
-                  key={step.title}
-                  className="flex gap-4 rounded-2xl border border-ink/10 bg-white/80 p-4"
-                >
-                  <span className="flex h-10 w-10 items-center justify-center rounded-full border border-ink/10 bg-white text-sm font-semibold text-ink">
-                    {index + 1}
-                  </span>
-                  <div>
-                    <p className="text-base font-semibold text-ink">{step.title}</p>
-                    <p className="text-sm text-ink/70">{step.description}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section id="cta" className="mx-auto max-w-6xl px-6 pb-20">
-          <div className="home-card flex flex-col items-start justify-between gap-6 p-8 md:flex-row md:items-center">
-            <div className="space-y-2">
-              <p className="home-pill">Ready when you are</p>
-              <h3 className="text-2xl font-semibold text-ink">Bring calm to your money in minutes.</h3>
-              <p className="text-sm text-ink/70">
-                Your welcome page becomes a living snapshot as soon as you sign in.
-              </p>
-            </div>
-            <div className="flex flex-wrap items-center gap-4">
-              <Link href="/signup" className="home-button home-button--primary">
-                Start free
-              </Link>
-              <button
-                type="button"
-                className="home-button home-button--ghost"
-                onClick={openSignIn}
-              >
-                I already have an account
-              </button>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <img
+                src="/login/feature-1.png"
+                alt="Dashboard snapshot"
+                className="h-40 w-full rounded-2xl border border-ink/10 bg-white object-cover"
+              />
+              <img
+                src="/login/feature-2.png"
+                alt="Transactions snapshot"
+                className="h-40 w-full rounded-2xl border border-ink/10 bg-white object-cover"
+              />
+              <img
+                src="/login/feature-3.png"
+                alt="Budgeting snapshot"
+                className="h-40 w-full rounded-2xl border border-ink/10 bg-white object-cover"
+              />
+              <img
+                src="/login/feature-4.png"
+                alt="Insights snapshot"
+                className="h-40 w-full rounded-2xl border border-ink/10 bg-white object-cover"
+              />
             </div>
           </div>
         </section>

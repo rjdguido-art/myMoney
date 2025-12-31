@@ -86,9 +86,9 @@ function LoginPageContent() {
           <div className="space-y-4">
           <div className="flex items-center gap-3">
             <img
-              src="/icon.svg"
+              src="/argo-logo.png"
               alt="ArgoBucks logo"
-              className="h-12 w-12 rounded-md shadow-sm"
+              className="h-14 w-14 rounded-full object-cover scale-[1.08] shadow-sm"
             />
             <div>
               <p className="text-sm uppercase tracking-[0.18em] text-muted">

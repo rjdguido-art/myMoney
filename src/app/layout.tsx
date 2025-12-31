@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   description: "ArgoBucks personal finance management dashboard",
   icons: {
     icon: [
-      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/argo-logo.png", type: "image/png" },
     ],
   },
 };

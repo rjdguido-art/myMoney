@@ -94,9 +94,13 @@ export function Nav() {
         <nav className="border-b border-border/70 px-4 py-3">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-md bg-gradient-to-br from-emerald-500 to-navy-500 text-white shadow-[0_10px_30px_rgba(11,35,71,0.35)]">
-              <span className="text-base font-semibold">AB</span>
-            </div>
+        <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full shadow-[0_10px_30px_rgba(11,35,71,0.35)]">
+          <img
+            src="/argo-logo.png"
+            alt="ArgoBucks logo"
+            className="h-full w-full scale-[1.12] object-cover"
+          />
+        </div>
             <div>
               <p className="text-xs uppercase tracking-[0.12em] text-muted">ArgoBucks</p>
               <p className="text-sm font-semibold text-ink">
@@ -178,9 +182,13 @@ export function Nav() {
     <div className="sticky top-0 z-30 bg-white/90 backdrop-blur">
       <nav className="flex flex-wrap items-center justify-between gap-3 border-b border-border/70 px-6 py-4 lg:px-10">
         <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-md bg-gradient-to-br from-emerald-500 to-navy-500 text-white shadow-[0_10px_30px_rgba(11,35,71,0.35)]">
-            <span className="text-lg font-semibold">AB</span>
-          </div>
+        <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full shadow-[0_10px_30px_rgba(11,35,71,0.35)]">
+          <img
+            src="/argo-logo.png"
+            alt="ArgoBucks logo"
+            className="h-full w-full scale-[1.12] object-cover"
+          />
+        </div>
           <div>
             <p className="text-sm uppercase tracking-[0.12em] text-muted">ArgoBucks</p>
             <p className="text-base font-semibold text-ink">
