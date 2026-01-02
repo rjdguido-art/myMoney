@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type OpenAI from "openai";
 import { prisma } from "@/lib/prisma";
 import { openai } from "@/lib/ai/openai";
 import { buildForecast } from "@/lib/forecastEngine";
@@ -91,7 +92,13 @@ function toOpenAIInput(messages: ChatMessage[]) {
   return messages.map((m) => ({ role: m.role, content: m.content }));
 }
 
-type ToolCall = { type: "tool_call"; id?: string; name?: string; arguments?: string };
+type ToolCall = {
+  type: "tool_call" | "function_call";
+  id?: string;
+  name?: string;
+  arguments?: string;
+  function?: { name?: string };
+};
 type MessageContent = { type?: string; text?: string };
 type OutputMessage = { type: "message"; content?: MessageContent[] };
 type OutputItem = ToolCall | OutputMessage | { type?: string };
@@ -99,7 +106,9 @@ type ResponseLike = { output?: OutputItem[]; output_text?: string; id?: string }
 
 function extractToolCalls(resp: ResponseLike) {
   const out = Array.isArray(resp?.output) ? resp.output : [];
-  return out.filter((item): item is ToolCall => item?.type === "tool_call");
+  return out.filter(
+    (item): item is ToolCall => item?.type === "function_call" || item?.type === "tool_call",
+  );
 }
 
 function extractText(resp: ResponseLike): string {
@@ -123,37 +132,39 @@ export async function runFinanceAgent(req: AgentRequest): Promise<AgentResponse>
 
   const tools = [
     {
-      type: "function",
-      name: "get_forecast",
-      description:
-        "Get a cashflow snapshot until next pay date, including bills due and safe-to-spend.",
-      strict: true,
-      parameters: {
-        type: "object",
-        properties: {},
-        additionalProperties: false,
+      type: "function" as const,
+      function: {
+        name: "get_forecast",
+        description:
+          "Get a cashflow snapshot until next pay date, including bills due and safe-to-spend.",
+        parameters: {
+          type: "object",
+          properties: {},
+          additionalProperties: false,
+        },
       },
     },
     {
-      type: "function",
-      name: "list_transactions",
-      description:
-        "List recent transactions for the signed-in user (supports date range, account/category filters, and text search).",
-      strict: true,
-      parameters: {
-        type: "object",
-        properties: {
-          from: { type: "string", description: "ISO date-time" },
-          to: { type: "string", description: "ISO date-time" },
-          categoryId: { type: "string" },
-          accountId: { type: "string" },
-          search: { type: "string" },
-          limit: { type: "number", description: "1-200" },
+      type: "function" as const,
+      function: {
+        name: "list_transactions",
+        description:
+          "List recent transactions for the signed-in user (supports date range, account/category filters, and text search).",
+        parameters: {
+          type: "object",
+          properties: {
+            from: { type: "string", description: "ISO date-time" },
+            to: { type: "string", description: "ISO date-time" },
+            categoryId: { type: "string" },
+            accountId: { type: "string" },
+            search: { type: "string" },
+            limit: { type: "number", description: "1-200" },
+          },
+          additionalProperties: false,
         },
-        additionalProperties: false,
       },
     },
-  ];
+  ] satisfies OpenAI.Responses.Tool[];
 
   const system: ChatMessage = {
     role: "system",
@@ -188,7 +199,7 @@ export async function runFinanceAgent(req: AgentRequest): Promise<AgentResponse>
     const toolMessages: Array<{ role: "tool"; tool_call_id?: string; output: string }> = [];
 
     for (const call of toolCalls) {
-      const name = call?.name;
+      const name = call?.name ?? call?.function?.name;
       const toolCallId = call?.id;
 
       let args: unknown = {};
