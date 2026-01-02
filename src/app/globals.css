@@ -218,12 +218,26 @@ button > *,
   position: relative;
   overflow: hidden;
   background:
-    radial-gradient(1200px 700px at 15% 20%, rgba(116, 199, 195, 0.45), transparent 60%),
-    radial-gradient(900px 600px at 80% 10%, rgba(201, 162, 39, 0.3), transparent 55%),
-    radial-gradient(1000px 800px at 65% 85%, rgba(11, 27, 51, 0.24), transparent 60%),
-    linear-gradient(180deg, rgba(255, 255, 255, 1), rgba(245, 247, 250, 1));
+    radial-gradient(1100px 720px at 18% 18%, rgba(127, 218, 211, 0.5), transparent 62%),
+    radial-gradient(900px 520px at 85% 12%, rgba(210, 162, 61, 0.38), transparent 58%),
+    radial-gradient(1000px 820px at 65% 88%, rgba(11, 27, 51, 0.32), transparent 62%),
+    linear-gradient(180deg, rgba(255, 255, 255, 1), rgba(244, 247, 251, 1));
   background-repeat: no-repeat;
-  background-color: rgb(var(--surface));
+  background-color: #ffffff;
+}
+
+.bg-aurora::before {
+  content: "";
+  position: absolute;
+  inset: -10%;
+  pointer-events: none;
+  background:
+    radial-gradient(700px 460px at 8% 22%, rgba(127, 218, 211, 0.7), transparent 72%),
+    radial-gradient(640px 520px at 92% 14%, rgba(210, 162, 61, 0.6), transparent 72%),
+    radial-gradient(820px 620px at 60% 92%, rgba(11, 27, 51, 0.6), transparent 76%);
+  filter: blur(40px);
+  opacity: 0.85;
+  z-index: 0;
 }
 
 .bg-aurora::after {

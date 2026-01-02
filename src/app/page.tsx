@@ -17,7 +17,7 @@ const upcomingBills = [
 
 export default function HomePage() {
   return (
-    <main className="relative min-h-screen bg-aurora">
+    <main className="relative min-h-screen">
       <div className="relative z-10">
         <Navbar />
 

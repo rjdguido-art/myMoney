@@ -20,7 +20,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="antialiased bg-surface text-ink">
+      <body className="min-h-screen antialiased bg-aurora text-ink">
         <Suspense fallback={null}>
           <PageTransition />
         </Suspense>

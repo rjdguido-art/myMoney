@@ -7,7 +7,7 @@ import { AppProviders } from "./providers";
 export default function AppLayout({ children }: { children: ReactNode }) {
   return (
     <AppProviders>
-      <div className="min-h-screen bg-surface">
+      <div className="relative min-h-screen bg-transparent z-10">
         <Nav />
         <main className="px-4 pb-24 pt-6 sm:px-6 lg:px-10">
           {children}
