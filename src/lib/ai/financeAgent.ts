@@ -193,7 +193,7 @@ export async function runFinanceAgent(req: AgentRequest): Promise<AgentResponse>
     const toolCalls = extractToolCalls(response);
     if (!toolCalls.length) break;
 
-    const toolMessages: Array<{ role: "tool"; tool_call_id?: string; output: string }> = [];
+    const toolMessages: Array<{ type: "tool_call_output"; call_id?: string; output: string }> = [];
 
     for (const call of toolCalls) {
       const name = call?.name;
@@ -241,8 +241,8 @@ export async function runFinanceAgent(req: AgentRequest): Promise<AgentResponse>
       }
 
       toolMessages.push({
-        role: "tool",
-        tool_call_id: toolCallId,
+        type: "tool_call_output",
+        call_id: toolCallId,
         output: JSON.stringify(output),
       });
     }
