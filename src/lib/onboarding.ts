@@ -5,6 +5,9 @@ import { prisma } from "@/lib/prisma";
 type OnboardingUser = {
   id: string;
   name: string | null;
+  username: string | null;
+  imageUrl: string | null;
+  email: string;
   currency: string;
   timezone: string;
   preferredLanguage: string;
@@ -23,6 +26,9 @@ export async function requireOnboardedUser(): Promise<OnboardingUser> {
     select: {
       id: true,
       name: true,
+      username: true,
+      imageUrl: true,
+      email: true,
       currency: true,
       timezone: true,
       preferredLanguage: true,
@@ -53,6 +59,9 @@ export async function requireNotOnboardedUser(): Promise<OnboardingUser> {
     select: {
       id: true,
       name: true,
+      username: true,
+      imageUrl: true,
+      email: true,
       currency: true,
       timezone: true,
       preferredLanguage: true,

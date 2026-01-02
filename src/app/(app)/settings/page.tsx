@@ -1,6 +1,7 @@
 import { requireOnboardedUser } from "@/lib/onboarding";
 import { t, tJSON, type Locale } from "@/lib/i18n";
 import { LanguageToggle } from "@/app/(app)/components/language-toggle";
+import { ProfileForm } from "./profile-form";
 
 export default async function SettingsPage() {
   const user = await requireOnboardedUser();
@@ -35,39 +36,27 @@ export default async function SettingsPage() {
             </h2>
             <p className="text-muted">{t("settings.profileIntro", locale)}</p>
           </div>
-          <form className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-sm text-ink">{t("settings.fullName", locale)}</label>
-              <input
-                className="w-full rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
-                placeholder={t("settings.placeholders.fullName", locale)}
-                title={t("settings.helpers.fullName", locale)}
-              />
-              <p className="text-xs text-muted">{t("settings.helpers.fullName", locale)}</p>
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm text-ink">{t("settings.email", locale)}</label>
-              <input
-                className="w-full rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
-                placeholder={t("settings.placeholders.email", locale)}
-                type="email"
-                title={t("settings.helpers.email", locale)}
-              />
-              <p className="text-xs text-muted">{t("settings.helpers.email", locale)}</p>
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm text-ink">{t("settings.timezone", locale)}</label>
-              <select
-                className="w-full rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
-                title={t("settings.helpers.timezone", locale)}
-              >
-                <option>UTC</option>
-                <option>ET (UTC-5)</option>
-                <option>PT (UTC-8)</option>
-              </select>
-              <p className="text-xs text-muted">{t("settings.helpers.timezone", locale)}</p>
-            </div>
-          </form>
+          <ProfileForm
+            locale={locale}
+            initial={{
+              name: user.name,
+              username: user.username,
+              imageUrl: user.imageUrl,
+              email: user.email,
+            }}
+          />
+          <div className="space-y-2">
+            <label className="text-sm text-ink">{t("settings.timezone", locale)}</label>
+            <select
+              className="w-full rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+              title={t("settings.helpers.timezone", locale)}
+            >
+              <option>UTC</option>
+              <option>ET (UTC-5)</option>
+              <option>PT (UTC-8)</option>
+            </select>
+            <p className="text-xs text-muted">{t("settings.helpers.timezone", locale)}</p>
+          </div>
         </section>
 
         <section className="space-y-4 rounded-lg border border-border/80 bg-white p-6 shadow-sm">

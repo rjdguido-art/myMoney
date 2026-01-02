@@ -12,6 +12,7 @@ import { openQuickAddTransaction } from "./quick-add-transaction";
 
 const links = [
   { href: "/dashboard", labelKey: "nav.dashboard" },
+  { href: "/leaderboard", labelKey: "nav.leaderboard" },
   { href: "/transactions", labelKey: "nav.transactions" },
   { href: "/budgets", labelKey: "nav.budgets" },
   { href: "/bills", labelKey: "nav.bills" },

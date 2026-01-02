@@ -1,6 +1,7 @@
 import { CategoryType } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { buildForecast } from "@/lib/forecastEngine";
+import { getWeeklyScoreForUser } from "@/lib/gamification";
 import { requireOnboardedUser } from "@/lib/onboarding";
 import { t, type Locale } from "@/lib/i18n";
 
@@ -38,7 +39,7 @@ export default async function DashboardPage() {
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
   const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
 
-  const [budgetPlan, monthTransactions, forecast] = await Promise.all([
+  const [budgetPlan, monthTransactions, forecast, weeklyScore] = await Promise.all([
     prisma.budgetPlan.findFirst({
       where: {
         userId,
@@ -67,6 +68,7 @@ export default async function DashboardPage() {
       },
     }),
     buildForecast({ userId, now }),
+    getWeeklyScoreForUser({ prisma, userId, now }),
   ]);
 
   const currency = user.currency ?? "USD";
@@ -246,6 +248,20 @@ export default async function DashboardPage() {
           </p>
           <p className="mt-2 text-xs text-muted">
             {t("dashboard.dailyAllowanceBody", locale, { days: forecast.daysUntilPay })}
+          </p>
+        </div>
+
+        <div className="rounded-2xl border border-border/60 bg-white/95 p-4 shadow-[0_12px_30px_rgba(11,35,71,0.08)] sm:p-5">
+          <p className="text-xs uppercase tracking-[0.14em] text-muted sm:text-sm">
+            {t("dashboard.weeklyPoints", locale)}
+          </p>
+          <p className="mt-2 text-2xl font-semibold text-ink sm:text-3xl">
+            {weeklyScore.points}
+          </p>
+          <p className="mt-2 text-xs text-muted">
+            {t("dashboard.weeklyPointsBody", locale, {
+              percent: Math.round(weeklyScore.percentSaved * 100),
+            })}
           </p>
         </div>
       </section>
