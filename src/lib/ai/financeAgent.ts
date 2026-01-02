@@ -108,6 +108,13 @@ type OutputMessage = { type: "message"; content?: MessageContent[] };
 type OutputItem = ToolCall | OutputMessage | { type?: string };
 type ResponseLike = { output?: OutputItem[]; output_text?: string; id?: string };
 
+type Effort = "low" | "medium" | "high";
+
+function parseEffort(v: string | undefined): Effort {
+  if (v === "low" || v === "medium" || v === "high") return v;
+  return "medium";
+}
+
 function extractToolCalls(resp: any) {
   const out: any[] = Array.isArray(resp?.output) ? resp.output : [];
   return out.filter(
@@ -133,14 +140,14 @@ function extractText(resp: ResponseLike): string {
   return textParts.join("\n").trim();
 }
 
-function modelParams(model: string) {
-  const isNano = model.includes("nano");
-
-  return {
-    reasoning: { effort: isNano ? "low" : "medium" },
-    text: { verbosity: "low" },
-    ...(isNano ? {} : { temperature: 0.7 }),
-  };
+function addTemperatureIfSupported(
+  body: Record<string, unknown>,
+  model: string,
+): Record<string, unknown> {
+  if (!model.includes("gpt-5-nano")) {
+    return { ...body, temperature: 1 };
+  }
+  return body;
 }
 
 function toDateOrUndefined(value: unknown): Date | undefined {
@@ -182,6 +189,7 @@ async function withTimeout<T>(
 export async function runFinanceAgent(req: AgentRequest): Promise<AgentResponse> {
   const model = pickModel(req.messages);
   const max_output_tokens = pickMaxOutputTokens(req.messages);
+  const reasoningEffort = parseEffort(process.env.MYMONEY_AI_REASONING_EFFORT);
 
   const tools = [
     {
@@ -237,18 +245,21 @@ export async function runFinanceAgent(req: AgentRequest): Promise<AgentResponse>
   const input = toOpenAIInput([system, ...req.messages]);
 
   let response = await withTimeout(
-    (signal) =>
-      openai.responses.create(
+    (signal) => {
+      const body = addTemperatureIfSupported(
         {
           model,
           max_output_tokens,
           input,
           tools,
           tool_choice: "auto",
-          ...modelParams(model),
+          reasoning: { effort: reasoningEffort },
+          text: { verbosity: "medium" as const },
         },
-        { signal } as any,
-      ),
+        model,
+      );
+      return openai.responses.create(body, { signal } as any);
+    },
     20000,
   );
 
@@ -328,8 +339,8 @@ export async function runFinanceAgent(req: AgentRequest): Promise<AgentResponse>
     }
 
     response = await withTimeout(
-      (signal) =>
-        openai.responses.create(
+      (signal) => {
+        const body = addTemperatureIfSupported(
           {
             model,
             max_output_tokens,
@@ -337,11 +348,13 @@ export async function runFinanceAgent(req: AgentRequest): Promise<AgentResponse>
             input: toolMessages,
             tools,
             tool_choice: "auto",
-            reasoning: { effort: model.includes("nano") ? "low" : "medium" },
-            text: { verbosity: "low" },
+            reasoning: { effort: reasoningEffort },
+            text: { verbosity: "medium" as const },
           },
-          { signal } as any,
-        ),
+          model,
+        );
+        return openai.responses.create(body, { signal } as any);
+      },
       20000,
     );
   }
@@ -351,8 +364,8 @@ export async function runFinanceAgent(req: AgentRequest): Promise<AgentResponse>
     response?.incomplete_details?.reason === "max_output_tokens"
   ) {
     response = await withTimeout(
-      (signal) =>
-        openai.responses.create(
+      (signal) => {
+        const body = addTemperatureIfSupported(
           {
             model: MODEL_SMART,
             max_output_tokens: Math.max(max_output_tokens * 2, 1200),
@@ -360,12 +373,13 @@ export async function runFinanceAgent(req: AgentRequest): Promise<AgentResponse>
             input: [{ role: "user", content: "Answer in 5 short bullet points." }],
             tools,
             tool_choice: "auto",
-            reasoning: { effort: "low" },
-            text: { verbosity: "low" },
-            temperature: 0.7,
+            reasoning: { effort: reasoningEffort },
+            text: { verbosity: "medium" as const },
           },
-          { signal } as any,
-        ),
+          MODEL_SMART,
+        );
+        return openai.responses.create(body, { signal } as any);
+      },
       20000,
     );
   }
