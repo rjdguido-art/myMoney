@@ -294,6 +294,12 @@ export function Nav() {
         </div>
         <div className="flex items-center gap-2">
           <LanguageToggle locale={locale} variant="compact" />
+          <Link
+            href="/chat"
+            className="pill inline-flex items-center gap-2 border border-border/80 bg-white/80 text-ink hover:bg-card"
+          >
+            Assistant
+          </Link>
           <button
             type="button"
             onClick={openQuickAddTransaction}
