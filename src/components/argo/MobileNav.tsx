@@ -10,13 +10,20 @@ import {
   User,
 } from "lucide-react";
 
-const tabs = [
+type MobileTab = {
+  href: "/home" | "/transactions" | "/chat" | "/goals" | "/settings";
+  label: string;
+  icon: typeof Home;
+  isCenter?: boolean;
+};
+
+const tabs: MobileTab[] = [
   { href: "/home", label: "Home", icon: Home },
   { href: "/transactions", label: "Activity", icon: Activity },
   { href: "/chat", label: "AI", icon: Sparkles, isCenter: true },
   { href: "/goals", label: "Goals", icon: Target },
   { href: "/settings", label: "Profile", icon: User },
-] as const;
+];
 
 export function MobileNav() {
   const pathname = usePathname();
