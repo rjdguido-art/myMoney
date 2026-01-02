@@ -193,7 +193,11 @@ export async function runFinanceAgent(req: AgentRequest): Promise<AgentResponse>
     const toolCalls = extractToolCalls(response);
     if (!toolCalls.length) break;
 
-    const toolMessages: Array<{ type: "tool_call_output"; call_id: string; output: string }> = [];
+    const toolMessages: Array<{
+      type: "custom_tool_call_output";
+      call_id: string;
+      output: string;
+    }> = [];
 
     for (const call of toolCalls) {
       const name = call?.name;
@@ -242,13 +246,13 @@ export async function runFinanceAgent(req: AgentRequest): Promise<AgentResponse>
 
       if (!toolCallId) {
         toolMessages.push({
-          type: "tool_call_output",
+          type: "custom_tool_call_output",
           call_id: "missing_call_id",
           output: JSON.stringify({ error: "Missing tool call id" }),
         });
       } else {
         toolMessages.push({
-          type: "tool_call_output",
+          type: "custom_tool_call_output",
           call_id: toolCallId,
           output: JSON.stringify(output),
         });
