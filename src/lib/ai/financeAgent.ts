@@ -127,6 +127,7 @@ export async function runFinanceAgent(req: AgentRequest): Promise<AgentResponse>
       name: "get_forecast",
       description:
         "Get a cashflow snapshot until next pay date, including bills due and safe-to-spend.",
+      strict: true,
       parameters: {
         type: "object",
         properties: {},
@@ -138,6 +139,7 @@ export async function runFinanceAgent(req: AgentRequest): Promise<AgentResponse>
       name: "list_transactions",
       description:
         "List recent transactions for the signed-in user (supports date range, account/category filters, and text search).",
+      strict: true,
       parameters: {
         type: "object",
         properties: {
