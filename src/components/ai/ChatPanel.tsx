@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
@@ -13,6 +14,7 @@ export default function ChatPanel({ storageKey = "mymoney-chat" }: { storageKey?
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const router = useRouter();
 
   const listRef = useRef<HTMLDivElement | null>(null);
 
@@ -89,29 +91,38 @@ export default function ChatPanel({ storageKey = "mymoney-chat" }: { storageKey?
   }
 
   return (
-    <div className="flex h-[calc(100vh-6rem)] flex-col rounded-2xl border border-white/10 bg-slate-950/80 text-white shadow-[0_24px_60px_rgba(3,7,18,0.45)]">
-      <div className="flex items-center justify-between gap-3 border-b border-white/10 bg-slate-950/80 px-4 py-3">
+    <div className="flex h-screen w-full flex-col border border-[#1b2b57] bg-gradient-to-b from-[#0a1733] via-[#0a1733] to-[#0b1f4b] text-white shadow-[0_24px_60px_rgba(3,10,30,0.5)]">
+      <div className="flex items-center justify-between gap-3 border-b border-[#1b2b57] bg-[#0b1735]/90 px-4 py-3">
         <div>
           <div className="text-sm font-semibold">myMoney Assistant</div>
-          <div className="text-xs text-white/60">
+          <div className="text-xs text-[#a8b6e6]">
             Ask about spending, saving, bills, and your plan.
           </div>
         </div>
 
-        <button
-          onClick={clearChat}
-          className="rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white/80 hover:bg-white/10"
-          type="button"
-        >
-          Clear
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => router.back()}
+            className="rounded-xl border border-[#223566] bg-[#122248] px-3 py-1.5 text-xs text-[#cbd8ff] hover:bg-[#162a5a]"
+            type="button"
+          >
+            Back
+          </button>
+          <button
+            onClick={clearChat}
+            className="rounded-xl border border-[#223566] bg-[#122248] px-3 py-1.5 text-xs text-[#cbd8ff] hover:bg-[#162a5a]"
+            type="button"
+          >
+            Clear
+          </button>
+        </div>
       </div>
 
       <div ref={listRef} className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
         {messages.length === 0 ? (
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-white/80">
+          <div className="rounded-2xl border border-[#1b2f61] bg-[#0f234f] p-4 text-sm text-[#d3ddff]">
             Try:
-            <ul className="mt-2 list-disc space-y-1 pl-5 text-white/70">
+            <ul className="mt-2 list-disc space-y-1 pl-5 text-[#b9c6f2]">
               <li>“What can I safely spend until payday?”</li>
               <li>“Where did I overspend this month?”</li>
               <li>“Make a 30-day debt payoff plan.”</li>
@@ -125,8 +136,8 @@ export default function ChatPanel({ storageKey = "mymoney-chat" }: { storageKey?
             className={cx(
               "max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed",
               m.role === "user"
-                ? "ml-auto bg-white/10 border border-white/15"
-                : "mr-auto bg-slate-900/70 border border-white/10",
+                ? "ml-auto border border-[#27407a] bg-[#1a2e63]"
+                : "mr-auto border border-[#1b2f61] bg-[#0f234f]",
             )}
           >
             {m.content}
@@ -134,26 +145,26 @@ export default function ChatPanel({ storageKey = "mymoney-chat" }: { storageKey?
         ))}
 
         {loading ? (
-          <div className="mr-auto max-w-[85%] rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white/70">
+          <div className="mr-auto max-w-[85%] rounded-2xl border border-[#1b2f61] bg-[#0f234f] px-4 py-3 text-sm text-[#b9c6f2]">
             Thinking…
           </div>
         ) : null}
 
         {err ? (
-          <div className="rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+          <div className="rounded-2xl border border-red-400/40 bg-red-500/15 px-4 py-3 text-sm text-red-100">
             {err}
           </div>
         ) : null}
       </div>
 
-      <div className="border-t border-white/10 bg-slate-950/80 p-3">
+      <div className="border-t border-[#1b2b57] bg-[#0b1735]/90 p-3">
         <div className="flex gap-2">
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={onKeyDown}
             placeholder="Ask myMoney…"
-            className="min-h-[44px] flex-1 resize-none rounded-2xl border border-white/10 bg-black/60 px-4 py-3 text-sm text-white outline-none placeholder:text-white/40 focus:border-white/20"
+            className="min-h-[44px] flex-1 resize-none rounded-2xl border border-[#1c2f5d] bg-[#0a1a3b] px-4 py-3 text-sm text-white outline-none placeholder:text-[#8fa3d8] focus:border-[#2a4b8c]"
           />
           <button
             onClick={() => void send()}
@@ -161,8 +172,8 @@ export default function ChatPanel({ storageKey = "mymoney-chat" }: { storageKey?
             className={cx(
               "rounded-2xl px-4 py-3 text-sm font-semibold",
               canSend
-                ? "bg-white text-slate-900 hover:bg-white/90"
-                : "bg-white/20 text-white/50 cursor-not-allowed",
+                ? "bg-[#e6efff] text-[#10254f] hover:bg-white"
+                : "bg-[#1b2f5c] text-[#7c8fbf] cursor-not-allowed",
             )}
             type="button"
           >
@@ -170,7 +181,7 @@ export default function ChatPanel({ storageKey = "mymoney-chat" }: { storageKey?
           </button>
         </div>
 
-        <div className="mt-2 text-xs text-white/50">
+        <div className="mt-2 text-xs text-[#8fa3d8]">
           Enter to send, Shift+Enter for newline.
         </div>
       </div>
