@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, Suspense, useState } from "react";
+import Image from "next/image";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -60,34 +61,44 @@ function LoginPageContent() {
         <div className="login-orb login-orb--one" />
         <div className="login-orb login-orb--two" />
         <div className="login-orb login-orb--three" />
-        <img
+        <Image
           className="login-float login-float--one"
           src="/login/feature-1.png"
           alt=""
+          width={220}
+          height={220}
         />
-        <img
+        <Image
           className="login-float login-float--two"
           src="/login/feature-2.png"
           alt=""
+          width={240}
+          height={240}
         />
-        <img
+        <Image
           className="login-float login-float--three"
           src="/login/feature-3.png"
           alt=""
+          width={260}
+          height={260}
         />
-        <img
+        <Image
           className="login-float login-float--four"
           src="/login/feature-4.png"
           alt=""
+          width={220}
+          height={220}
         />
       </div>
       <div className="relative mx-auto flex min-h-[calc(100vh-6rem)] max-w-4xl items-center">
         <div className="grid w-full gap-10 rounded-lg border border-border/80 bg-white p-10 shadow-sm backdrop-blur-sm md:grid-cols-2">
           <div className="space-y-4">
           <div className="flex items-center gap-3">
-            <img
+            <Image
               src="/argo-logo.png"
               alt="ArgoBucks logo"
+              width={56}
+              height={56}
               className="h-14 w-14 rounded-full object-cover scale-[1.08] shadow-sm"
             />
             <div>

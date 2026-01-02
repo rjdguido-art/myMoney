@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { t, type Locale } from "@/lib/i18n";
 
 type ProfileFormProps = {
@@ -50,7 +51,7 @@ export function ProfileForm({ locale, initial }: ProfileFormProps) {
       <div className="flex flex-wrap items-center gap-4">
         <div className="h-16 w-16 overflow-hidden rounded-full border border-border/80 bg-white">
           {imageUrl ? (
-            <img src={imageUrl} alt="" className="h-full w-full object-cover" />
+            <Image src={imageUrl} alt="" width={64} height={64} className="h-full w-full object-cover" />
           ) : (
             <div className="flex h-full w-full items-center justify-center text-xs text-muted">
               {t("settings.profilePhotoEmpty", locale)}

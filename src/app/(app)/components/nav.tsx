@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
@@ -77,7 +78,7 @@ export function Nav() {
       document.removeEventListener("mousedown", handleClick);
       document.removeEventListener("keydown", handleKey);
     };
-  }, []);
+  }, [pathname]);
 
   const overflowOpen = overflowState.open && overflowState.path === pathname;
   const menuOpen = !isDesktop && menuState.open && menuState.path === pathname;
@@ -94,9 +95,11 @@ export function Nav() {
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
         <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full shadow-[0_10px_30px_rgba(11,35,71,0.35)]">
-          <img
+          <Image
             src="/argo-logo.png"
             alt="ArgoBucks logo"
+            width={48}
+            height={48}
             className="h-full w-full scale-[1.12] object-cover"
           />
         </div>
@@ -187,9 +190,11 @@ export function Nav() {
       <nav className="flex flex-wrap items-center justify-between gap-3 border-b border-border/70 px-6 py-4 lg:px-10">
         <div className="flex items-center gap-3">
         <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full shadow-[0_10px_30px_rgba(11,35,71,0.35)]">
-          <img
+          <Image
             src="/argo-logo.png"
             alt="ArgoBucks logo"
+            width={48}
+            height={48}
             className="h-full w-full scale-[1.12] object-cover"
           />
         </div>

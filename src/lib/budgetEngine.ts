@@ -1,4 +1,4 @@
-import { BudgetMode, BillInput, BudgetEngineInput, ComputedBudget } from "./budgetEngine.types";
+import { BillInput, BudgetEngineInput, ComputedBudget } from "./budgetEngine.types";
 import { PrismaClient, CategoryType } from "@prisma/client";
 
 function clampCents(value: number) {

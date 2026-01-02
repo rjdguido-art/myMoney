@@ -407,7 +407,6 @@ async function sendOnboardingReminders(now: Date) {
     const key = `onboarding:${weekKey}`;
     if (await wasNotified(user.id, NotificationType.ONBOARDING_REMINDER, key)) continue;
 
-    const localeCode = getLocaleCode(user.locale);
     const body = `
       <p>Hi ${formatName(user)}, you are just a few minutes away from your personalized dashboard.</p>
       <p>Complete onboarding to add your pay schedule, bills, and budget targets.</p>
