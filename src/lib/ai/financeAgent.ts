@@ -97,7 +97,6 @@ type ToolCall = {
   id?: string;
   name?: string;
   arguments?: string;
-  function?: { name?: string };
 };
 type MessageContent = { type?: string; text?: string };
 type OutputMessage = { type: "message"; content?: MessageContent[] };
@@ -133,35 +132,31 @@ export async function runFinanceAgent(req: AgentRequest): Promise<AgentResponse>
   const tools = [
     {
       type: "function" as const,
-      function: {
-        name: "get_forecast",
-        description:
-          "Get a cashflow snapshot until next pay date, including bills due and safe-to-spend.",
-        parameters: {
-          type: "object",
-          properties: {},
-          additionalProperties: false,
-        },
+      name: "get_forecast",
+      description:
+        "Get a cashflow snapshot until next pay date, including bills due and safe-to-spend.",
+      parameters: {
+        type: "object",
+        properties: {},
+        additionalProperties: false,
       },
     },
     {
       type: "function" as const,
-      function: {
-        name: "list_transactions",
-        description:
-          "List recent transactions for the signed-in user (supports date range, account/category filters, and text search).",
-        parameters: {
-          type: "object",
-          properties: {
-            from: { type: "string", description: "ISO date-time" },
-            to: { type: "string", description: "ISO date-time" },
-            categoryId: { type: "string" },
-            accountId: { type: "string" },
-            search: { type: "string" },
-            limit: { type: "number", description: "1-200" },
-          },
-          additionalProperties: false,
+      name: "list_transactions",
+      description:
+        "List recent transactions for the signed-in user (supports date range, account/category filters, and text search).",
+      parameters: {
+        type: "object",
+        properties: {
+          from: { type: "string", description: "ISO date-time" },
+          to: { type: "string", description: "ISO date-time" },
+          categoryId: { type: "string" },
+          accountId: { type: "string" },
+          search: { type: "string" },
+          limit: { type: "number", description: "1-200" },
         },
+        additionalProperties: false,
       },
     },
   ] satisfies OpenAI.Responses.Tool[];
@@ -199,7 +194,7 @@ export async function runFinanceAgent(req: AgentRequest): Promise<AgentResponse>
     const toolMessages: Array<{ role: "tool"; tool_call_id?: string; output: string }> = [];
 
     for (const call of toolCalls) {
-      const name = call?.name ?? call?.function?.name;
+      const name = call?.name;
       const toolCallId = call?.id;
 
       let args: unknown = {};
