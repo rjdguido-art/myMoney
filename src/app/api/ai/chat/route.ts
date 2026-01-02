@@ -32,7 +32,7 @@ export async function POST(request: Request) {
   const result = await runFinanceAgent({
     userId: session.user.id,
     messages: parsed.data.messages,
-    locale: parsed.data.locale ?? session.user.locale,
+    locale: parsed.data.locale ?? session.user.locale ?? undefined,
     timezone: parsed.data.timezone,
   });
 
