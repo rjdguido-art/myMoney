@@ -159,26 +159,63 @@ export function OnboardingClient({
   name,
 }: Props) {
   const router = useRouter();
-  const [step, setStep] = useState(0);
+  const initialDraft = useMemo(() => {
+    const fallbackTimezone =
+      initialTimezone === "UTC" ? getResolvedTimezone() ?? initialTimezone : initialTimezone;
+    const fallback: DraftState = {
+      step: 0,
+      language: initialLanguage,
+      currency: initialCurrency,
+      timezone: fallbackTimezone,
+      payFrequency: "BIWEEKLY",
+      takeHomePay: "",
+      deductions: [{ id: uid(), name: "", amount: "" }],
+      bills: [{ id: uid(), name: "", amount: "", dueDay: "", frequency: "MONTHLY" }],
+      budgets: defaultBudgets.map((category) => ({ id: uid(), category, amount: "" })),
+      goals: [],
+      debts: [],
+    };
+
+    if (typeof window === "undefined") return fallback;
+
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (!stored) return fallback;
+      const draft = JSON.parse(stored) as DraftState;
+      if (!draft) return fallback;
+      return {
+        ...fallback,
+        step: Number.isFinite(draft.step) ? draft.step : fallback.step,
+        language: draft.language ?? fallback.language,
+        currency: draft.currency ?? fallback.currency,
+        timezone: draft.timezone ?? fallback.timezone,
+        payFrequency: draft.payFrequency ?? fallback.payFrequency,
+        takeHomePay: draft.takeHomePay ?? fallback.takeHomePay,
+        deductions: draft.deductions?.length ? draft.deductions : fallback.deductions,
+        bills: draft.bills?.length ? draft.bills : fallback.bills,
+        budgets: draft.budgets?.length ? draft.budgets : fallback.budgets,
+        goals: draft.goals ?? fallback.goals,
+        debts: draft.debts ?? fallback.debts,
+      };
+    } catch {
+      return fallback;
+    }
+  }, [initialCurrency, initialLanguage, initialTimezone]);
+
+  const [step, setStep] = useState(initialDraft.step);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [language, setLanguage] = useState<Locale>(initialLanguage);
-  const [currency, setCurrency] = useState(initialCurrency);
-  const [timezone, setTimezone] = useState(initialTimezone);
-  const [payFrequency, setPayFrequency] = useState<PayFrequency>("BIWEEKLY");
-  const [takeHomePay, setTakeHomePay] = useState("");
-  const [deductions, setDeductions] = useState<DeductionRow[]>([
-    { id: uid(), name: "", amount: "" },
-  ]);
-  const [bills, setBills] = useState<BillRow[]>([
-    { id: uid(), name: "", amount: "", dueDay: "", frequency: "MONTHLY" },
-  ]);
-  const [budgets, setBudgets] = useState<BudgetRow[]>(
-    defaultBudgets.map((category) => ({ id: uid(), category, amount: "" })),
-  );
-  const [goals, setGoals] = useState<GoalRow[]>([]);
-  const [debts, setDebts] = useState<DebtRow[]>([]);
+  const [language, setLanguage] = useState<Locale>(initialDraft.language);
+  const [currency, setCurrency] = useState(initialDraft.currency);
+  const [timezone, setTimezone] = useState(initialDraft.timezone);
+  const [payFrequency, setPayFrequency] = useState<PayFrequency>(initialDraft.payFrequency);
+  const [takeHomePay, setTakeHomePay] = useState(initialDraft.takeHomePay);
+  const [deductions, setDeductions] = useState<DeductionRow[]>(initialDraft.deductions);
+  const [bills, setBills] = useState<BillRow[]>(initialDraft.bills);
+  const [budgets, setBudgets] = useState<BudgetRow[]>(initialDraft.budgets);
+  const [goals, setGoals] = useState<GoalRow[]>(initialDraft.goals);
+  const [debts, setDebts] = useState<DebtRow[]>(initialDraft.debts);
 
   const steps = useMemo(
     () =>
@@ -207,49 +244,7 @@ export function OnboardingClient({
   );
   const progress = ((step + 1) / steps.length) * 100;
   const timezoneOptions = useMemo(() => getTimezoneOptions(), []);
-  const [hydrated, setHydrated] = useState(false);
-
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (!stored) {
-        const resolved = getResolvedTimezone();
-        if (resolved && initialTimezone === "UTC") {
-          setTimezone(resolved);
-        }
-      } else {
-        const draft = JSON.parse(stored) as DraftState;
-        if (draft) {
-          setStep(Number.isFinite(draft.step) ? draft.step : 0);
-          setLanguage(draft.language ?? initialLanguage);
-          setCurrency(draft.currency ?? initialCurrency);
-          setTimezone(draft.timezone ?? initialTimezone);
-          setPayFrequency(draft.payFrequency ?? "BIWEEKLY");
-          setTakeHomePay(draft.takeHomePay ?? "");
-          setDeductions(
-            draft.deductions?.length ? draft.deductions : [{ id: uid(), name: "", amount: "" }],
-          );
-          setBills(
-            draft.bills?.length
-              ? draft.bills
-              : [{ id: uid(), name: "", amount: "", dueDay: "", frequency: "MONTHLY" }],
-          );
-          setBudgets(
-            draft.budgets?.length
-              ? draft.budgets
-              : defaultBudgets.map((category) => ({ id: uid(), category, amount: "" })),
-          );
-          setGoals(draft.goals ?? []);
-          setDebts(draft.debts ?? []);
-        }
-      }
-    } catch {
-      // Ignore invalid drafts.
-    }
-    setHydrated(true);
-  }, [initialCurrency, initialLanguage, initialTimezone]);
-
-  const showSkeleton = !hydrated;
+  const showSkeleton = false;
 
   useEffect(() => {
     const draft: DraftState = {

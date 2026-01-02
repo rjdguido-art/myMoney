@@ -106,7 +106,7 @@ export function computeBudget(input: BudgetEngineInput): ComputedBudget {
       };
     });
 
-    let distributed = allocations.reduce((sum, item) => sum + item.base, 0);
+    const distributed = allocations.reduce((sum, item) => sum + item.base, 0);
     let toDistribute = remainingCents - distributed;
 
     allocations.sort((a, b) => b.remainder - a.remainder);

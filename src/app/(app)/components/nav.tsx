@@ -28,8 +28,14 @@ export function Nav() {
   const locale = (session?.user?.locale as Locale) ?? "en";
   const isDesktop = useMediaQuery("(min-width: 1024px)");
   const [onboarded, setOnboarded] = useState(true);
-  const [overflowOpen, setOverflowOpen] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [overflowState, setOverflowState] = useState(() => ({
+    open: false,
+    path: pathname,
+  }));
+  const [menuState, setMenuState] = useState(() => ({
+    open: false,
+    path: pathname,
+  }));
   const overflowRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -56,12 +62,12 @@ export function Nav() {
     const handleClick = (event: MouseEvent) => {
       if (!overflowRef.current) return;
       if (!overflowRef.current.contains(event.target as Node)) {
-        setOverflowOpen(false);
+        setOverflowState({ open: false, path: pathname });
       }
     };
     const handleKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        setOverflowOpen(false);
+        setOverflowState({ open: false, path: pathname });
       }
     };
     document.addEventListener("mousedown", handleClick);
@@ -72,16 +78,8 @@ export function Nav() {
     };
   }, []);
 
-  useEffect(() => {
-    setOverflowOpen(false);
-    setMenuOpen(false);
-  }, [pathname]);
-
-  useEffect(() => {
-    if (isDesktop) {
-      setMenuOpen(false);
-    }
-  }, [isDesktop]);
+  const overflowOpen = overflowState.open && overflowState.path === pathname;
+  const menuOpen = !isDesktop && menuState.open && menuState.path === pathname;
 
   const disabledLinks = new Set(["/budgets", "/bills", "/insights"]);
   const overflowLinks = new Set(["/onboarding", "/auth"]);
@@ -110,7 +108,12 @@ export function Nav() {
           </div>
           <button
             type="button"
-            onClick={() => setMenuOpen((prev) => !prev)}
+            onClick={() =>
+              setMenuState((prev) => ({
+                open: prev.path === pathname ? !prev.open : true,
+                path: pathname,
+              }))
+            }
             className="rounded-sm border border-border/80 px-3 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-ink/70"
             aria-expanded={menuOpen}
             aria-controls="mobile-nav"
@@ -230,7 +233,12 @@ export function Nav() {
           <div ref={overflowRef} className="relative">
             <button
               type="button"
-              onClick={() => setOverflowOpen((prev) => !prev)}
+              onClick={() =>
+                setOverflowState((prev) => ({
+                  open: prev.path === pathname ? !prev.open : true,
+                  path: pathname,
+                }))
+              }
               className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border/80 bg-white text-ink/70 transition-all duration-200 ease-out hover:bg-card hover:text-ink hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60"
               aria-haspopup="menu"
               aria-expanded={overflowOpen}

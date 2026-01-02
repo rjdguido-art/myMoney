@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Suspense } from "react";
 import PageTransition from "./page-transition";
+import { MorphingBackground } from "@/components/background/morphing-background";
 
 export const metadata: Metadata = {
   title: "ArgoBucks",
@@ -21,6 +22,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="min-h-screen antialiased bg-aurora text-ink">
+        <MorphingBackground />
         <Suspense fallback={null}>
           <PageTransition />
         </Suspense>

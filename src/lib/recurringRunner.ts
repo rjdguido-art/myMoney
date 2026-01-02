@@ -75,7 +75,7 @@ export async function runRecurringRules({
   const skipped: Array<{ id: string; reason: string }> = [];
 
   for (const rule of rules) {
-    let runDate = rule.nextRunAt ?? rule.nextRun ?? rule.startDate;
+    const runDate = rule.nextRunAt ?? rule.nextRun ?? rule.startDate;
     if (!runDate) {
       skipped.push({ id: rule.id, reason: "No start date" });
       continue;

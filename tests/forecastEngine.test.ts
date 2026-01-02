@@ -2,13 +2,23 @@ import { describe, expect, it, vi } from "vitest";
 import { buildForecast } from "@/lib/forecastEngine";
 import { CategoryType, Frequency, Prisma } from "@prisma/client";
 
+type ForecastPrisma = {
+  paySchedule: { findMany: (args?: unknown) => Promise<unknown> };
+  bill?: { findMany: (args?: unknown) => Promise<unknown> };
+  recurringRule?: { findMany: (args?: unknown) => Promise<unknown> };
+  transaction?: { findMany: (args?: unknown) => Promise<unknown> };
+};
+
 describe("buildForecast", () => {
   it("returns a zeroed snapshot when no pay schedule exists", async () => {
     const prisma = {
       paySchedule: { findMany: vi.fn().mockResolvedValue([]) },
     };
 
-    const result = await buildForecast({ userId: "user-1", prisma: prisma as any });
+    const result = await buildForecast({
+      userId: "user-1",
+      prisma: prisma as ForecastPrisma,
+    });
 
     expect(result.nextPayDate).toBeNull();
     expect(result.safeToSpend).toBe(0);
@@ -99,8 +109,11 @@ describe("buildForecast", () => {
       bill: { findMany: vi.fn().mockResolvedValue(bills) },
       recurringRule: { findMany: vi.fn().mockResolvedValue(recurringRules) },
       transaction: {
-        findMany: vi.fn().mockImplementation(({ where }) => {
-          const lte = (where as any).postedAt?.lte as Date | undefined;
+        findMany: vi.fn().mockImplementation((args?: unknown) => {
+          const typed = args as {
+            where?: { postedAt?: { lte?: Date } };
+          };
+          const lte = typed.where?.postedAt?.lte;
           if (lte && lte.getTime() === now.getTime()) {
             return Promise.resolve(cycleTransactions);
           }
@@ -109,7 +122,11 @@ describe("buildForecast", () => {
       },
     };
 
-    const result = await buildForecast({ userId: "user-1", prisma: prisma as any, now });
+    const result = await buildForecast({
+      userId: "user-1",
+      prisma: prisma as ForecastPrisma,
+      now,
+    });
 
     expect(result.periodStart?.getTime()).toBe(new Date("2024-05-01T00:00:00Z").getTime());
     expect(result.nextPayDate?.getTime()).toBe(new Date("2024-06-01T00:00:00Z").getTime());

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 
 const LOGIN_TRANSITION_KEY = "argo-login-transition";
@@ -8,7 +8,7 @@ const LOGIN_TRANSITION_KEY = "argo-login-transition";
 export default function PageTransition() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [active, setActive] = useState(false);
+  const transitionRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     let shouldAnimate = false;
@@ -19,8 +19,11 @@ export default function PageTransition() {
     }
     if (!shouldAnimate) return;
 
-    setActive(true);
-    const timeout = window.setTimeout(() => setActive(false), 720);
+    if (!transitionRef.current) return;
+    transitionRef.current.classList.add("is-active");
+    const timeout = window.setTimeout(() => {
+      transitionRef.current?.classList.remove("is-active");
+    }, 720);
     try {
       window.sessionStorage.removeItem(LOGIN_TRANSITION_KEY);
     } catch {
@@ -29,5 +32,5 @@ export default function PageTransition() {
     return () => window.clearTimeout(timeout);
   }, [pathname, searchParams]);
 
-  return <div className={`page-transition${active ? " is-active" : ""}`} />;
+  return <div ref={transitionRef} className="page-transition" />;
 }

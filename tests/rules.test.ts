@@ -1,6 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
 import { resolveCategoryRule } from "@/lib/rules";
 
+type RulesPrisma = {
+  rule: { findMany: (args?: unknown) => Promise<unknown> };
+};
+
 const mockRules = [
   { descriptionContains: "coffee", categoryId: "cat-coffee", priority: 10 },
   { descriptionContains: "uber", categoryId: "cat-ride", priority: 5 },
@@ -14,7 +18,7 @@ describe("resolveCategoryRule", () => {
     const result = await resolveCategoryRule({
       userId: "user-1",
       description: "",
-      prisma: prisma as any,
+      prisma: prisma as RulesPrisma,
     });
     expect(result).toBeNull();
     expect(prisma.rule.findMany).not.toHaveBeenCalled();
@@ -33,7 +37,7 @@ describe("resolveCategoryRule", () => {
     const result = await resolveCategoryRule({
       userId: "user-1",
       description: "Starbucks coffee shop",
-      prisma: prisma as any,
+      prisma: prisma as RulesPrisma,
     });
 
     expect(prisma.rule.findMany).toHaveBeenCalledWith(

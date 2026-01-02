@@ -20,6 +20,42 @@
   font-weight: 400;
 }
 
+@property --p1x {
+  syntax: "<percentage>";
+  inherits: true;
+  initial-value: 18%;
+}
+
+@property --p1y {
+  syntax: "<percentage>";
+  inherits: true;
+  initial-value: 20%;
+}
+
+@property --p2x {
+  syntax: "<percentage>";
+  inherits: true;
+  initial-value: 78%;
+}
+
+@property --p2y {
+  syntax: "<percentage>";
+  inherits: true;
+  initial-value: 28%;
+}
+
+@property --p3x {
+  syntax: "<percentage>";
+  inherits: true;
+  initial-value: 55%;
+}
+
+@property --p3y {
+  syntax: "<percentage>";
+  inherits: true;
+  initial-value: 85%;
+}
+
 :root {
   --green-900: 27 109 103;
   --green-700: 46 156 147;
@@ -54,6 +90,13 @@
   --home-border: rgb(var(--border));
   --home-warm: rgba(245, 240, 230, 0.92);
   --font-display: "RST Reactor Regular", "RST Reactor Medium", "Inter", sans-serif;
+  --ease-morph: cubic-bezier(0.2, 0.85, 0.15, 1);
+  --p1x: 18%;
+  --p1y: 20%;
+  --p2x: 78%;
+  --p2y: 28%;
+  --p3x: 55%;
+  --p3y: 85%;
 }
 
 @theme inline {
@@ -216,49 +259,46 @@ button > *,
 
 .bg-aurora {
   position: relative;
-  overflow: hidden;
-  background:
-    radial-gradient(1100px 720px at 16% 20%, rgba(76, 214, 204, 0.58), transparent 62%),
-    radial-gradient(980px 560px at 86% 12%, rgba(239, 175, 58, 0.5), transparent 60%),
-    radial-gradient(1150px 900px at 62% 88%, rgba(7, 16, 38, 0.6), transparent 66%),
-    linear-gradient(180deg, rgba(255, 255, 255, 1), rgba(241, 245, 249, 1));
-  background-repeat: no-repeat;
-  background-size: 120% 120%, 130% 130%, 120% 120%, 100% 100%;
-  background-position: 12% 12%, 88% 6%, 68% 92%, 0% 0%;
-  animation: auroraShift 26s linear infinite alternate;
-  will-change: background-position, background-size;
-  background-color: #ffffff;
+  isolation: isolate;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 1), rgba(241, 245, 249, 1));
+  color: var(--color-ink);
 }
 
-.bg-aurora::before {
+.morph-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  animation: morphPositions 18s var(--ease-morph) infinite alternate;
+}
+
+.morph-bg::before {
   content: "";
   position: absolute;
-  inset: -10%;
-  pointer-events: none;
+  inset: -25%;
   background:
-    radial-gradient(820px 560px at 8% 22%, rgba(76, 214, 204, 0.82), transparent 72%),
-    radial-gradient(760px 600px at 92% 14%, rgba(239, 175, 58, 0.74), transparent 72%),
-    radial-gradient(980px 760px at 60% 92%, rgba(7, 16, 38, 0.82), transparent 76%);
-  background-size: 140% 140%, 150% 150%, 140% 140%;
-  background-position: 8% 22%, 92% 14%, 60% 92%;
-  filter: blur(40px);
-  opacity: 0.85;
-  z-index: 0;
-  animation:
-    auroraPulse 16s ease-in-out infinite alternate,
-    auroraFloat 22s linear infinite alternate;
-  will-change: transform, opacity;
+    radial-gradient(900px 700px at var(--p1x) var(--p1y), rgba(121, 211, 198, 0.6), transparent 60%),
+    radial-gradient(900px 700px at var(--p2x) var(--p2y), rgba(212, 162, 59, 0.45), transparent 62%),
+    radial-gradient(1100px 900px at var(--p3x) var(--p3y), rgba(11, 35, 71, 0.28), transparent 64%),
+    radial-gradient(1200px 900px at 65% 55%, rgba(255, 255, 255, 0.14), transparent 65%);
+  filter: blur(34px);
+  transition:
+    --p1x 1400ms var(--ease-morph),
+    --p1y 1400ms var(--ease-morph),
+    --p2x 1400ms var(--ease-morph),
+    --p2y 1400ms var(--ease-morph),
+    --p3x 1400ms var(--ease-morph),
+    --p3y 1400ms var(--ease-morph),
+    filter 1400ms var(--ease-morph);
 }
 
-.bg-aurora::after {
+.morph-bg::after {
   content: "";
   position: absolute;
   inset: 0;
-  pointer-events: none;
-  opacity: 0.045;
+  opacity: 0.04;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.45'/%3E%3C/svg%3E");
   mix-blend-mode: multiply;
-  z-index: 0;
 }
 
 .aurora-strong {
@@ -295,15 +335,151 @@ button > *,
   animation: navItemIn 220ms ease-out;
 }
 
+.bg-aurora-pro {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.aurora-blobs {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.aurora-blob {
+  position: absolute;
+  width: 520px;
+  height: 520px;
+  border-radius: 999px;
+  opacity: 0.55;
+  transform: translate3d(0, 0, 0) scale(1);
+  will-change: transform;
+  filter: blur(16px);
+  mix-blend-mode: screen;
+}
+
+.aurora-blob--teal {
+  left: 6%;
+  top: 10%;
+  background: radial-gradient(circle, rgba(121, 211, 198, 0.85), transparent 62%);
+  animation: blobFloatA 20s ease-in-out infinite alternate;
+}
+
+.aurora-blob--gold {
+  right: 6%;
+  top: 4%;
+  width: 560px;
+  height: 560px;
+  opacity: 0.45;
+  background: radial-gradient(circle, rgba(212, 162, 59, 0.8), transparent 64%);
+  animation: blobFloatB 24s ease-in-out infinite alternate;
+}
+
+.aurora-blob--navy {
+  left: 42%;
+  bottom: -6%;
+  width: 680px;
+  height: 680px;
+  opacity: 0.5;
+  background: radial-gradient(circle, rgba(11, 35, 71, 0.82), transparent 66%);
+  animation: blobFloatC 28s ease-in-out infinite alternate;
+}
+
+.aurora-noise {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.45'/%3E%3C/svg%3E");
+  mix-blend-mode: multiply;
+}
+
+.aurora-content {
+  position: relative;
+  z-index: 2;
+}
+
+@keyframes blobFloatA {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(140px, -80px, 0) scale(1.12) rotate(10deg);
+  }
+  100% {
+    transform: translate3d(-60px, 40px, 0) scale(1.04) rotate(-6deg);
+  }
+}
+
+@keyframes blobFloatB {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(-160px, 70px, 0) scale(1.1) rotate(-12deg);
+  }
+  100% {
+    transform: translate3d(70px, -40px, 0) scale(1.04) rotate(6deg);
+  }
+}
+
+@keyframes blobFloatC {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(-120px, -120px, 0) scale(1.14) rotate(8deg);
+  }
+  100% {
+    transform: translate3d(80px, 60px, 0) scale(1.06) rotate(-6deg);
+  }
+}
+
+@keyframes morphPositions {
+  0% {
+    --p1x: 18%;
+    --p1y: 20%;
+    --p2x: 78%;
+    --p2y: 28%;
+    --p3x: 55%;
+    --p3y: 85%;
+  }
+  50% {
+    --p1x: 28%;
+    --p1y: 12%;
+    --p2x: 70%;
+    --p2y: 38%;
+    --p3x: 62%;
+    --p3y: 78%;
+  }
+  100% {
+    --p1x: 14%;
+    --p1y: 26%;
+    --p2x: 84%;
+    --p2y: 20%;
+    --p3x: 48%;
+    --p3y: 88%;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .nav-menu,
   .nav-menu-item {
     animation: none;
   }
   .bg-aurora,
-  .bg-aurora::before,
-  .aurora-strong::before {
+  .aurora-strong::before,
+  .aurora-blob {
     animation: none;
+  }
+  .morph-bg {
+    animation: none;
+  }
+  .morph-bg::before {
+    transition: none;
   }
 }
 

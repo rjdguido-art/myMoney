@@ -32,6 +32,14 @@ type FormState = {
   splits: SplitLine[];
 };
 
+type CsvMapping = {
+  date?: string;
+  amount?: string;
+  merchant?: string;
+  note?: string;
+  account?: string;
+};
+
 type TransactionResponse = {
   transactions: SerializableTransaction[];
   accounts: AccountOption[];
@@ -127,13 +135,7 @@ export function TransactionsClient({
   const mounted = useRef(false);
   const [csvHeaders, setCsvHeaders] = useState<string[]>([]);
   const [csvRows, setCsvRows] = useState<string[][]>([]);
-  const [mapping, setMapping] = useState<{
-    date?: string;
-    amount?: string;
-    merchant?: string;
-    note?: string;
-    account?: string;
-  }>({});
+  const [mapping, setMapping] = useState<CsvMapping>({});
   const [preview, setPreview] = useState<
     Array<{ date: string; amount: string; merchant: string; note: string; account: string }>
   >([]);
@@ -513,6 +515,14 @@ export function TransactionsClient({
     }));
   };
 
+  const mappingFields: Array<{ key: keyof CsvMapping; label: string }> = [
+    { key: "date", label: "Date" },
+    { key: "amount", label: "Amount" },
+    { key: "merchant", label: "Merchant" },
+    { key: "note", label: "Note (optional)" },
+    { key: "account", label: "Account (optional)" },
+  ];
+
   return (
     <div className="space-y-8">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -634,18 +644,12 @@ export function TransactionsClient({
         </div>
         {csvHeaders.length > 0 && (
           <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-5">
-            {[
-              { key: "date", label: "Date" },
-              { key: "amount", label: "Amount" },
-              { key: "merchant", label: "Merchant" },
-              { key: "note", label: "Note (optional)" },
-              { key: "account", label: "Account (optional)" },
-            ].map((field) => (
+            {mappingFields.map((field) => (
               <div key={field.key} className="space-y-1">
                 <label className="text-sm text-ink">{field.label}</label>
                 <select
                   className="w-full rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
-                  value={(mapping as any)[field.key] ?? ""}
+                  value={mapping[field.key] ?? ""}
                   onChange={(e) =>
                     setMapping((prev) => ({ ...prev, [field.key]: e.target.value }))
                   }
