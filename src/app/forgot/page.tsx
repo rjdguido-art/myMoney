@@ -1,6 +1,6 @@
 export default function ForgotPage() {
   return (
-    <div className="mx-auto flex min-h-screen max-w-3xl items-center px-6">
+    <div className="aurora-strong mx-auto flex min-h-screen max-w-3xl items-center px-6">
       <div className="w-full space-y-6 rounded-lg border border-border/80 bg-white p-10 shadow-sm">
         <div className="space-y-2">
           <p className="pill bg-white/80 text-emerald-700 border-emerald-500/30">

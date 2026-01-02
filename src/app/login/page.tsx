@@ -55,7 +55,7 @@ function LoginPageContent() {
   };
 
   return (
-    <div className="login-shell relative overflow-hidden px-6 py-12">
+    <div className="login-shell aurora-strong relative overflow-hidden px-6 py-12">
       <div className="login-background" aria-hidden="true">
         <div className="login-orb login-orb--one" />
         <div className="login-orb login-orb--two" />

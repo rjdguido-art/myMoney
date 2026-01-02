@@ -142,7 +142,7 @@ export default async function DashboardPage() {
     : t("dashboard.defaultName", locale);
 
   return (
-    <div className="space-y-8 sm:space-y-10">
+    <div className="aurora-strong space-y-8 sm:space-y-10">
       <header className="grid gap-4 rounded-2xl border border-border/60 bg-white/95 p-5 shadow-[0_18px_45px_rgba(11,35,71,0.12)] sm:p-8">
         <span className="inline-flex h-3 w-3 items-center justify-center">
           <span className="h-2.5 w-2.5 rounded-full bg-emerald-500/80 shadow-[0_0_0_4px_rgba(46,156,147,0.18)] animate-pulse" />

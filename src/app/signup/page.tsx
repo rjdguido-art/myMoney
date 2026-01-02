@@ -70,7 +70,7 @@ function SignupPageContent() {
   };
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-4xl items-center px-6">
+    <div className="aurora-strong mx-auto flex min-h-screen max-w-4xl items-center px-6">
       <div className="grid w-full gap-10 rounded-lg border border-border/80 bg-white p-10 shadow-sm md:grid-cols-2">
         <div className="space-y-4">
           <p className="pill bg-sky-500 text-white border-transparent shadow-[0_10px_24px_rgba(56,189,248,0.32)]">
