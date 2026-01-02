@@ -107,8 +107,8 @@ function extractText(resp: ResponseLike): string {
   const out = Array.isArray(resp?.output) ? resp.output : [];
   const textParts: string[] = [];
   for (const item of out) {
-    if (item?.type === "message") {
-      const content = Array.isArray(item?.content) ? item.content : [];
+    if (item?.type === "message" && "content" in item) {
+      const content = Array.isArray(item.content) ? item.content : [];
       for (const c of content) {
         if (c?.type === "output_text" && typeof c?.text === "string") textParts.push(c.text);
       }
