@@ -89,8 +89,8 @@ export default function ChatPanel({ storageKey = "mymoney-chat" }: { storageKey?
   }
 
   return (
-    <div className="flex h-[calc(100vh-6rem)] flex-col rounded-2xl border border-white/10 bg-white/5">
-      <div className="flex items-center justify-between gap-3 border-b border-white/10 px-4 py-3">
+    <div className="flex h-[calc(100vh-6rem)] flex-col rounded-2xl border border-white/10 bg-slate-950/80 text-white shadow-[0_24px_60px_rgba(3,7,18,0.45)]">
+      <div className="flex items-center justify-between gap-3 border-b border-white/10 bg-slate-950/80 px-4 py-3">
         <div>
           <div className="text-sm font-semibold">myMoney Assistant</div>
           <div className="text-xs text-white/60">
@@ -125,8 +125,8 @@ export default function ChatPanel({ storageKey = "mymoney-chat" }: { storageKey?
             className={cx(
               "max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed",
               m.role === "user"
-                ? "ml-auto bg-white/10 border border-white/10"
-                : "mr-auto bg-black/30 border border-white/10",
+                ? "ml-auto bg-white/10 border border-white/15"
+                : "mr-auto bg-slate-900/70 border border-white/10",
             )}
           >
             {m.content}
@@ -134,7 +134,7 @@ export default function ChatPanel({ storageKey = "mymoney-chat" }: { storageKey?
         ))}
 
         {loading ? (
-          <div className="mr-auto max-w-[85%] rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white/70">
+          <div className="mr-auto max-w-[85%] rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white/70">
             Thinking…
           </div>
         ) : null}
@@ -146,14 +146,14 @@ export default function ChatPanel({ storageKey = "mymoney-chat" }: { storageKey?
         ) : null}
       </div>
 
-      <div className="border-t border-white/10 p-3">
+      <div className="border-t border-white/10 bg-slate-950/80 p-3">
         <div className="flex gap-2">
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={onKeyDown}
             placeholder="Ask myMoney…"
-            className="min-h-[44px] flex-1 resize-none rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm outline-none placeholder:text-white/40 focus:border-white/20"
+            className="min-h-[44px] flex-1 resize-none rounded-2xl border border-white/10 bg-black/60 px-4 py-3 text-sm text-white outline-none placeholder:text-white/40 focus:border-white/20"
           />
           <button
             onClick={() => void send()}
@@ -161,7 +161,7 @@ export default function ChatPanel({ storageKey = "mymoney-chat" }: { storageKey?
             className={cx(
               "rounded-2xl px-4 py-3 text-sm font-semibold",
               canSend
-                ? "bg-white text-black hover:bg-white/90"
+                ? "bg-white text-slate-900 hover:bg-white/90"
                 : "bg-white/20 text-white/50 cursor-not-allowed",
             )}
             type="button"

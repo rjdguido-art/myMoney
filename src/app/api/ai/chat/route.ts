@@ -1,4 +1,7 @@
 import { NextResponse } from "next/server";
+
+export const runtime = "nodejs";
+export const maxDuration = 60;
 import { z } from "zod";
 import { auth } from "@/lib/auth";
 import { runFinanceAgent } from "@/lib/ai/financeAgent";
@@ -29,12 +32,24 @@ export async function POST(request: Request) {
     );
   }
 
-  const result = await runFinanceAgent({
-    userId: session.user.id,
-    messages: parsed.data.messages,
-    locale: parsed.data.locale ?? session.user.locale ?? undefined,
-    timezone: parsed.data.timezone,
-  });
+  try {
+    const result = await runFinanceAgent({
+      userId: session.user.id,
+      messages: parsed.data.messages,
+      locale: parsed.data.locale ?? session.user.locale ?? undefined,
+      timezone: parsed.data.timezone,
+    });
 
-  return NextResponse.json({ message: result.message });
+    return NextResponse.json({ message: result.message });
+  } catch (err: any) {
+    const msg = String(err?.message || "");
+    if (msg.includes("aborted") || msg.includes("AbortError") || msg.includes("terminated")) {
+      return NextResponse.json(
+        { error: "AI request timed out. Please try again." },
+        { status: 504 },
+      );
+    }
+    console.error("AI CHAT ERROR:", err);
+    return NextResponse.json({ error: msg || "Internal error" }, { status: 500 });
+  }
 }

@@ -20,10 +20,10 @@ const MODEL_FAST = process.env.MYMONEY_AI_MODEL_FAST || "gpt-5-nano";
 const MODEL_SMART = process.env.MYMONEY_AI_MODEL_SMART || "gpt-5-mini";
 
 const MAX_OUTPUT_TOKENS_FAST = Number(
-  process.env.MYMONEY_AI_MAX_OUTPUT_TOKENS_FAST || 450,
+  process.env.MYMONEY_AI_MAX_OUTPUT_TOKENS_FAST || 700,
 );
 const MAX_OUTPUT_TOKENS_SMART = Number(
-  process.env.MYMONEY_AI_MAX_OUTPUT_TOKENS_SMART || 900,
+  process.env.MYMONEY_AI_MAX_OUTPUT_TOKENS_SMART || 1200,
 );
 
 function pickModel(messages: ChatMessage[]): string {
@@ -85,7 +85,12 @@ function pickMaxOutputTokens(messages: ChatMessage[]): number {
 }
 
 const listTransactionsArgs = transactionFilterSchema.extend({
-  limit: z.coerce.number().int().min(1).max(200).optional(),
+  from: z.string().nullable().optional(),
+  to: z.string().nullable().optional(),
+  categoryId: z.string().nullable().optional(),
+  accountId: z.string().nullable().optional(),
+  search: z.string().nullable().optional(),
+  limit: z.coerce.number().int().min(1).max(200).nullable().optional(),
 });
 
 function toOpenAIInput(messages: ChatMessage[]) {
@@ -103,10 +108,13 @@ type OutputMessage = { type: "message"; content?: MessageContent[] };
 type OutputItem = ToolCall | OutputMessage | { type?: string };
 type ResponseLike = { output?: OutputItem[]; output_text?: string; id?: string };
 
-function extractToolCalls(resp: ResponseLike) {
-  const out = Array.isArray(resp?.output) ? resp.output : [];
+function extractToolCalls(resp: any) {
+  const out: any[] = Array.isArray(resp?.output) ? resp.output : [];
   return out.filter(
-    (item): item is ToolCall => item?.type === "function_call" || item?.type === "tool_call",
+    (item) =>
+      item?.type === "function_call" ||
+      item?.type === "tool_call" ||
+      item?.type === "custom_tool_call",
   );
 }
 
@@ -125,6 +133,52 @@ function extractText(resp: ResponseLike): string {
   return textParts.join("\n").trim();
 }
 
+function modelParams(model: string) {
+  const isNano = model.includes("nano");
+
+  return {
+    reasoning: { effort: isNano ? "low" : "medium" },
+    text: { verbosity: "low" },
+    ...(isNano ? {} : { temperature: 0.7 }),
+  };
+}
+
+function toDateOrUndefined(value: unknown): Date | undefined {
+  if (value == null) return undefined;
+  if (value instanceof Date) return value;
+
+  if (typeof value === "string") {
+    const s = value.trim();
+    if (!s) return undefined;
+
+    if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+      return new Date(`${s}T00:00:00.000Z`);
+    }
+
+    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/.test(s)) {
+      return new Date(`${s}.000Z`);
+    }
+
+    const d = new Date(s);
+    if (!Number.isNaN(d.getTime())) return d;
+  }
+
+  return undefined;
+}
+
+async function withTimeout<T>(
+  fn: (signal: AbortSignal) => Promise<T>,
+  ms: number,
+): Promise<T> {
+  const ac = new AbortController();
+  const t = setTimeout(() => ac.abort(), ms);
+  try {
+    return await fn(ac.signal);
+  } finally {
+    clearTimeout(t);
+  }
+}
+
 export async function runFinanceAgent(req: AgentRequest): Promise<AgentResponse> {
   const model = pickModel(req.messages);
   const max_output_tokens = pickMaxOutputTokens(req.messages);
@@ -139,6 +193,7 @@ export async function runFinanceAgent(req: AgentRequest): Promise<AgentResponse>
       parameters: {
         type: "object",
         properties: {},
+        required: [],
         additionalProperties: false,
       },
     },
@@ -151,13 +206,14 @@ export async function runFinanceAgent(req: AgentRequest): Promise<AgentResponse>
       parameters: {
         type: "object",
         properties: {
-          from: { type: "string", description: "ISO date-time" },
-          to: { type: "string", description: "ISO date-time" },
-          categoryId: { type: "string" },
-          accountId: { type: "string" },
-          search: { type: "string" },
-          limit: { type: "number", description: "1-200" },
+          from: { type: ["string", "null"], description: "ISO date-time" },
+          to: { type: ["string", "null"], description: "ISO date-time" },
+          categoryId: { type: ["string", "null"] },
+          accountId: { type: ["string", "null"] },
+          search: { type: ["string", "null"] },
+          limit: { type: ["number", "null"], description: "1-200" },
         },
+        required: ["from", "to", "categoryId", "accountId", "search", "limit"],
         additionalProperties: false,
       },
     },
@@ -180,95 +236,143 @@ export async function runFinanceAgent(req: AgentRequest): Promise<AgentResponse>
 
   const input = toOpenAIInput([system, ...req.messages]);
 
-  let response = await openai.responses.create({
-    model,
-    max_output_tokens,
-    input,
-    tools,
-    tool_choice: "auto",
-  });
+  let response = await withTimeout(
+    (signal) =>
+      openai.responses.create(
+        {
+          model,
+          max_output_tokens,
+          input,
+          tools,
+          tool_choice: "auto",
+          ...modelParams(model),
+        },
+        { signal } as any,
+      ),
+    20000,
+  );
 
   // Tool loop
-  for (let i = 0; i < 8; i += 1) {
+  for (let i = 0; i < 4; i += 1) {
     const toolCalls = extractToolCalls(response);
     if (!toolCalls.length) break;
 
-    const toolMessages: Array<{
-      type: "custom_tool_call_output";
-      call_id: string;
-      output: string;
-    }> = [];
+    const toolMessages: any[] = [];
 
     for (const call of toolCalls) {
-      const name = call?.name;
-      const toolCallId = call?.id;
+      if (call.type !== "function_call") continue;
 
-      let args: unknown = {};
-      try {
-        args = call?.arguments ? JSON.parse(call.arguments) : {};
-      } catch {
-        args = {};
+      const toolCallId = call.call_id ?? call.id;
+      const toolName = call.name;
+
+      if (!toolCallId || !toolName) {
+        console.error("Malformed function_call:", call);
+        continue;
       }
 
-      let output: unknown = { error: "Unknown tool" };
+      let output: any = {};
 
-      if (name === "get_forecast") {
-        const snap = await buildForecast({ userId: req.userId, now: new Date() });
-        output = {
-          periodStart: snap.periodStart,
-          periodEnd: snap.periodEnd,
-          nextPayDate: snap.nextPayDate,
-          daysUntilPay: snap.daysUntilPay,
-          netPay: snap.netPay,
-          safeToSpend: snap.safeToSpend,
-          dailyAllowance: snap.dailyAllowance,
-          totals: snap.totals,
-          billsDue: snap.billsDue,
-        };
-      }
-
-      if (name === "list_transactions") {
-        const parsed = listTransactionsArgs.safeParse(args);
-        if (!parsed.success) {
-          output = { error: "Invalid filters", details: parsed.error.flatten() };
-        } else {
-          const where = buildTransactionWhere(req.userId, parsed.data);
-          const take = parsed.data.limit ?? 50;
-          const txns = await prisma.transaction.findMany({
-            where,
-            include: transactionInclude,
-            orderBy: { postedAt: "desc" },
-            take,
-          });
-          output = { count: txns.length, transactions: txns.map(serializeTransaction) };
+      if (toolName === "get_forecast") {
+        try {
+          const snap = await buildForecast({ userId: req.userId, now: new Date() });
+          output = {
+            periodStart: snap.periodStart,
+            periodEnd: snap.periodEnd,
+            nextPayDate: snap.nextPayDate,
+            daysUntilPay: snap.daysUntilPay,
+            netPay: snap.netPay,
+            safeToSpend: snap.safeToSpend,
+            dailyAllowance: snap.dailyAllowance,
+            totals: snap.totals,
+            billsDue: snap.billsDue,
+          };
+        } catch (e: any) {
+          output = { error: e?.message ?? "forecast failed" };
         }
       }
 
-      if (!toolCallId) {
-        toolMessages.push({
-          type: "custom_tool_call_output",
-          call_id: "missing_call_id",
-          output: JSON.stringify({ error: "Missing tool call id" }),
-        });
-      } else {
-        toolMessages.push({
-          type: "custom_tool_call_output",
-          call_id: toolCallId,
-          output: JSON.stringify(output),
-        });
+      if (toolName === "list_transactions") {
+        try {
+          const parsed = listTransactionsArgs.safeParse(
+            call.arguments ? JSON.parse(call.arguments) : {},
+          );
+          if (!parsed.success) {
+            output = { error: "Invalid filters", details: parsed.error.flatten() };
+          } else {
+            const data: any = { ...parsed.data };
+            data.from = toDateOrUndefined(data.from);
+            data.to = toDateOrUndefined(data.to);
+
+            const where = buildTransactionWhere(req.userId, data);
+            const take = data.limit ?? 50;
+
+            const txns = await prisma.transaction.findMany({
+              where,
+              include: transactionInclude,
+              orderBy: { postedAt: "desc" },
+              take,
+            });
+
+            output = { count: txns.length, transactions: txns.map(serializeTransaction) };
+          }
+        } catch (e: any) {
+          output = { error: e?.message ?? "transaction query failed" };
+        }
       }
+
+      toolMessages.push({
+        type: "function_call_output",
+        call_id: toolCallId,
+        output: JSON.stringify(output),
+      });
     }
 
-    response = await openai.responses.create({
-      model,
-      max_output_tokens,
-      previous_response_id: response.id,
-      input: toolMessages,
-      tools,
-      tool_choice: "auto",
-    });
+    response = await withTimeout(
+      (signal) =>
+        openai.responses.create(
+          {
+            model,
+            max_output_tokens,
+            previous_response_id: response.id,
+            input: toolMessages,
+            tools,
+            tool_choice: "auto",
+            reasoning: { effort: model.includes("nano") ? "low" : "medium" },
+            text: { verbosity: "low" },
+          },
+          { signal } as any,
+        ),
+      20000,
+    );
+  }
+
+  if (
+    response?.status === "incomplete" &&
+    response?.incomplete_details?.reason === "max_output_tokens"
+  ) {
+    response = await withTimeout(
+      (signal) =>
+        openai.responses.create(
+          {
+            model: MODEL_SMART,
+            max_output_tokens: Math.max(max_output_tokens * 2, 1200),
+            previous_response_id: response.id,
+            input: [{ role: "user", content: "Answer in 5 short bullet points." }],
+            tools,
+            tool_choice: "auto",
+            reasoning: { effort: "low" },
+            text: { verbosity: "low" },
+            temperature: 0.7,
+          },
+          { signal } as any,
+        ),
+      20000,
+    );
   }
 
   const text = extractText(response);
+  if (!text) {
+    console.log("EMPTY RESPONSE DEBUG:", JSON.stringify(response, null, 2));
+  }
   return { message: text || "I couldn't generate a response. Try again." };
 }
