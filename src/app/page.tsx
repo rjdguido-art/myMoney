@@ -1,3 +1,7 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { HeroLeft } from "@/components/landing/hero-left";
 import { Navbar } from "@/components/landing/navbar";
 import { SnapshotCard } from "@/components/landing/snapshot-card";
@@ -15,9 +19,47 @@ const upcomingBills = [
   { name: "Subscriptions", amount: "$42" },
 ];
 
+type AuthMode = "signin" | "signup";
+
 export default function HomePage() {
+  const [authMode, setAuthMode] = useState<AuthMode | null>(null);
+  const isAuthOpen = Boolean(authMode);
+  const authCopy = useMemo(() => {
+    if (authMode === "signup") {
+      return {
+        title: "Create your ArgoBucks account",
+        description: "Bring your budgets, bills, and goals into one clean space.",
+        primaryLabel: "Create account",
+        primaryHref: "/signup",
+        secondaryLabel: "Sign in instead",
+        secondaryMode: "signin" as AuthMode,
+      };
+    }
+    return {
+      title: "Welcome back",
+      description: "Pick up where you left off and see the latest snapshot.",
+      primaryLabel: "Sign in",
+      primaryHref: "/login",
+      secondaryLabel: "Create an account",
+      secondaryMode: "signup" as AuthMode,
+    };
+  }, [authMode]);
+
+  useEffect(() => {
+    if (!isAuthOpen) return;
+    const handleKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setAuthMode(null);
+      }
+    };
+    document.addEventListener("keydown", handleKey);
+    return () => {
+      document.removeEventListener("keydown", handleKey);
+    };
+  }, [isAuthOpen]);
+
   return (
-    <main className="relative min-h-screen">
+    <main className={`relative min-h-screen ${isAuthOpen ? "auth-open" : ""}`}>
       <div className="bg-aurora-pro">
         <div className="hero-video" aria-hidden="true">
           <video
@@ -36,7 +78,7 @@ export default function HomePage() {
         </div>
         <div className="aurora-noise" aria-hidden="true" />
         <div className="aurora-content">
-          <Navbar />
+          <Navbar onSignIn={() => setAuthMode("signin")} onSignUp={() => setAuthMode("signup")} />
 
           <div className="mx-auto grid max-w-6xl gap-12 px-6 pb-16 pt-4 lg:grid-cols-[1.1fr_0.9fr] lg:items-start lg:px-10">
             <HeroLeft
@@ -44,6 +86,8 @@ export default function HomePage() {
               title="Make money feel local, clear, calm."
               description="A peaceful landing spot for budgets, bills, and insights that keeps every household decision steady and obvious."
               metrics={heroMetrics}
+              onSignIn={() => setAuthMode("signin")}
+              onSignUp={() => setAuthMode("signup")}
             />
             <SnapshotCard
               label="Snapshot"
@@ -71,22 +115,58 @@ export default function HomePage() {
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-3">
-              <a
-                href="/signup"
+              <button
+                type="button"
+                onClick={() => setAuthMode("signup")}
                 className="inline-flex items-center rounded-[var(--radius-pill)] bg-primary px-5 py-2.5 text-sm font-semibold text-on-primary shadow-[var(--shadow-soft)] transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2"
               >
                 Get started
-              </a>
-              <a
-                href="/login"
+              </button>
+              <button
+                type="button"
+                onClick={() => setAuthMode("signin")}
                 className="inline-flex items-center text-sm font-semibold text-white/80 transition hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2"
               >
                 Sign in
-              </a>
+              </button>
             </div>
           </section>
         </div>
       </div>
+      {isAuthOpen ? (
+        <div className="auth-modal" role="dialog" aria-modal="true">
+          <button
+            type="button"
+            className="auth-backdrop"
+            aria-label="Close authentication modal"
+            onClick={() => setAuthMode(null)}
+          />
+          <section className="auth-card" aria-live="polite">
+            <div className="space-y-2">
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted">
+                ArgoBucks access
+              </p>
+              <h2 className="text-2xl font-semibold text-foreground">{authCopy.title}</h2>
+              <p className="text-sm text-muted">{authCopy.description}</p>
+            </div>
+            <div className="mt-6 space-y-3">
+              <Link
+                href={authCopy.primaryHref}
+                className="inline-flex w-full items-center justify-center rounded-[var(--radius-pill)] bg-primary px-5 py-2.5 text-sm font-semibold text-on-primary shadow-[var(--shadow-soft)] transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2"
+              >
+                {authCopy.primaryLabel}
+              </Link>
+              <button
+                type="button"
+                onClick={() => setAuthMode(authCopy.secondaryMode)}
+                className="inline-flex w-full items-center justify-center text-sm font-semibold text-muted transition hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2"
+              >
+                {authCopy.secondaryLabel}
+              </button>
+            </div>
+          </section>
+        </div>
+      ) : null}
     </main>
   );
 }

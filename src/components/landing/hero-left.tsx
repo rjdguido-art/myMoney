@@ -13,14 +13,20 @@ type HeroLeftProps = {
   description: string;
   metrics: HeroMetric[];
   sectionId?: string;
+  onSignIn?: () => void;
+  onSignUp?: () => void;
 };
 
-export function HeroLeft({ title, description, metrics, sectionId }: HeroLeftProps) {
+export function HeroLeft({
+  title,
+  description,
+  metrics,
+  sectionId,
+  onSignIn,
+  onSignUp,
+}: HeroLeftProps) {
   return (
     <section id={sectionId} className="space-y-8" aria-labelledby="hero-title">
-      <p className="inline-flex items-center gap-2 rounded-[var(--radius-pill)] border border-white/30 bg-white/10 px-4 py-1 text-xs font-medium uppercase tracking-[0.3em] text-white/80">
-        Calm money cockpit
-      </p>
       <div className="space-y-4">
         <h1
           id="hero-title"
@@ -33,18 +39,38 @@ export function HeroLeft({ title, description, metrics, sectionId }: HeroLeftPro
         </p>
       </div>
       <div className="flex flex-wrap items-center gap-3">
-        <Link
-          href="/signup"
-          className="inline-flex items-center rounded-[var(--radius-pill)] bg-primary px-5 py-2.5 text-sm font-semibold text-on-primary shadow-[var(--shadow-soft)] transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2"
-        >
-          Get started
-        </Link>
-        <Link
-          href="/login"
-          className="inline-flex items-center text-sm font-semibold text-white/80 transition hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2"
-        >
-          Sign in
-        </Link>
+        {onSignUp ? (
+          <button
+            type="button"
+            onClick={onSignUp}
+            className="inline-flex items-center rounded-[var(--radius-pill)] bg-primary px-5 py-2.5 text-sm font-semibold text-on-primary shadow-[var(--shadow-soft)] transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2"
+          >
+            Get started
+          </button>
+        ) : (
+          <Link
+            href="/signup"
+            className="inline-flex items-center rounded-[var(--radius-pill)] bg-primary px-5 py-2.5 text-sm font-semibold text-on-primary shadow-[var(--shadow-soft)] transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2"
+          >
+            Get started
+          </Link>
+        )}
+        {onSignIn ? (
+          <button
+            type="button"
+            onClick={onSignIn}
+            className="inline-flex items-center text-sm font-semibold text-white/80 transition hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2"
+          >
+            Sign in
+          </button>
+        ) : (
+          <Link
+            href="/login"
+            className="inline-flex items-center text-sm font-semibold text-white/80 transition hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2"
+          >
+            Sign in
+          </Link>
+        )}
       </div>
       <div
         className="flex flex-wrap items-center gap-4 text-xs font-medium uppercase tracking-[0.2em] text-white/70"
