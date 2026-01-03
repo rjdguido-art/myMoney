@@ -5,7 +5,7 @@ export function Navbar() {
   return (
     <header className="flex items-center justify-between px-6 py-6 lg:px-10">
       <div className="flex items-center gap-4">
-        <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-[var(--radius-md)] shadow-[var(--shadow-soft)]">
+        <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-[var(--radius-md)]">
           <Image
             src="/argo-logo.png"
             alt="ArgoBucks logo"
@@ -15,7 +15,9 @@ export function Navbar() {
           />
         </div>
         <div>
-          <p className="text-xs uppercase tracking-[0.3em] text-white/70">ArgoBucks</p>
+          <p className="text-sm uppercase tracking-[0.3em] text-white/80 sm:text-base">
+            ArgoBucks
+          </p>
         </div>
       </div>
       <div className="flex items-center gap-3">
