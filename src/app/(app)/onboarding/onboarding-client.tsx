@@ -242,6 +242,86 @@ export function OnboardingClient({
     () => tJSON("onboarding.helpers", language, {} as Record<string, string>),
     [language],
   );
+  const stepCompletion = useMemo(() => {
+    if (!steps.length) return 0;
+
+    if (step === 0) {
+      const filled = Number(Boolean(language)) + Number(Boolean(currency)) + Number(Boolean(timezone));
+      return (filled / 3) * 100;
+    }
+
+    if (step === 1) {
+      const filled = Number(Boolean(payFrequency)) + Number(toNumber(takeHomePay) > 0);
+      return (filled / 2) * 100;
+    }
+
+    if (step === 2) {
+      const totalFields = deductions.length * 2;
+      if (!totalFields) return 0;
+      const filled = deductions.reduce(
+        (sum, row) => sum + Number(Boolean(row.name.trim())) + Number(toNumber(row.amount) > 0),
+        0,
+      );
+      return (filled / totalFields) * 100;
+    }
+
+    if (step === 3) {
+      const totalFields = bills.length * 4;
+      if (!totalFields) return 0;
+      const filled = bills.reduce(
+        (sum, row) =>
+          sum +
+          Number(Boolean(row.name.trim())) +
+          Number(toNumber(row.amount) > 0) +
+          Number(Number(row.dueDay) > 0) +
+          Number(Boolean(row.frequency)),
+        0,
+      );
+      return (filled / totalFields) * 100;
+    }
+
+    if (step === 4) {
+      const totalFields = budgets.length;
+      if (!totalFields) return 0;
+      const filled = budgets.reduce((sum, row) => sum + Number(toNumber(row.amount) > 0), 0);
+      return (filled / totalFields) * 100;
+    }
+
+    if (step === 5) {
+      const totalFields = goals.length * 2;
+      if (!totalFields) return 0;
+      const filled = goals.reduce(
+        (sum, row) => sum + Number(Boolean(row.name.trim())) + Number(toNumber(row.targetAmount) > 0),
+        0,
+      );
+      return (filled / totalFields) * 100;
+    }
+
+    if (step === 6) {
+      const totalFields = debts.length * 2;
+      if (!totalFields) return 0;
+      const filled = debts.reduce(
+        (sum, row) => sum + Number(Boolean(row.name.trim())) + Number(toNumber(row.minimumPayment) > 0),
+        0,
+      );
+      return (filled / totalFields) * 100;
+    }
+
+    return 100;
+  }, [
+    steps.length,
+    step,
+    language,
+    currency,
+    timezone,
+    payFrequency,
+    takeHomePay,
+    deductions,
+    bills,
+    budgets,
+    goals,
+    debts,
+  ]);
   const progress = ((step + 1) / steps.length) * 100;
   const timezoneOptions = useMemo(() => getTimezoneOptions(), []);
   const showSkeleton = false;
@@ -512,23 +592,26 @@ export function OnboardingClient({
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        {steps.map((s, idx) => (
+      <div className="onboarding-step">
+        <div className="space-y-1">
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted">
+            {t("onboarding.labels.stepLabel", language, {
+              current: step + 1,
+              total: steps.length,
+            })}
+          </p>
+          <h2 className="text-xl font-semibold text-ink">{steps[step]?.title}</h2>
+          <p className="text-sm text-muted">{steps[step]?.description}</p>
+        </div>
+        <div className="onboarding-line" aria-hidden="true">
           <div
-            key={s.title}
-            className={`rounded-md border px-4 py-3 text-sm ${
-              idx === step
-                ? "border-emerald-500 bg-emerald-500/10"
-                : "border-border/80 bg-white"
-            }`}
-          >
-            <p className="font-semibold text-ink">{s.title}</p>
-            <p className="text-muted">{s.description}</p>
-          </div>
-        ))}
+            className="onboarding-line__fill"
+            style={{ width: `${Math.min(100, Math.max(0, stepCompletion))}%` }}
+          />
+        </div>
       </div>
 
-      <div className={`card p-8 space-y-6 relative ${showSkeleton ? "opacity-60 pointer-events-none" : ""}`}>
+      <div className={`card glass-surface p-8 space-y-6 relative ${showSkeleton ? "opacity-60 pointer-events-none" : ""}`}>
         {submitting ? (
           <div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-white/90 backdrop-blur-sm">
             <div className="flex items-center gap-3 rounded-md border border-border/80 bg-white px-4 py-3 text-sm text-ink shadow-sm">

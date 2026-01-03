@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { HeroLeft } from "@/components/landing/hero-left";
 import { Navbar } from "@/components/landing/navbar";
 import { SnapshotCard } from "@/components/landing/snapshot-card";
@@ -24,6 +25,7 @@ type AuthMode = "signin" | "signup";
 export default function HomePage() {
   const [authMode, setAuthMode] = useState<AuthMode | null>(null);
   const isAuthOpen = Boolean(authMode);
+  const router = useRouter();
   const authCopy = useMemo(() => {
     if (authMode === "signup") {
       return {
@@ -145,7 +147,13 @@ export default function HomePage() {
               <h2 className="text-2xl font-semibold text-foreground">{authCopy.title}</h2>
               <p className="text-sm text-muted">{authCopy.description}</p>
             </div>
-            <form className="mt-6 space-y-4">
+            <form
+              className="mt-6 space-y-4"
+              onSubmit={(event) => {
+                event.preventDefault();
+                router.push("/dashboard");
+              }}
+            >
               <label className="auth-field">
                 <span className="auth-label">Email</span>
                 <input

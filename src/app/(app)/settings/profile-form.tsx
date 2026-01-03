@@ -19,6 +19,8 @@ export function ProfileForm({ locale, initial }: ProfileFormProps) {
   const [username, setUsername] = useState(initial.username ?? "");
   const [imageUrl, setImageUrl] = useState(initial.imageUrl ?? "");
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -61,12 +63,55 @@ export function ProfileForm({ locale, initial }: ProfileFormProps) {
         <div className="min-w-[220px] flex-1 space-y-2">
           <label className="text-sm text-ink">{t("settings.profilePhoto", locale)}</label>
           <input
+            type="file"
+            accept="image/*"
+            onChange={async (event) => {
+              const file = event.target.files?.[0];
+              if (!file) return;
+              setUploading(true);
+              setUploadError(null);
+              try {
+                const formData = new FormData();
+                formData.append("file", file);
+                const res = await fetch("/api/upload", {
+                  method: "POST",
+                  body: formData,
+                });
+                if (!res.ok) {
+                  const data = await res.json().catch(() => ({}));
+                  throw new Error(data.error ?? "Upload failed.");
+                }
+                const data = (await res.json()) as { url?: string };
+                if (data.url) {
+                  setImageUrl(data.url);
+                } else {
+                  throw new Error("Upload failed.");
+                }
+              } catch (err) {
+                setUploadError(err instanceof Error ? err.message : "Upload failed.");
+              } finally {
+                setUploading(false);
+              }
+            }}
+            className="w-full rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink file:mr-3 file:rounded-full file:border-0 file:bg-emerald-500/15 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-emerald-700"
+          />
+          <input
             value={imageUrl}
             onChange={(event) => setImageUrl(event.target.value)}
             className="w-full rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
             placeholder={t("settings.placeholders.photoUrl", locale)}
           />
           <p className="text-xs text-muted">{t("settings.profilePhotoHint", locale)}</p>
+          {uploading ? (
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-600">
+              Uploading...
+            </p>
+          ) : null}
+          {uploadError ? (
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-rose-600">
+              {uploadError}
+            </p>
+          ) : null}
         </div>
       </div>
 

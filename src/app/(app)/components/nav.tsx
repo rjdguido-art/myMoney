@@ -8,7 +8,6 @@ import { signOut } from "next-auth/react";
 import { useSession } from "next-auth/react";
 import { t, type Locale } from "@/lib/i18n";
 import { useMediaQuery } from "@/lib/use-media-query";
-import { LanguageToggle } from "./language-toggle";
 import { openQuickAddTransaction } from "./quick-add-transaction";
 
 const links = [
@@ -105,9 +104,6 @@ export function Nav() {
               </div>
               <div>
                 <p className="text-xs uppercase tracking-[0.12em] text-white/70">ArgoBucks</p>
-                <p className="text-sm font-semibold text-white">
-                  {String(t("nav.brandTagline", locale))}
-                </p>
               </div>
             </div>
             <button
@@ -125,6 +121,30 @@ export function Nav() {
               {menuOpen ? "Close" : "Menu"}
             </button>
           </div>
+
+        <div className="mt-4 flex flex-wrap items-center gap-2">
+          <Link
+            href="/chat"
+            className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white/90 transition hover:bg-white/20"
+          >
+            Assistant
+          </Link>
+          <button
+            type="button"
+            onClick={openQuickAddTransaction}
+            className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[color:rgb(var(--app-nav))] shadow-[0_12px_32px_rgba(0,0,0,0.2)] transition hover:brightness-105"
+            title="Quick add a transaction without leaving this page."
+          >
+            {String(t("nav.newTransaction", locale))}
+          </button>
+          <button
+            type="button"
+            onClick={() => signOut({ callbackUrl: "/login" })}
+            className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white/90 transition hover:bg-white/20"
+          >
+            {String(t("nav.logOut", locale))}
+          </button>
+        </div>
 
         {menuOpen ? (
           <div id="mobile-nav" className="mt-4 space-y-4">
@@ -160,24 +180,6 @@ export function Nav() {
                 );
               })}
             </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <LanguageToggle locale={locale} variant="compact" />
-              <button
-                type="button"
-                onClick={openQuickAddTransaction}
-                className="pill inline-flex items-center gap-2 bg-white text-[color:rgb(var(--app-nav))] border-transparent shadow-[0_12px_32px_rgba(0,0,0,0.2)] hover:brightness-105 transition"
-                title="Quick add a transaction without leaving this page."
-              >
-                {String(t("nav.newTransaction", locale))}
-              </button>
-              <button
-                type="button"
-                onClick={() => signOut({ callbackUrl: "/login" })}
-                className="pill inline-flex items-center gap-2 border border-white/30 bg-white/10 text-white hover:bg-white/20"
-              >
-                {String(t("nav.logOut", locale))}
-              </button>
-            </div>
           </div>
         ) : null}
         </nav>
@@ -188,7 +190,7 @@ export function Nav() {
   return (
     <div className="sticky top-0 z-30 app-nav">
       <nav className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 px-6 py-4 lg:px-10">
-        <div className="flex items-center gap-3">
+        <div className="flex items-start gap-4">
           <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full shadow-[0_10px_30px_rgba(11,35,71,0.35)]">
             <Image
               src="/argo-logo.png"
@@ -200,9 +202,29 @@ export function Nav() {
           </div>
           <div>
             <p className="text-sm uppercase tracking-[0.12em] text-white/70">ArgoBucks</p>
-            <p className="text-base font-semibold text-white">
-              {String(t("nav.brandTagline", locale))}
-            </p>
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <Link
+                href="/chat"
+                className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white/90 transition hover:bg-white/20"
+              >
+                Assistant
+              </Link>
+              <button
+                type="button"
+                onClick={openQuickAddTransaction}
+                className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[color:rgb(var(--app-nav))] shadow-[0_12px_32px_rgba(0,0,0,0.2)] transition hover:brightness-105"
+                title="Quick add a transaction without leaving this page."
+              >
+                {String(t("nav.newTransaction", locale))}
+              </button>
+              <button
+                type="button"
+                onClick={() => signOut({ callbackUrl: "/login" })}
+                className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white/90 transition hover:bg-white/20"
+              >
+                {String(t("nav.logOut", locale))}
+              </button>
+            </div>
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -250,7 +272,11 @@ export function Nav() {
               aria-expanded={overflowOpen}
               aria-label="More navigation"
             >
-              <span className="text-lg font-semibold tracking-[0.2em]">...</span>
+              <span className="flex flex-col gap-1">
+                <span className="h-0.5 w-4 rounded-full bg-current" />
+                <span className="h-0.5 w-4 rounded-full bg-current" />
+                <span className="h-0.5 w-4 rounded-full bg-current" />
+              </span>
             </button>
             {overflowOpen ? (
               <div
@@ -291,30 +317,6 @@ export function Nav() {
               </div>
             ) : null}
           </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <LanguageToggle locale={locale} variant="compact" />
-          <Link
-            href="/chat"
-            className="pill inline-flex items-center gap-2 border border-white/30 bg-white/10 text-white hover:bg-white/20"
-          >
-            Assistant
-          </Link>
-          <button
-            type="button"
-            onClick={openQuickAddTransaction}
-            className="pill inline-flex items-center gap-2 bg-white text-[color:rgb(var(--app-nav))] border-transparent shadow-[0_12px_32px_rgba(0,0,0,0.2)] hover:brightness-105 transition"
-            title="Quick add a transaction without leaving this page."
-          >
-            {String(t("nav.newTransaction", locale))}
-          </button>
-          <button
-            type="button"
-            onClick={() => signOut({ callbackUrl: "/login" })}
-            className="pill inline-flex items-center gap-2 border border-white/30 bg-white/10 text-white hover:bg-white/20"
-          >
-            {String(t("nav.logOut", locale))}
-          </button>
         </div>
       </nav>
     </div>

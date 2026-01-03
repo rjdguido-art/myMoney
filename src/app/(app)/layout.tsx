@@ -3,6 +3,7 @@ import { Nav } from "./components/nav";
 import { MobileNav } from "@/components/argo/MobileNav";
 import { QuickAddTransactionModal } from "./components/quick-add-transaction";
 import { AppProviders } from "./providers";
+import { ChatWidget } from "./components/chat-widget";
 
 export default function AppLayout({ children }: { children: ReactNode }) {
   return (
@@ -14,6 +15,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         </main>
         <QuickAddTransactionModal />
         <MobileNav />
+        <ChatWidget />
       </div>
     </AppProviders>
   );
