@@ -29,8 +29,6 @@ export default function HomePage() {
       return {
         title: "Create your ArgoBucks account",
         description: "Bring your budgets, bills, and goals into one clean space.",
-        primaryLabel: "Create account",
-        primaryHref: "/signup",
         secondaryLabel: "Sign in instead",
         secondaryMode: "signin" as AuthMode,
       };
@@ -38,8 +36,6 @@ export default function HomePage() {
     return {
       title: "Welcome back",
       description: "Pick up where you left off and see the latest snapshot.",
-      primaryLabel: "Sign in",
-      primaryHref: "/login",
       secondaryLabel: "Create an account",
       secondaryMode: "signup" as AuthMode,
     };
@@ -149,21 +145,46 @@ export default function HomePage() {
               <h2 className="text-2xl font-semibold text-foreground">{authCopy.title}</h2>
               <p className="text-sm text-muted">{authCopy.description}</p>
             </div>
-            <div className="mt-6 space-y-3">
-              <Link
-                href={authCopy.primaryHref}
-                className="inline-flex w-full items-center justify-center rounded-[var(--radius-pill)] bg-primary px-5 py-2.5 text-sm font-semibold text-on-primary shadow-[var(--shadow-soft)] transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2"
-              >
-                {authCopy.primaryLabel}
-              </Link>
+            <form className="mt-6 space-y-4">
+              <label className="auth-field">
+                <span className="auth-label">Email</span>
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="you@example.com"
+                  autoComplete="email"
+                  className="auth-input"
+                />
+              </label>
+              <label className="auth-field">
+                <span className="auth-label">Password</span>
+                <input
+                  type="password"
+                  name="password"
+                  placeholder="••••••••"
+                  autoComplete={authMode === "signup" ? "new-password" : "current-password"}
+                  className="auth-input"
+                />
+              </label>
               <button
-                type="button"
-                onClick={() => setAuthMode(authCopy.secondaryMode)}
-                className="inline-flex w-full items-center justify-center text-sm font-semibold text-muted transition hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2"
+                type="submit"
+                className="auth-submit"
               >
-                {authCopy.secondaryLabel}
+                {authMode === "signup" ? "Create account" : "Sign in"}
               </button>
-            </div>
+              <div className="auth-links">
+                <button
+                  type="button"
+                  onClick={() => setAuthMode(authCopy.secondaryMode)}
+                  className="auth-link"
+                >
+                  {authCopy.secondaryLabel}
+                </button>
+                <Link href="/forgot" className="auth-link">
+                  Forgot password
+                </Link>
+              </div>
+            </form>
           </section>
         </div>
       ) : null}
