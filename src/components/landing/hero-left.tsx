@@ -18,17 +18,17 @@ type HeroLeftProps = {
 export function HeroLeft({ title, description, metrics, sectionId }: HeroLeftProps) {
   return (
     <section id={sectionId} className="space-y-8" aria-labelledby="hero-title">
-      <p className="inline-flex items-center gap-2 rounded-[var(--radius-pill)] border border-border/70 bg-card/80 px-4 py-1 text-xs font-medium uppercase tracking-[0.3em] text-muted">
+      <p className="inline-flex items-center gap-2 rounded-[var(--radius-pill)] border border-white/30 bg-white/10 px-4 py-1 text-xs font-medium uppercase tracking-[0.3em] text-white/80">
         Calm money cockpit
       </p>
       <div className="space-y-4">
         <h1
           id="hero-title"
-          className="text-4xl font-semibold text-foreground sm:text-5xl lg:text-6xl"
+          className="text-4xl font-semibold text-white sm:text-5xl lg:text-6xl"
         >
           {title}
         </h1>
-        <p className="max-w-xl text-base text-muted sm:text-lg">
+        <p className="max-w-xl text-base text-white/80 sm:text-lg">
           {description}
         </p>
       </div>
@@ -41,25 +41,25 @@ export function HeroLeft({ title, description, metrics, sectionId }: HeroLeftPro
         </Link>
         <Link
           href="/login"
-          className="inline-flex items-center text-sm font-semibold text-muted transition hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2"
+          className="inline-flex items-center text-sm font-semibold text-white/80 transition hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2"
         >
           Sign in
         </Link>
       </div>
       <div
-        className="flex flex-wrap items-center gap-4 text-xs font-medium uppercase tracking-[0.2em] text-muted"
+        className="flex flex-wrap items-center gap-4 text-xs font-medium uppercase tracking-[0.2em] text-white/70"
         aria-label="Trust highlights"
       >
         <div className="flex items-center gap-2">
-          <ShieldCheck className="h-4 w-4 text-success" aria-hidden="true" />
+          <ShieldCheck className="h-4 w-4 text-emerald-300" aria-hidden="true" />
           Privacy-first
         </div>
         <div className="flex items-center gap-2">
-          <Download className="h-4 w-4 text-success" aria-hidden="true" />
+          <Download className="h-4 w-4 text-emerald-300" aria-hidden="true" />
           Export anytime
         </div>
         <div className="flex items-center gap-2">
-          <Ban className="h-4 w-4 text-success" aria-hidden="true" />
+          <Ban className="h-4 w-4 text-emerald-300" aria-hidden="true" />
           No ads
         </div>
       </div>

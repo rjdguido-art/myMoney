@@ -7,11 +7,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/argo/card";
-import { ArgoShell } from "@/components/argo/ArgoBackground";
 
 export default function HomeCommandPage() {
   return (
-    <ArgoShell>
+    <main className="relative min-h-screen p-6 lg:p-10 z-10">
       <header className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border border-[color:var(--border)] bg-[color:var(--card)]/80 shadow-[0_10px_26px_rgba(13,19,22,0.18)]">
@@ -120,6 +119,6 @@ export default function HomeCommandPage() {
           </span>
         </Link>
       </section>
-    </ArgoShell>
+    </main>
   );
 }

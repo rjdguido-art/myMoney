@@ -39,8 +39,8 @@ export function MobileNav() {
           const baseClasses =
             "flex flex-1 flex-col items-center gap-1 rounded-full px-2 py-2 text-xs font-medium transition";
           const stateClasses = isActive
-            ? "text-[color:var(--text)] shadow-[0_0_20px_rgba(155,205,198,0.55)]"
-            : "text-[color:var(--muted)]";
+            ? "text-ink shadow-[0_0_20px_rgba(155,205,198,0.55)]"
+            : "text-muted";
 
           return (
             <Link

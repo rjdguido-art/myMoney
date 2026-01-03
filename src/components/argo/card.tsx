@@ -1,7 +1,7 @@
 import type { HTMLAttributes } from "react";
 
 const baseCard =
-  "relative overflow-hidden rounded-2xl border border-[color:var(--border)] bg-[color:var(--card)]/90 text-[color:var(--text)] backdrop-blur";
+  "relative overflow-hidden rounded-2xl glass-surface text-[color:var(--text)]";
 
 const elevationMap = {
   sm: "shadow-[0_8px_20px_rgba(13,19,22,0.18)]",

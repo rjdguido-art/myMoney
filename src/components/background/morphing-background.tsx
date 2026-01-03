@@ -131,5 +131,5 @@ export function MorphingBackground() {
     };
   }, [pathname]);
 
-  return <div className="morph-bg" aria-hidden="true" />;
+  return <div className="morph-bg fixed inset-0 -z-10 bg-[#020408]" aria-hidden="true" />;
 }

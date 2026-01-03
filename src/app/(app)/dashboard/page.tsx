@@ -144,8 +144,8 @@ export default async function DashboardPage() {
     : t("dashboard.defaultName", locale);
 
   return (
-    <div className="dashboard-gradient aurora-strong dashboard-theme--oscura space-y-8 sm:space-y-10">
-      <header className="grid gap-4 rounded-2xl border border-border/60 bg-white/95 p-5 shadow-[0_18px_45px_rgba(11,35,71,0.12)] sm:p-8">
+    <div className="space-y-8 sm:space-y-10">
+      <header className="grid gap-4 rounded-2xl border border-border/60 glass-card p-5 shadow-[0_18px_45px_rgba(11,35,71,0.12)] sm:p-8">
         <span className="inline-flex h-3 w-3 items-center justify-center">
           <span className="h-2.5 w-2.5 rounded-full bg-emerald-500/80 shadow-[0_0_0_4px_rgba(46,156,147,0.18)] animate-pulse" />
           <span className="sr-only">{t("dashboard.forecastLive", locale)}</span>
@@ -159,7 +159,7 @@ export default async function DashboardPage() {
               {t("dashboard.intro", locale)}
             </p>
           </div>
-          <div className="rounded-2xl border border-border/60 bg-white/95 px-4 py-3 text-sm text-ink shadow-[0_12px_30px_rgba(11,35,71,0.08)]">
+          <div className="rounded-2xl border border-border/60 glass-card px-4 py-3 text-sm text-ink shadow-[0_12px_30px_rgba(11,35,71,0.08)]">
             <p className="text-xs uppercase tracking-[0.14em] text-muted sm:text-sm">
               {t("dashboard.nextPayday", locale)}
             </p>
@@ -184,7 +184,7 @@ export default async function DashboardPage() {
       </header>
 
       <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <div className="rounded-2xl border border-border/60 bg-white/95 p-6 shadow-[0_10px_24px_rgba(11,35,71,0.08)] sm:p-8">
+        <div className="rounded-2xl border border-border/60 glass-card p-6 shadow-[0_10px_24px_rgba(11,35,71,0.08)] sm:p-8">
           <p className="text-xs uppercase tracking-[0.14em] text-muted sm:text-sm">
             {t("dashboard.monthSpent", locale)}
           </p>
@@ -196,7 +196,7 @@ export default async function DashboardPage() {
           </p>
         </div>
 
-        <div className="rounded-2xl border border-border/60 bg-white/95 p-6 shadow-[0_10px_24px_rgba(11,35,71,0.08)] sm:p-8">
+        <div className="rounded-2xl border border-border/60 glass-card p-6 shadow-[0_10px_24px_rgba(11,35,71,0.08)] sm:p-8">
           <p className="text-xs uppercase tracking-[0.14em] text-muted sm:text-sm">
             {t("dashboard.remainingBudget", locale)}
           </p>
@@ -239,7 +239,7 @@ export default async function DashboardPage() {
           </p>
         </div>
 
-        <div className="rounded-2xl border border-border/60 bg-white/95 p-4 shadow-[0_12px_30px_rgba(11,35,71,0.08)] sm:p-5">
+        <div className="rounded-2xl border border-border/60 glass-card p-4 shadow-[0_12px_30px_rgba(11,35,71,0.08)] sm:p-5">
           <p className="text-xs uppercase tracking-[0.14em] text-muted sm:text-sm">
             {t("dashboard.dailyAllowance", locale)}
           </p>
@@ -251,7 +251,7 @@ export default async function DashboardPage() {
           </p>
         </div>
 
-        <div className="rounded-2xl border border-border/60 bg-white/95 p-4 shadow-[0_12px_30px_rgba(11,35,71,0.08)] sm:p-5">
+        <div className="rounded-2xl border border-border/60 glass-card p-4 shadow-[0_12px_30px_rgba(11,35,71,0.08)] sm:p-5">
           <p className="text-xs uppercase tracking-[0.14em] text-muted sm:text-sm">
             {t("dashboard.weeklyPoints", locale)}
           </p>
@@ -267,7 +267,7 @@ export default async function DashboardPage() {
       </section>
 
       <section className="grid gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2 space-y-5 rounded-2xl border border-border/60 bg-white/95 p-5 shadow-[0_18px_45px_rgba(11,35,71,0.1)] sm:p-6">
+        <div className="lg:col-span-2 space-y-5 rounded-2xl border border-border/60 glass-card p-5 shadow-[0_18px_45px_rgba(11,35,71,0.1)] sm:p-6">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted">{t("dashboard.categoryHeatmap", locale)}</p>
@@ -285,7 +285,7 @@ export default async function DashboardPage() {
               {topCategories.map((cat) => (
                 <div
                   key={cat.name}
-                  className="rounded-2xl border border-border/60 bg-white/95 p-4"
+                  className="rounded-2xl border border-border/60 glass-card p-4"
                 >
                   <div className="flex items-center justify-between">
                     <p className="font-semibold text-ink">{cat.name}</p>
@@ -310,7 +310,7 @@ export default async function DashboardPage() {
           )}
         </div>
 
-        <div className="space-y-4 rounded-2xl border border-border/60 bg-white/95 p-5 shadow-[0_18px_45px_rgba(11,35,71,0.1)] sm:p-6">
+        <div className="space-y-4 rounded-2xl border border-border/60 glass-card p-5 shadow-[0_18px_45px_rgba(11,35,71,0.1)] sm:p-6">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted">{t("dashboard.beforeNextPayday", locale)}</p>
@@ -327,7 +327,7 @@ export default async function DashboardPage() {
               billsBeforePay.map((bill) => (
                 <div
                   key={`${bill.id}-${bill.dueDate.toISOString()}`}
-                  className="flex items-center justify-between rounded-2xl border border-border/60 bg-white/95 px-4 py-3"
+                  className="flex items-center justify-between rounded-2xl border border-border/60 glass-card px-4 py-3"
                 >
                   <div>
                     <p className="font-medium text-ink">{bill.name}</p>
@@ -350,7 +350,7 @@ export default async function DashboardPage() {
       </section>
 
       <section className="grid gap-6 lg:grid-cols-3">
-        <div className="space-y-3 rounded-2xl border border-border/60 bg-white/95 p-5 shadow-[0_18px_45px_rgba(11,35,71,0.1)] lg:col-span-2 sm:p-6">
+        <div className="space-y-3 rounded-2xl border border-border/60 glass-card p-5 shadow-[0_18px_45px_rgba(11,35,71,0.1)] lg:col-span-2 sm:p-6">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted">{t("dashboard.forecastEngine", locale)}</p>
@@ -373,7 +373,7 @@ export default async function DashboardPage() {
             ].map((item) => (
               <div
                 key={item.label}
-                className="rounded-2xl border border-border/60 bg-white/95 p-4"
+                className="rounded-2xl border border-border/60 glass-card p-4"
               >
                 <p className="text-sm text-muted">{item.label}</p>
                 <p className="mt-2 text-lg font-semibold text-ink sm:text-xl">
@@ -387,12 +387,12 @@ export default async function DashboardPage() {
           </p>
         </div>
 
-        <div className="space-y-3 rounded-2xl border border-border/60 bg-white/95 p-5 shadow-[0_18px_45px_rgba(11,35,71,0.1)] sm:p-6">
+        <div className="space-y-3 rounded-2xl border border-border/60 glass-card p-5 shadow-[0_18px_45px_rgba(11,35,71,0.1)] sm:p-6">
           <p className="text-sm text-muted">{t("dashboard.budgetSnapshot", locale)}</p>
           <h2 className="text-lg font-semibold text-ink">
             {budgetPlan ? budgetPlan.name : t("dashboard.noBudgetPlan", locale)}
           </h2>
-          <div className="rounded-2xl border border-border/60 bg-white/95 p-4">
+          <div className="rounded-2xl border border-border/60 glass-card p-4">
             <div className="flex items-center justify-between">
               <p className="text-sm text-muted">{t("dashboard.allocated", locale)}</p>
               <p className="text-sm font-semibold text-ink">

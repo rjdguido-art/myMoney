@@ -19,6 +19,16 @@ export default function HomePage() {
   return (
     <main className="relative min-h-screen">
       <div className="bg-aurora-pro">
+        <div className="hero-video" aria-hidden="true">
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="auto"
+            src="https://presspersona.blob.core.windows.net/images/BG%20Video.mp4"
+          />
+        </div>
         <div className="aurora-blobs" aria-hidden="true">
           <span className="aurora-blob aurora-blob--teal" />
           <span className="aurora-blob aurora-blob--gold" />
@@ -53,10 +63,10 @@ export default function HomePage() {
             aria-label="Get started"
           >
             <div>
-              <h2 className="text-2xl font-semibold text-foreground">
+              <h2 className="text-2xl font-semibold text-white">
                 Ready to build your home view?
               </h2>
-              <p className="mt-2 text-sm text-muted">
+              <p className="mt-2 text-sm text-white/80">
                 Start with the free plan, then grow into shared budgets and automated bill flow.
               </p>
             </div>
@@ -69,7 +79,7 @@ export default function HomePage() {
               </a>
               <a
                 href="/login"
-                className="inline-flex items-center text-sm font-semibold text-muted transition hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2"
+                className="inline-flex items-center text-sm font-semibold text-white/80 transition hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2"
               >
                 Sign in
               </a>
