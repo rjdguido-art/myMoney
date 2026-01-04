@@ -30,7 +30,7 @@ if (missing.length) {
   throw new Error(`Missing Firebase Admin environment variables: ${missing.join(", ")}`);
 }
 
-const privateKey = privateKeyRaw.replace(/\\n/g, "\n");
+const privateKey = (privateKeyRaw ?? "").replace(/\\n/g, "\n");
 
 const app =
   getApps().length > 0
