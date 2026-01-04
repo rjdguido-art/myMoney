@@ -25,40 +25,7 @@ export function Navbar({ onSignIn, onSignUp }: NavbarProps) {
           </p>
         </div>
       </div>
-      <div className="flex items-center gap-3">
-        {onSignIn ? (
-          <button
-            type="button"
-            onClick={onSignIn}
-            className="hidden text-sm font-medium text-white/80 transition hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 lg:inline-flex"
-          >
-            Sign in
-          </button>
-        ) : (
-          <Link
-            href="/login"
-            className="hidden text-sm font-medium text-white/80 transition hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 lg:inline-flex"
-          >
-            Sign in
-          </Link>
-        )}
-        {onSignUp ? (
-          <button
-            type="button"
-            onClick={onSignUp}
-            className="inline-flex items-center rounded-[var(--radius-pill)] bg-primary px-4 py-2 text-sm font-semibold text-on-primary shadow-[var(--shadow-soft)] transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2"
-          >
-            Get started
-          </button>
-        ) : (
-          <Link
-            href="/signup"
-            className="inline-flex items-center rounded-[var(--radius-pill)] bg-primary px-4 py-2 text-sm font-semibold text-on-primary shadow-[var(--shadow-soft)] transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2"
-          >
-            Get started
-          </Link>
-        )}
-      </div>
+      <div aria-hidden="true" />
     </header>
   );
 }

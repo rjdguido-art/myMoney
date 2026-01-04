@@ -3,15 +3,17 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { HeroLeft } from "@/components/landing/hero-left";
 import { Navbar } from "@/components/landing/navbar";
 import { SnapshotCard } from "@/components/landing/snapshot-card";
+import { firebaseAuth } from "@/lib/firebase";
 
 const heroMetrics = [
-  { label: "Views to explore", value: "3" },
-  { label: "Bills tracked", value: "Unlimited" },
-  { label: "Weekly check-in", value: "5 min", trend: "Auto" },
-  { label: "Safe-to-spend", value: "$1,420", trend: "+12%" },
+  { label: "Weekly summary email", value: "Sent every Friday" },
+  { label: "Bills tracked for you", value: "Unlimited bills" },
+  { label: "Check-in time", value: "About 5 minutes", trend: "No spreadsheets needed" },
+  { label: "Safe-to-spend today", value: "$1,420", trend: "Up 12% vs last week" },
 ];
 
 const upcomingBills = [
@@ -24,6 +26,10 @@ type AuthMode = "signin" | "signup";
 
 export default function HomePage() {
   const [authMode, setAuthMode] = useState<AuthMode | null>(null);
+  const [authEmail, setAuthEmail] = useState("");
+  const [authPassword, setAuthPassword] = useState("");
+  const [authLoading, setAuthLoading] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
   const isAuthOpen = Boolean(authMode);
   const router = useRouter();
   const authCopy = useMemo(() => {
@@ -149,9 +155,51 @@ export default function HomePage() {
             </div>
             <form
               className="mt-6 space-y-4"
-              onSubmit={(event) => {
+              onSubmit={async (event) => {
                 event.preventDefault();
-                router.push("/dashboard");
+                if (!authMode) return;
+                setAuthLoading(true);
+                setAuthError(null);
+                try {
+                  if (authMode === "signup") {
+                    const credential = await createUserWithEmailAndPassword(
+                      firebaseAuth,
+                      authEmail,
+                      authPassword,
+                    );
+                    await updateProfile(credential.user, { displayName: authEmail.split("@")[0] });
+                    const idToken = await credential.user.getIdToken();
+                    const res = await fetch("/api/firebase/session", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ idToken }),
+                    });
+                    if (!res.ok) {
+                      throw new Error("Failed to start session");
+                    }
+                    router.push("/welcome");
+                    return;
+                  }
+                  const credential = await signInWithEmailAndPassword(
+                    firebaseAuth,
+                    authEmail,
+                    authPassword,
+                  );
+                  const idToken = await credential.user.getIdToken();
+                  const res = await fetch("/api/firebase/session", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ idToken }),
+                  });
+                  if (!res.ok) {
+                    throw new Error("Failed to start session");
+                  }
+                  router.push("/dashboard");
+                } catch {
+                  setAuthError("Invalid credentials.");
+                } finally {
+                  setAuthLoading(false);
+                }
               }}
             >
               <label className="auth-field">
@@ -162,6 +210,8 @@ export default function HomePage() {
                   placeholder="you@example.com"
                   autoComplete="email"
                   className="auth-input"
+                  value={authEmail}
+                  onChange={(event) => setAuthEmail(event.target.value)}
                 />
               </label>
               <label className="auth-field">
@@ -172,13 +222,23 @@ export default function HomePage() {
                   placeholder="••••••••"
                   autoComplete={authMode === "signup" ? "new-password" : "current-password"}
                   className="auth-input"
+                  value={authPassword}
+                  onChange={(event) => setAuthPassword(event.target.value)}
                 />
               </label>
+              {authError ? <p className="text-sm text-red-600">{authError}</p> : null}
               <button
                 type="submit"
                 className="auth-submit"
+                disabled={authLoading}
               >
-                {authMode === "signup" ? "Create account" : "Sign in"}
+                {authLoading
+                  ? authMode === "signup"
+                    ? "Creating..."
+                    : "Signing in..."
+                  : authMode === "signup"
+                    ? "Create account"
+                    : "Sign in"}
               </button>
               <div className="auth-links">
                 <button

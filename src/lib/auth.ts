@@ -1,87 +1,61 @@
-import NextAuth, { type NextAuthOptions, getServerSession } from "next-auth";
-import Credentials from "next-auth/providers/credentials";
-import { PrismaAdapter } from "@auth/prisma-adapter";
-import bcrypt from "bcrypt";
+import { cookies } from "next/headers";
 import { prisma } from "./prisma";
+import { firebaseAdminAuth } from "./firebase-admin";
 
-const missingEnv = ["NEXTAUTH_SECRET", "DATABASE_URL"].filter(
-  (key) => !process.env[key],
-);
-if (missingEnv.length) {
-  console.error(
-    `Missing required environment variables: ${missingEnv.join(", ")}`,
-  );
-}
-if (process.env.NODE_ENV === "production" && !process.env.NEXTAUTH_URL) {
-  console.error("Missing NEXTAUTH_URL in production.");
-}
-
-export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma),
-  session: { strategy: "jwt" },
-  pages: { signIn: "/login" },
-  providers: [
-    Credentials({
-      name: "Credentials",
-      credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
-      },
-      async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          return null;
-        }
-
-        const email = credentials.email.trim().toLowerCase();
-        const user = await prisma.user.findUnique({
-          where: { email },
-        });
-
-        if (!user?.passwordHash) return null;
-
-        const valid = await bcrypt.compare(
-          credentials.password,
-          user.passwordHash,
-        );
-
-        if (!valid) return null;
-
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name ?? undefined,
-        };
-      },
-    }),
-  ],
-  callbacks: {
-    session: async ({ session, token }) => {
-      if (session.user && token.sub) {
-        session.user.id = token.sub;
-        session.user.locale = token.locale ?? "en";
-        session.user.onboarded = token.onboarded ?? false;
-      }
-      return session;
-    },
-    jwt: async ({ token, user }) => {
-      if (user) {
-        token.sub = user.id;
-      }
-      if (token.sub) {
-        const userRecord = await prisma.user.findUnique({
-          where: { id: token.sub },
-          select: { locale: true, onboarded: true },
-        });
-        token.locale = userRecord?.locale ?? "en";
-        token.onboarded = userRecord?.onboarded ?? false;
-      }
-      return token;
-    },
-  },
-  secret: process.env.NEXTAUTH_SECRET,
+type SessionUser = {
+  id: string;
+  email: string;
+  name?: string | null;
+  locale: string;
+  onboarded: boolean;
 };
 
-export const authHandler = NextAuth(authOptions);
-export async function auth() {
-  return getServerSession(authOptions);
+type Session = {
+  user: SessionUser;
+};
+
+export const authHandler = () => {
+  throw new Error("NextAuth is disabled. Firebase Auth is now in use.");
+};
+
+export async function auth(): Promise<Session | null> {
+  const cookieStore = await cookies();
+  const sessionCookie = cookieStore.get("firebaseSession")?.value;
+  if (!sessionCookie) return null;
+
+  try {
+    const decoded = await firebaseAdminAuth.verifySessionCookie(sessionCookie, true);
+    const email = decoded.email?.toLowerCase();
+    if (!email) return null;
+
+    let user = await prisma.user.findUnique({
+      where: { email },
+      select: { id: true, email: true, name: true, locale: true, onboarded: true, imageUrl: true },
+    });
+
+    if (!user) {
+      const created = await prisma.user.create({
+        data: {
+          email,
+          name: decoded.name ?? null,
+          imageUrl: decoded.picture ?? null,
+          onboarded: false,
+        },
+        select: { id: true, email: true, name: true, locale: true, onboarded: true },
+      });
+      user = created;
+    }
+
+    return {
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name ?? undefined,
+        locale: user.locale ?? "en",
+        onboarded: Boolean(user.onboarded),
+      },
+    };
+  } catch {
+    return null;
+  }
 }

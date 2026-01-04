@@ -1,8 +1,9 @@
 "use client";
 
 import { FormEvent, Suspense, useState } from "react";
-import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { firebaseAuth } from "@/lib/firebase";
 
 function SignupPageContent() {
   const router = useRouter();
@@ -19,29 +20,23 @@ function SignupPageContent() {
     setLoading(true);
     setError(null);
 
-    const res = await fetch("/api/signup", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password, name }),
-    });
-
-    if (!res.ok) {
-      const data = await res.json().catch(() => ({}));
-      setError(data.error ?? "Failed to create account");
+    try {
+      const credential = await createUserWithEmailAndPassword(firebaseAuth, email, password);
+      if (name.trim()) {
+        await updateProfile(credential.user, { displayName: name.trim() });
+      }
+      const idToken = await credential.user.getIdToken();
+      const res = await fetch("/api/firebase/session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idToken }),
+      });
+      if (!res.ok) {
+        throw new Error("Failed to start session");
+      }
+    } catch {
       setLoading(false);
-      return;
-    }
-
-    const result = await signIn("credentials", {
-      redirect: false,
-      email,
-      password,
-      callbackUrl,
-    });
-
-    if (result?.error) {
-      setLoading(false);
-      setError("Could not sign in after creating your account");
+      setError("Failed to create account");
       return;
     }
 

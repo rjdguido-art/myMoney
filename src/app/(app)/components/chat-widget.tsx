@@ -2,13 +2,13 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
+import { useFirebaseUser } from "./use-firebase-user";
 
 export function ChatWidget() {
-  const { data: session } = useSession();
+  const { user } = useFirebaseUser();
   const [open, setOpen] = useState(false);
 
-  if (!session?.user) return null;
+  if (!user) return null;
 
   return (
     <div className={`chat-widget ${open ? "is-open" : ""}`} aria-live="polite">

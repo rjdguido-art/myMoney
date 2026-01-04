@@ -6,16 +6,14 @@ type MetricRowProps = {
 
 export function MetricRow({ label, value, trend }: MetricRowProps) {
   return (
-    <div className="flex items-center justify-between gap-4">
-      <dt className="text-sm text-muted">{label}</dt>
-      <dd className="flex items-center gap-2 text-sm font-semibold text-foreground">
-        <span>{value}</span>
-        {trend ? (
-          <span className="rounded-full bg-success/10 px-2 py-1 text-xs font-medium text-success">
-            {trend}
-          </span>
-        ) : null}
-      </dd>
+    <div className="flex flex-col gap-1">
+      <dt className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">
+        {label}
+      </dt>
+      <dd className="text-lg font-semibold text-foreground">{value}</dd>
+      {trend ? (
+        <p className="text-xs font-medium text-muted">{trend}</p>
+      ) : null}
     </div>
   );
 }

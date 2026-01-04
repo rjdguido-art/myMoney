@@ -4,11 +4,12 @@ import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
-import { signOut } from "next-auth/react";
-import { useSession } from "next-auth/react";
 import { t, type Locale } from "@/lib/i18n";
 import { useMediaQuery } from "@/lib/use-media-query";
 import { openQuickAddTransaction } from "./quick-add-transaction";
+import { useFirebaseUser } from "./use-firebase-user";
+import { firebaseAuth } from "@/lib/firebase";
+import { signOut } from "firebase/auth";
 
 const links = [
   { href: "/dashboard", labelKey: "nav.dashboard" },
@@ -25,8 +26,8 @@ const links = [
 
 export function Nav() {
   const pathname = usePathname();
-  const { data: session } = useSession();
-  const locale = (session?.user?.locale as Locale) ?? "en";
+  const { user } = useFirebaseUser();
+  const locale = (user?.locale as Locale) ?? "en";
   const isDesktop = useMediaQuery("(min-width: 1024px)");
   const [onboarded, setOnboarded] = useState(true);
   const [overflowState, setOverflowState] = useState(() => ({
@@ -139,7 +140,11 @@ export function Nav() {
           </button>
           <button
             type="button"
-            onClick={() => signOut({ callbackUrl: "/login" })}
+            onClick={async () => {
+              await signOut(firebaseAuth);
+              await fetch("/api/firebase/logout", { method: "POST" });
+              window.location.href = "/login";
+            }}
             className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white/90 transition hover:bg-white/20"
           >
             {String(t("nav.logOut", locale))}
@@ -219,7 +224,11 @@ export function Nav() {
               </button>
               <button
                 type="button"
-                onClick={() => signOut({ callbackUrl: "/login" })}
+                onClick={async () => {
+                  await signOut(firebaseAuth);
+                  await fetch("/api/firebase/logout", { method: "POST" });
+                  window.location.href = "/login";
+                }}
                 className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white/90 transition hover:bg-white/20"
               >
                 {String(t("nav.logOut", locale))}

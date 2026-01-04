@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
 import { t, type Locale } from "@/lib/i18n";
 
 type Props = {
@@ -12,7 +11,6 @@ type Props = {
 
 export function LanguageToggle({ locale, variant = "pill" }: Props) {
   const router = useRouter();
-  const { update } = useSession();
   const [value, setValue] = useState<Locale>(locale);
   const [loading, setLoading] = useState(false);
 
@@ -26,7 +24,6 @@ export function LanguageToggle({ locale, variant = "pill" }: Props) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ locale: nextLocale }),
       });
-      await update();
       router.refresh();
     } finally {
       setLoading(false);

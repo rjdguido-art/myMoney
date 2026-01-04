@@ -89,7 +89,7 @@ export function HeroLeft({
           No ads
         </div>
       </div>
-      <dl className="grid gap-4 rounded-[var(--radius-card)] border border-border/60 bg-card/80 p-5 shadow-[var(--shadow-soft)] sm:grid-cols-2">
+      <dl className="grid gap-5 rounded-[var(--radius-card)] border border-border/60 bg-card/80 p-5 shadow-[var(--shadow-soft)] sm:grid-cols-2 sm:gap-6">
         {metrics.map((metric) => (
           <MetricRow
             key={metric.label}

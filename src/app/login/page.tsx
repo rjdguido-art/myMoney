@@ -2,8 +2,9 @@
 
 import { FormEvent, Suspense, useState } from "react";
 import Image from "next/image";
-import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { firebaseAuth } from "@/lib/firebase";
 
 function LoginPageContent() {
   const router = useRouter();
@@ -18,14 +19,18 @@ function LoginPageContent() {
     event.preventDefault();
     setLoading(true);
     setError(null);
-    const result = await signIn("credentials", {
-      redirect: false,
-      email,
-      password,
-      callbackUrl,
-    });
-
-    if (result?.error) {
+    try {
+      const credential = await signInWithEmailAndPassword(firebaseAuth, email, password);
+      const idToken = await credential.user.getIdToken();
+      const res = await fetch("/api/firebase/session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idToken }),
+      });
+      if (!res.ok) {
+        throw new Error("Failed to start session");
+      }
+    } catch {
       setLoading(false);
       setError("Invalid credentials");
       return;

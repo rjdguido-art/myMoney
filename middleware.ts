@@ -1,6 +1,5 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
 
 const protectedPrefixes = [
   "/dashboard",
@@ -27,30 +26,8 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const token = await getToken({
-    req: request,
-    secret: process.env.NEXTAUTH_SECRET,
-  });
-  if (token) {
-    const isOnboardingRoute =
-      pathname === "/welcome" ||
-      pathname.startsWith("/welcome/") ||
-      pathname === "/guide" ||
-      pathname.startsWith("/guide/") ||
-      pathname === "/onboarding" ||
-      pathname.startsWith("/onboarding/");
-
-    if (isOnboardingRoute) {
-      return NextResponse.next();
-    }
-
-    if (!token.onboarded) {
-      const welcomeUrl = request.nextUrl.clone();
-      welcomeUrl.pathname = "/welcome";
-      welcomeUrl.search = "";
-      return NextResponse.redirect(welcomeUrl);
-    }
-
+  const hasSession = Boolean(request.cookies.get("firebaseSession")?.value);
+  if (hasSession) {
     return NextResponse.next();
   }
 

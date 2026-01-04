@@ -203,6 +203,7 @@ export function OnboardingClient({
   }, [initialCurrency, initialLanguage, initialTimezone]);
 
   const [step, setStep] = useState(initialDraft.step);
+  const [direction, setDirection] = useState<"forward" | "back">("forward");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -445,16 +446,19 @@ export function OnboardingClient({
 
   const nextStep = () => {
     if (!validateStep()) return;
+    setDirection("forward");
     setStep((s) => Math.min(s + 1, steps.length - 1));
   };
 
   const prevStep = () => {
     setError(null);
+    setDirection("back");
     setStep((s) => Math.max(s - 1, 0));
   };
 
   const skipStep = () => {
     setError(null);
+    setDirection("forward");
     setStep((s) => Math.min(s + 1, steps.length - 1));
   };
 
@@ -546,13 +550,13 @@ export function OnboardingClient({
     }
 
     localStorage.removeItem(STORAGE_KEY);
-    router.push("/setup-complete");
+    router.push("/dashboard");
   };
 
   const isSkippableStep = new Set([2, 3, 5, 6]).has(step);
 
   return (
-    <div className="space-y-8">
+    <div className="onboarding-shell">
       {showSkeleton ? (
         <div className="space-y-6 animate-pulse">
           <div className="h-6 w-40 rounded-sm bg-surface" />
@@ -565,53 +569,32 @@ export function OnboardingClient({
           <div className="h-64 rounded-lg bg-surface" />
         </div>
       ) : null}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <p className="pill bg-white/80 text-emerald-700 border-emerald-500/30">
-            {t("onboarding.welcome", language)}
-          </p>
-          <h1 className="mt-2 text-3xl font-semibold text-ink">
-            {t("onboarding.welcome", language)}
-            {name ? `, ${name.split(" ")[0]}` : ""}.
-          </h1>
-          <p className="text-muted">{t("onboarding.intro", language)}</p>
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="h-2 w-40 overflow-hidden rounded-sm bg-surface">
+      <div className="onboarding-card">
+        <div className="onboarding-card__header">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted">
+              {t("onboarding.labels.stepLabel", language, {
+                current: step + 1,
+                total: steps.length,
+              })}
+            </p>
+            <h2 className="mt-2 text-2xl font-semibold text-ink">
+              {steps[step]?.title}
+            </h2>
+            <p className="text-sm text-muted">{steps[step]?.description}</p>
+          </div>
+          <div className="onboarding-progress">
             <div
-              className="h-full bg-gradient-to-r from-emerald-500 to-sky-500 transition-all"
-              style={{ width: `${progress}%` }}
+              className="onboarding-progress__fill"
+              style={{ width: `${Math.min(100, Math.max(0, progress))}%` }}
             />
           </div>
-          <span className="text-sm font-medium text-muted">
-            {t("onboarding.labels.stepLabel", language, {
-              current: step + 1,
-              total: steps.length,
-            })}
-          </span>
         </div>
-      </div>
 
-      <div className="onboarding-step">
-        <div className="space-y-1">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted">
-            {t("onboarding.labels.stepLabel", language, {
-              current: step + 1,
-              total: steps.length,
-            })}
-          </p>
-          <h2 className="text-xl font-semibold text-ink">{steps[step]?.title}</h2>
-          <p className="text-sm text-muted">{steps[step]?.description}</p>
-        </div>
-        <div className="onboarding-line" aria-hidden="true">
-          <div
-            className="onboarding-line__fill"
-            style={{ width: `${Math.min(100, Math.max(0, stepCompletion))}%` }}
-          />
-        </div>
-      </div>
-
-      <div className={`card glass-surface p-8 space-y-6 relative ${showSkeleton ? "opacity-60 pointer-events-none" : ""}`}>
+        <div
+          key={`${step}-${direction}`}
+          className={`onboarding-card__body onboarding-card__body--${direction} ${showSkeleton ? "opacity-60 pointer-events-none" : ""}`}
+        >
         {submitting ? (
           <div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-white/90 backdrop-blur-sm">
             <div className="flex items-center gap-3 rounded-md border border-border/80 bg-white px-4 py-3 text-sm text-ink shadow-sm">
@@ -1026,6 +1009,7 @@ export function OnboardingClient({
               </button>
             )}
           </div>
+        </div>
         </div>
       </div>
     </div>
