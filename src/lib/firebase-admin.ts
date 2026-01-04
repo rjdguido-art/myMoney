@@ -38,7 +38,6 @@ const app =
     : initializeApp({
         credential: cert({
           projectId,
-          privateKeyId,
           privateKey,
           clientEmail,
         }),
