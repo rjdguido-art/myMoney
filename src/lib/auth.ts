@@ -30,7 +30,14 @@ export async function auth(): Promise<Session | null> {
 
     let user = await prisma.user.findUnique({
       where: { email },
-      select: { id: true, email: true, name: true, locale: true, onboarded: true, imageUrl: true },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        imageUrl: true,
+        locale: true,
+        onboarded: true,
+      },
     });
 
     if (!user) {
@@ -41,7 +48,14 @@ export async function auth(): Promise<Session | null> {
           imageUrl: decoded.picture ?? null,
           onboarded: false,
         },
-        select: { id: true, email: true, name: true, locale: true, onboarded: true },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          imageUrl: true,
+          locale: true,
+          onboarded: true,
+        },
       });
       user = created;
     }
