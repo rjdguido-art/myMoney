@@ -69,8 +69,8 @@ export default function ChatPanel({ storageKey = "mymoney-chat" }: { storageKey?
 
       const data = (await res.json()) as { message: string };
       setMessages((m) => [...m, { role: "assistant", content: data.message || "No response." }]);
-    } catch (e: any) {
-      setErr(e?.message || "Something went wrong.");
+    } catch (e: unknown) {
+      setErr(e instanceof Error ? e.message : "Something went wrong.");
     } finally {
       setLoading(false);
     }

@@ -29,7 +29,7 @@ export function Nav() {
   const { user } = useFirebaseUser();
   const locale = (user?.locale as Locale) ?? "en";
   const isDesktop = useMediaQuery("(min-width: 1024px)");
-  const [onboarded, setOnboarded] = useState(true);
+  const [onboarded, setOnboarded] = useState(false);
   const [overflowState, setOverflowState] = useState(() => ({
     open: false,
     path: pathname,
@@ -51,7 +51,7 @@ export function Nav() {
           setOnboarded(Boolean(data.onboarded));
         }
       } catch {
-        // Keep nav enabled if status can't be fetched.
+        setOnboarded(true);
       }
     };
     void loadStatus();
@@ -84,9 +84,37 @@ export function Nav() {
   const menuOpen = !isDesktop && menuState.open && menuState.path === pathname;
 
   const disabledLinks = new Set(["/budgets", "/bills", "/insights"]);
-  const overflowLinks = new Set(["/onboarding", "/auth"]);
+  const overflowLinks = new Set([
+    "/leaderboard",
+    "/transactions",
+    "/budgets",
+    "/bills",
+    "/guide",
+    "/insights",
+    "/settings",
+    "/onboarding",
+    "/auth",
+  ]);
   const primaryLinks = links.filter((link) => !overflowLinks.has(link.href));
   const extraLinks = links.filter((link) => overflowLinks.has(link.href));
+
+  if (!onboarded) {
+    return (
+      <div className="sticky top-0 z-30 app-nav">
+        <nav className="flex items-center border-b border-white/10 px-4 py-3 lg:px-10">
+          <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full shadow-[0_10px_30px_rgba(11,35,71,0.35)]">
+            <Image
+              src="/argo-logo.png"
+              alt="ArgoBucks logo"
+              width={48}
+              height={48}
+              className="h-full w-full scale-[1.12] object-cover"
+            />
+          </div>
+        </nav>
+      </div>
+    );
+  }
 
   if (!isDesktop) {
     return (
@@ -138,17 +166,6 @@ export function Nav() {
           >
             {String(t("nav.newTransaction", locale))}
           </button>
-          <button
-            type="button"
-            onClick={async () => {
-              await signOut(firebaseAuth);
-              await fetch("/api/firebase/logout", { method: "POST" });
-              window.location.href = "/login";
-            }}
-            className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white/90 transition hover:bg-white/20"
-          >
-            {String(t("nav.logOut", locale))}
-          </button>
         </div>
 
         {menuOpen ? (
@@ -184,6 +201,17 @@ export function Nav() {
                   </Link>
                 );
               })}
+              <button
+                type="button"
+                onClick={async () => {
+                  await signOut(firebaseAuth);
+                  await fetch("/api/firebase/logout", { method: "POST" });
+                  window.location.href = "/login";
+                }}
+                className="rounded-sm px-3 py-2 text-left text-sm font-medium text-white/80 hover:bg-white/10"
+              >
+                {String(t("nav.logOut", locale))}
+              </button>
             </div>
           </div>
         ) : null}
@@ -222,17 +250,6 @@ export function Nav() {
               >
                 {String(t("nav.newTransaction", locale))}
               </button>
-              <button
-                type="button"
-                onClick={async () => {
-                  await signOut(firebaseAuth);
-                  await fetch("/api/firebase/logout", { method: "POST" });
-                  window.location.href = "/login";
-                }}
-                className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white/90 transition hover:bg-white/20"
-              >
-                {String(t("nav.logOut", locale))}
-              </button>
             </div>
           </div>
         </div>
@@ -241,7 +258,6 @@ export function Nav() {
             const isActive =
               pathname === link.href ||
               (link.href !== "/dashboard" && pathname.startsWith(link.href));
-            const isDisabled = !onboarded && disabledLinks.has(link.href);
             const linkClass = [
               "rounded-full px-4 py-2 text-sm font-medium transition-all duration-200 ease-out",
               isActive
@@ -249,18 +265,6 @@ export function Nav() {
                 : "text-white/80 hover:bg-white/10",
             ].join(" ");
 
-            if (isDisabled) {
-              return (
-                <span
-                  key={link.href}
-                  className="rounded-full px-4 py-2 text-sm font-medium text-white/50 border border-dashed border-white/25 cursor-not-allowed"
-                  title="Complete onboarding first"
-                  aria-disabled="true"
-                >
-                  {String(t(link.labelKey, locale))}
-                </span>
-              );
-            }
             return (
               <Link key={link.href} href={link.href} className={linkClass}>
                 {String(t(link.labelKey, locale))}
@@ -323,6 +327,18 @@ export function Nav() {
                     </Link>
                   );
                 })}
+                <button
+                  type="button"
+                  onClick={async () => {
+                    await signOut(firebaseAuth);
+                    await fetch("/api/firebase/logout", { method: "POST" });
+                    window.location.href = "/login";
+                  }}
+                  className="nav-menu-item flex w-full items-center rounded-sm px-3 py-2 text-sm font-medium text-ink/80 hover:bg-card hover:text-ink border border-transparent hover:border-border/80"
+                  role="menuitem"
+                >
+                  {String(t("nav.logOut", locale))}
+                </button>
               </div>
             ) : null}
           </div>

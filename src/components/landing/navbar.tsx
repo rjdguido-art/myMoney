@@ -1,12 +1,6 @@
-import Link from "next/link";
 import Image from "next/image";
 
-type NavbarProps = {
-  onSignIn?: () => void;
-  onSignUp?: () => void;
-};
-
-export function Navbar({ onSignIn, onSignUp }: NavbarProps) {
+export function Navbar() {
   return (
     <header className="flex items-center justify-between px-6 py-6 lg:px-10">
       <div className="flex items-center gap-4">

@@ -65,16 +65,6 @@ export default function HomePage() {
   return (
     <main className={`relative min-h-screen ${isAuthOpen ? "auth-open" : ""}`}>
       <div className="bg-aurora-pro">
-        <div className="hero-video" aria-hidden="true">
-          <video
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="auto"
-            src="https://presspersona.blob.core.windows.net/images/BG%20Video.mp4"
-          />
-        </div>
         <div className="aurora-blobs" aria-hidden="true">
           <span className="aurora-blob aurora-blob--teal" />
           <span className="aurora-blob aurora-blob--gold" />
@@ -82,7 +72,7 @@ export default function HomePage() {
         </div>
         <div className="aurora-noise" aria-hidden="true" />
         <div className="aurora-content">
-          <Navbar onSignIn={() => setAuthMode("signin")} onSignUp={() => setAuthMode("signup")} />
+          <Navbar />
 
           <div className="mx-auto grid max-w-6xl gap-12 px-6 pb-16 pt-4 lg:grid-cols-[1.1fr_0.9fr] lg:items-start lg:px-10">
             <HeroLeft

@@ -30,7 +30,7 @@ export function MobileNav() {
 
   return (
     <nav
-      className="fixed bottom-4 left-1/2 z-40 w-[min(560px,92vw)] -translate-x-1/2 md:hidden"
+      className="mobile-nav fixed bottom-4 left-1/2 z-40 w-[min(560px,92vw)] -translate-x-1/2 md:hidden"
       aria-label="Primary"
     >
       <div className="flex items-center justify-between gap-2 rounded-full border border-[color:var(--border)] bg-[color:var(--card)]/90 px-4 py-2 shadow-[0_18px_40px_rgba(13,19,22,0.22)] backdrop-blur">

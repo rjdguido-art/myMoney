@@ -36,6 +36,7 @@ const onboardingSchema = z.object({
   currency: z.string().trim().min(1),
   timezone: z.string().trim().min(1),
   payFrequency: z.enum(["WEEKLY", "BIWEEKLY", "SEMIMONTHLY", "MONTHLY"]),
+  payDate: z.string().trim().min(1),
   takeHomePay: z.number().min(0),
   deductions: z.array(deductionSchema).optional(),
   bills: z.array(billSchema).optional(),
@@ -47,6 +48,14 @@ const onboardingSchema = z.object({
 function toDecimal(value: number | null | undefined) {
   if (value === undefined || value === null || Number.isNaN(value)) return 0;
   return Number(value);
+}
+
+function toPayDate(value: string) {
+  const date = new Date(`${value}T08:00:00`);
+  if (Number.isNaN(date.getTime())) {
+    throw new Error("Invalid pay date");
+  }
+  return date;
 }
 
 function nextDueDate(dueDay: number) {
@@ -104,6 +113,7 @@ export async function POST(request: Request) {
     currency,
     timezone,
     payFrequency,
+    payDate,
     takeHomePay,
     deductions,
     bills,
@@ -111,6 +121,13 @@ export async function POST(request: Request) {
     savingsGoals,
     debts,
   } = parsed.data;
+
+  let payAnchorDate: Date;
+  try {
+    payAnchorDate = toPayDate(payDate);
+  } catch {
+    return NextResponse.json({ error: "Invalid pay date" }, { status: 400 });
+  }
 
   await prisma.$transaction(async (tx) => {
     await tx.user.update({
@@ -152,8 +169,8 @@ export async function POST(request: Request) {
         name: "Primary Pay Schedule",
         cadence: payFrequency as Frequency,
         interval: 1,
-        anchorDate: new Date(),
-        nextPayDate: new Date(),
+        anchorDate: payAnchorDate,
+        nextPayDate: payAnchorDate,
         netPay: toDecimal(takeHomePay),
       },
     });

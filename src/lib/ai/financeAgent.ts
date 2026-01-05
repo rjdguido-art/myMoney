@@ -98,8 +98,9 @@ function toOpenAIInput(messages: ChatMessage[]) {
 }
 
 type ToolCall = {
-  type: "tool_call" | "function_call";
+  type: "tool_call" | "function_call" | "custom_tool_call";
   id?: string;
+  call_id?: string;
   name?: string;
   arguments?: string;
 };
@@ -107,6 +108,8 @@ type MessageContent = { type?: string; text?: string };
 type OutputMessage = { type: "message"; content?: MessageContent[] };
 type OutputItem = ToolCall | OutputMessage | { type?: string };
 type ResponseLike = { output?: OutputItem[]; output_text?: string; id?: string };
+type ToolMessage = { type: "function_call_output"; call_id: string; output: string };
+type ListTransactionsInput = z.infer<typeof listTransactionsArgs>;
 
 type Effort = "low" | "medium" | "high";
 
@@ -115,14 +118,19 @@ function parseEffort(v: string | undefined): Effort {
   return "medium";
 }
 
-function extractToolCalls(resp: any) {
-  const out: any[] = Array.isArray(resp?.output) ? resp.output : [];
-  return out.filter(
-    (item) =>
-      item?.type === "function_call" ||
-      item?.type === "tool_call" ||
-      item?.type === "custom_tool_call",
+function isToolCall(item: OutputItem): item is ToolCall {
+  return (
+    item?.type === "function_call" ||
+    item?.type === "tool_call" ||
+    item?.type === "custom_tool_call"
   );
+}
+
+function extractToolCalls(resp: unknown): ToolCall[] {
+  const out = Array.isArray((resp as ResponseLike | undefined)?.output)
+    ? (resp as ResponseLike).output || []
+    : [];
+  return out.filter(isToolCall);
 }
 
 function extractText(resp: ResponseLike): string {
@@ -171,6 +179,14 @@ function toDateOrUndefined(value: unknown): Date | undefined {
   }
 
   return undefined;
+}
+
+function nullToUndefined<T>(value: T | null | undefined): T | undefined {
+  return value ?? undefined;
+}
+
+function errorMessage(err: unknown): string {
+  return err instanceof Error ? err.message : String(err ?? "error");
 }
 
 async function withTimeout<T>(
@@ -258,7 +274,8 @@ export async function runFinanceAgent(req: AgentRequest): Promise<AgentResponse>
         },
         model,
       );
-      return openai.responses.create(body, { signal } as any);
+      const requestOptions: OpenAI.RequestOptions = { signal };
+      return openai.responses.create(body, requestOptions);
     },
     20000,
   );
@@ -268,7 +285,7 @@ export async function runFinanceAgent(req: AgentRequest): Promise<AgentResponse>
     const toolCalls = extractToolCalls(response);
     if (!toolCalls.length) break;
 
-    const toolMessages: any[] = [];
+    const toolMessages: ToolMessage[] = [];
 
     for (const call of toolCalls) {
       if (call.type !== "function_call") continue;
@@ -281,7 +298,7 @@ export async function runFinanceAgent(req: AgentRequest): Promise<AgentResponse>
         continue;
       }
 
-      let output: any = {};
+      let output: Record<string, unknown> = {};
 
       if (toolName === "get_forecast") {
         try {
@@ -297,8 +314,8 @@ export async function runFinanceAgent(req: AgentRequest): Promise<AgentResponse>
             totals: snap.totals,
             billsDue: snap.billsDue,
           };
-        } catch (e: any) {
-          output = { error: e?.message ?? "forecast failed" };
+        } catch (e: unknown) {
+          output = { error: errorMessage(e) || "forecast failed" };
         }
       }
 
@@ -310,11 +327,17 @@ export async function runFinanceAgent(req: AgentRequest): Promise<AgentResponse>
           if (!parsed.success) {
             output = { error: "Invalid filters", details: parsed.error.flatten() };
           } else {
-            const data: any = { ...parsed.data };
-            data.from = toDateOrUndefined(data.from);
-            data.to = toDateOrUndefined(data.to);
+            const data: ListTransactionsInput = parsed.data;
+            const filters = {
+              ...data,
+              from: toDateOrUndefined(data.from),
+              to: toDateOrUndefined(data.to),
+              categoryId: nullToUndefined(data.categoryId),
+              accountId: nullToUndefined(data.accountId),
+              search: nullToUndefined(data.search),
+            };
 
-            const where = buildTransactionWhere(req.userId, data);
+            const where = buildTransactionWhere(req.userId, filters);
             const take = data.limit ?? 50;
 
             const txns = await prisma.transaction.findMany({
@@ -326,8 +349,8 @@ export async function runFinanceAgent(req: AgentRequest): Promise<AgentResponse>
 
             output = { count: txns.length, transactions: txns.map(serializeTransaction) };
           }
-        } catch (e: any) {
-          output = { error: e?.message ?? "transaction query failed" };
+        } catch (e: unknown) {
+          output = { error: errorMessage(e) || "transaction query failed" };
         }
       }
 
@@ -353,7 +376,8 @@ export async function runFinanceAgent(req: AgentRequest): Promise<AgentResponse>
           },
           model,
         );
-        return openai.responses.create(body, { signal } as any);
+        const requestOptions: OpenAI.RequestOptions = { signal };
+        return openai.responses.create(body, requestOptions);
       },
       20000,
     );
@@ -378,7 +402,8 @@ export async function runFinanceAgent(req: AgentRequest): Promise<AgentResponse>
           },
           MODEL_SMART,
         );
-        return openai.responses.create(body, { signal } as any);
+        const requestOptions: OpenAI.RequestOptions = { signal };
+        return openai.responses.create(body, requestOptions);
       },
       20000,
     );

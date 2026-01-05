@@ -473,6 +473,10 @@ button > *,
   color: var(--color-ink);
 }
 
+.onboarding-open.bg-aurora {
+  background: transparent !important;
+}
+
 .morph-bg {
   position: fixed;
   inset: 0;
@@ -557,9 +561,10 @@ button > *,
   min-height: 100vh;
   overflow: hidden;
   background:
-    radial-gradient(120% 100% at 18% 18%, rgba(var(--ice-light), 0.95), transparent 45%),
-    radial-gradient(80% 70% at 86% 8%, rgba(255, 255, 255, 0.6), transparent 42%),
-    linear-gradient(120deg, rgb(var(--ice-mist)) 0%, rgb(var(--ice-deep)) 55%, rgb(var(--ice-abyss)) 100%);
+    radial-gradient(110% 90% at 12% 18%, rgba(84, 232, 220, 0.4), transparent 60%),
+    radial-gradient(90% 80% at 88% 12%, rgba(255, 214, 139, 0.35), transparent 55%),
+    radial-gradient(120% 100% at 50% 95%, rgba(20, 43, 92, 0.5), transparent 62%),
+    linear-gradient(130deg, rgba(244, 248, 255, 0.9) 0%, rgba(200, 219, 255, 0.75) 42%, rgba(20, 38, 84, 0.95) 100%);
 }
 
 .hero-video {
@@ -844,6 +849,57 @@ button > *,
   animation: onboardingSlideBack 320ms ease;
 }
 
+.receipt {
+  display: grid;
+  gap: 10px;
+  border-radius: 18px;
+  border: 1px dashed rgba(12, 22, 34, 0.25);
+  background: rgba(255, 255, 255, 0.6);
+  padding: 16px;
+  font-size: 13px;
+  color: rgba(12, 22, 34, 0.75);
+}
+
+.receipt__meta {
+  display: grid;
+  gap: 4px;
+  font-size: 12px;
+  color: rgba(12, 22, 34, 0.6);
+}
+
+.receipt__line {
+  height: 1px;
+  background: rgba(12, 22, 34, 0.15);
+}
+
+.receipt__line--dash {
+  background: repeating-linear-gradient(
+    90deg,
+    rgba(12, 22, 34, 0.18),
+    rgba(12, 22, 34, 0.18) 8px,
+    transparent 8px,
+    transparent 14px
+  );
+}
+
+.receipt__rows {
+  display: grid;
+  gap: 8px;
+}
+
+.receipt__row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  font-variant-numeric: tabular-nums;
+  color: rgba(12, 22, 34, 0.85);
+}
+
+.receipt__row--total {
+  font-weight: 600;
+  color: rgba(12, 22, 34, 0.95);
+}
+
 @keyframes onboardingSlideForward {
   0% {
     opacity: 0;
@@ -993,6 +1049,82 @@ button > *,
   --color-border: var(--border);
   background-color: var(--surface);
   color: rgb(var(--ink));
+}
+
+.onboarding-open .app-shell {
+  background: transparent !important;
+}
+
+.onboarding-open .app-shell main {
+  background: transparent;
+  padding: 0 !important;
+}
+
+.onboarding-open .bg-aurora-pro {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  min-height: 100vh;
+  margin: 0;
+  overflow-y: auto;
+}
+
+.onboarding-open .bg-aurora-pro::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(3, 8, 12, 0.42), rgba(3, 8, 12, 0.28));
+}
+
+.onboarding-open .hero-video {
+  opacity: 0.35;
+}
+
+.onboarding-open .app-nav {
+  display: none;
+}
+
+.onboarding-actions {
+  margin-top: 16px;
+  gap: 16px;
+}
+
+.onboarding-actions .pill {
+  border-radius: var(--radius-pill);
+  padding: 0.55rem 1.2rem;
+}
+
+.onboarding-actions > div {
+  gap: 16px;
+}
+
+.onboarding-card .pill {
+  border-radius: var(--radius-pill);
+}
+
+@media (max-width: 640px) {
+  .onboarding-shell {
+    padding: 0;
+  }
+
+  .onboarding-card {
+    width: 100vw;
+    max-width: 100vw;
+    min-height: 100vh;
+    border-radius: 0;
+    border-left: 0;
+    border-right: 0;
+  }
+}
+.onboarding-open .app-shell main {
+  padding: 0;
+}
+
+.onboarding-open .mobile-nav,
+.onboarding-open .chat-widget {
+  display: none;
 }
 
 .app-nav {

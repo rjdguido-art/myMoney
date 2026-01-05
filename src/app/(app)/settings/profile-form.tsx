@@ -98,10 +98,11 @@ export function ProfileForm({ locale, initial }: ProfileFormProps) {
           <input
             value={imageUrl}
             onChange={(event) => setImageUrl(event.target.value)}
-            className="w-full rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
-            placeholder={t("settings.placeholders.photoUrl", locale)}
+            className="sr-only"
+            aria-hidden="true"
+            tabIndex={-1}
           />
-          <p className="text-xs text-muted">{t("settings.profilePhotoHint", locale)}</p>
+          <p className="sr-only">{t("settings.profilePhotoHint", locale)}</p>
           {uploading ? (
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-600">
               Uploading...

@@ -74,6 +74,7 @@ const basicsSchema = z.object({
 
 const paycheckSchema = z.object({
   payFrequency: z.enum(["WEEKLY", "BIWEEKLY", "SEMIMONTHLY", "MONTHLY"]),
+  payDate: z.string().min(1),
   takeHomePay: z.number().positive(),
 });
 
@@ -114,6 +115,12 @@ function toNumber(value: string) {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
+function toLocalDateInputValue(date: Date) {
+  const offset = date.getTimezoneOffset();
+  const local = new Date(date.getTime() - offset * 60000);
+  return local.toISOString().slice(0, 10);
+}
+
 function getTimezoneOptions() {
   try {
     if (typeof Intl !== "undefined" && "supportedValuesOf" in Intl) {
@@ -144,6 +151,7 @@ type DraftState = {
   currency: string;
   timezone: string;
   payFrequency: PayFrequency;
+  payDate: string;
   takeHomePay: string;
   deductions: DeductionRow[];
   bills: BillRow[];
@@ -156,7 +164,6 @@ export function OnboardingClient({
   initialCurrency,
   initialLanguage,
   initialTimezone,
-  name,
 }: Props) {
   const router = useRouter();
   const initialDraft = useMemo(() => {
@@ -168,6 +175,7 @@ export function OnboardingClient({
       currency: initialCurrency,
       timezone: fallbackTimezone,
       payFrequency: "BIWEEKLY",
+      payDate: toLocalDateInputValue(new Date()),
       takeHomePay: "",
       deductions: [{ id: uid(), name: "", amount: "" }],
       bills: [{ id: uid(), name: "", amount: "", dueDay: "", frequency: "MONTHLY" }],
@@ -190,6 +198,7 @@ export function OnboardingClient({
         currency: draft.currency ?? fallback.currency,
         timezone: draft.timezone ?? fallback.timezone,
         payFrequency: draft.payFrequency ?? fallback.payFrequency,
+        payDate: draft.payDate ?? fallback.payDate,
         takeHomePay: draft.takeHomePay ?? fallback.takeHomePay,
         deductions: draft.deductions?.length ? draft.deductions : fallback.deductions,
         bills: draft.bills?.length ? draft.bills : fallback.bills,
@@ -211,6 +220,7 @@ export function OnboardingClient({
   const [currency, setCurrency] = useState(initialDraft.currency);
   const [timezone, setTimezone] = useState(initialDraft.timezone);
   const [payFrequency, setPayFrequency] = useState<PayFrequency>(initialDraft.payFrequency);
+  const [payDate, setPayDate] = useState(initialDraft.payDate);
   const [takeHomePay, setTakeHomePay] = useState(initialDraft.takeHomePay);
   const [deductions, setDeductions] = useState<DeductionRow[]>(initialDraft.deductions);
   const [bills, setBills] = useState<BillRow[]>(initialDraft.bills);
@@ -243,89 +253,16 @@ export function OnboardingClient({
     () => tJSON("onboarding.helpers", language, {} as Record<string, string>),
     [language],
   );
-  const stepCompletion = useMemo(() => {
-    if (!steps.length) return 0;
-
-    if (step === 0) {
-      const filled = Number(Boolean(language)) + Number(Boolean(currency)) + Number(Boolean(timezone));
-      return (filled / 3) * 100;
-    }
-
-    if (step === 1) {
-      const filled = Number(Boolean(payFrequency)) + Number(toNumber(takeHomePay) > 0);
-      return (filled / 2) * 100;
-    }
-
-    if (step === 2) {
-      const totalFields = deductions.length * 2;
-      if (!totalFields) return 0;
-      const filled = deductions.reduce(
-        (sum, row) => sum + Number(Boolean(row.name.trim())) + Number(toNumber(row.amount) > 0),
-        0,
-      );
-      return (filled / totalFields) * 100;
-    }
-
-    if (step === 3) {
-      const totalFields = bills.length * 4;
-      if (!totalFields) return 0;
-      const filled = bills.reduce(
-        (sum, row) =>
-          sum +
-          Number(Boolean(row.name.trim())) +
-          Number(toNumber(row.amount) > 0) +
-          Number(Number(row.dueDay) > 0) +
-          Number(Boolean(row.frequency)),
-        0,
-      );
-      return (filled / totalFields) * 100;
-    }
-
-    if (step === 4) {
-      const totalFields = budgets.length;
-      if (!totalFields) return 0;
-      const filled = budgets.reduce((sum, row) => sum + Number(toNumber(row.amount) > 0), 0);
-      return (filled / totalFields) * 100;
-    }
-
-    if (step === 5) {
-      const totalFields = goals.length * 2;
-      if (!totalFields) return 0;
-      const filled = goals.reduce(
-        (sum, row) => sum + Number(Boolean(row.name.trim())) + Number(toNumber(row.targetAmount) > 0),
-        0,
-      );
-      return (filled / totalFields) * 100;
-    }
-
-    if (step === 6) {
-      const totalFields = debts.length * 2;
-      if (!totalFields) return 0;
-      const filled = debts.reduce(
-        (sum, row) => sum + Number(Boolean(row.name.trim())) + Number(toNumber(row.minimumPayment) > 0),
-        0,
-      );
-      return (filled / totalFields) * 100;
-    }
-
-    return 100;
-  }, [
-    steps.length,
-    step,
-    language,
-    currency,
-    timezone,
-    payFrequency,
-    takeHomePay,
-    deductions,
-    bills,
-    budgets,
-    goals,
-    debts,
-  ]);
   const progress = ((step + 1) / steps.length) * 100;
   const timezoneOptions = useMemo(() => getTimezoneOptions(), []);
   const showSkeleton = false;
+
+  useEffect(() => {
+    document.body.classList.add("onboarding-open");
+    return () => {
+      document.body.classList.remove("onboarding-open");
+    };
+  }, []);
 
   useEffect(() => {
     const draft: DraftState = {
@@ -334,6 +271,7 @@ export function OnboardingClient({
       currency,
       timezone,
       payFrequency,
+      payDate,
       takeHomePay,
       deductions,
       bills,
@@ -348,6 +286,7 @@ export function OnboardingClient({
     currency,
     timezone,
     payFrequency,
+    payDate,
     takeHomePay,
     deductions,
     bills,
@@ -372,6 +311,7 @@ export function OnboardingClient({
     if (step === 1) {
       const result = paycheckSchema.safeParse({
         payFrequency,
+        payDate,
         takeHomePay: toNumber(takeHomePay),
       });
       if (!result.success) {
@@ -501,6 +441,7 @@ export function OnboardingClient({
       currency,
       timezone,
       payFrequency,
+      payDate,
       takeHomePay: toNumber(takeHomePay),
       deductions: deductions
         .filter((deduction) => deduction.name.trim())
@@ -676,6 +617,16 @@ export function OnboardingClient({
                 className="w-full rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
                 placeholder="0.00"
                 title={helpers.takeHome}
+              />
+            </div>
+            <div className="space-y-2 md:col-span-2">
+              <label className="text-sm text-ink">{labels.payDate}</label>
+              <input
+                value={payDate}
+                onChange={(e) => setPayDate(e.target.value)}
+                type="date"
+                className="w-full rounded-sm border border-border/80 bg-white/80 px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+                title={helpers.payDate}
               />
             </div>
           </div>
@@ -906,60 +857,75 @@ export function OnboardingClient({
         {step === 7 && (
           <div className="space-y-4">
             <h2 className="text-lg font-semibold text-ink">{labels.summaryTitle}</h2>
-            <div className="grid gap-3 rounded-md border border-border/80 bg-white p-4 text-sm text-muted">
-              <p>
-                {labels.language}: <span className="text-ink">{language}</span>
-              </p>
-              <p>
-                {labels.currency}: <span className="text-ink">{currency}</span>
-              </p>
-              <p>
-                {labels.timezone}: <span className="text-ink">{timezone}</span>
-              </p>
-              <p>
-                {labels.payFrequency}:{" "}
-                <span className="text-ink">
-                  {payFrequencyOptions.find((option) => option.value === payFrequency)
-                    ?.label[language] ?? payFrequency}
-                </span>
-              </p>
-              <p>
-                {labels.takeHome}: <span className="text-ink">{takeHomePay || "0"}</span>
-              </p>
-              <p>
-                {labels.deductionsTitle}:{" "}
-                <span className="text-ink">
-                  {deductions.filter((row) => row.name.trim()).length}
-                </span>
-              </p>
-              <p>
-                {labels.billsTitle}:{" "}
-                <span className="text-ink">
-                  {bills.filter((bill) => bill.name.trim()).length}
-                </span>
-              </p>
-              <p>
-                {labels.budgetsTitle}:{" "}
-                <span className="text-ink">
-                  {
-                    budgets.filter(
-                      (budget) => budget.category.trim() && toNumber(budget.amount) > 0,
-                    ).length
-                  }
-                </span>
-              </p>
-              <p>
-                {labels.goalsTitle}:{" "}
-                <span className="text-ink">
-                  {goals.filter((goal) => goal.name.trim()).length}
-                </span>
-              </p>
-              <p>
-                {labels.debtsTitle}:{" "}
-                <span className="text-ink">
-                  {debts.filter((debt) => debt.name.trim()).length}
-                </span>
-              </p>
+            <div className="receipt">
+              {(() => {
+                const currencyCode = currency || "USD";
+                const format = (value: number) =>
+                  new Intl.NumberFormat(language === "es" ? "es" : "en", {
+                    style: "currency",
+                    currency: currencyCode,
+                    maximumFractionDigits: 2,
+                  }).format(value);
+                const netPay = toNumber(takeHomePay);
+                const deductionsTotal = deductions.reduce((sum, row) => sum + toNumber(row.amount), 0);
+                const billsTotal = bills.reduce((sum, row) => sum + toNumber(row.amount), 0);
+                const budgetsTotal = budgets.reduce((sum, row) => sum + toNumber(row.amount), 0);
+                const goalsTotal = goals.reduce((sum, row) => sum + toNumber(row.targetAmount), 0);
+                const debtsTotal = debts.reduce(
+                  (sum, row) => sum + toNumber(row.minimumPayment),
+                  0,
+                );
+                const totalOut =
+                  deductionsTotal + billsTotal + budgetsTotal + goalsTotal + debtsTotal;
+                const remaining = netPay - totalOut;
+                return (
+                  <>
+                    <div className="receipt__meta">
+                      <span>{labels.language}: {language}</span>
+                      <span>{labels.currency}: {currencyCode}</span>
+                      <span>{labels.timezone}: {timezone}</span>
+                      <span>
+                        {labels.payFrequency}:{" "}
+                        {payFrequencyOptions.find((option) => option.value === payFrequency)
+                          ?.label[language] ?? payFrequency}
+                      </span>
+                      <span>{labels.payDate}: {payDate}</span>
+                    </div>
+                    <div className="receipt__line" />
+                    <div className="receipt__rows">
+                      <div className="receipt__row">
+                        <span>{labels.takeHome}</span>
+                        <span>{format(netPay)}</span>
+                      </div>
+                      <div className="receipt__row">
+                        <span>{labels.deductionsTitle}</span>
+                        <span>-{format(deductionsTotal)}</span>
+                      </div>
+                      <div className="receipt__row">
+                        <span>{labels.billsTitle}</span>
+                        <span>-{format(billsTotal)}</span>
+                      </div>
+                      <div className="receipt__row">
+                        <span>{labels.budgetsTitle}</span>
+                        <span>-{format(budgetsTotal)}</span>
+                      </div>
+                      <div className="receipt__row">
+                        <span>{labels.goalsTitle}</span>
+                        <span>-{format(goalsTotal)}</span>
+                      </div>
+                      <div className="receipt__row">
+                        <span>{labels.debtsTitle}</span>
+                        <span>-{format(debtsTotal)}</span>
+                      </div>
+                    </div>
+                    <div className="receipt__line receipt__line--dash" />
+                    <div className="receipt__row receipt__row--total">
+                      <span>{labels.leftAfterExpenses}</span>
+                      <span>{format(remaining)}</span>
+                    </div>
+                  </>
+                );
+              })()}
             </div>
             <p className="text-sm text-muted">
               {tips.guidePrompt}{" "}
@@ -971,7 +937,7 @@ export function OnboardingClient({
         )}
 
         {error ? <p className="text-sm text-red-600">{error}</p> : null}
-        <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="onboarding-actions flex flex-wrap items-center justify-between gap-3">
           <button
             type="button"
             onClick={prevStep}

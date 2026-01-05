@@ -11,11 +11,37 @@ function sanitizeFileExtension(name: string) {
 
 export async function POST(request: Request) {
   const sasUrl = process.env.AZURE_BLOB_SAS_URL ?? process.env.AzureBlob;
+  const baseUrlEnv =
+    process.env.AZURE_BLOB_CONTAINER_URL ??
+    process.env.AZURE_BLOB_BASE_URL ??
+    process.env.AZURE_BLOB_URL;
   if (!sasUrl) {
     return NextResponse.json(
       { error: "Missing Azure Blob SAS configuration." },
       { status: 500 },
     );
+  }
+
+  const normalizedSas = sasUrl.trim().replace(/^\?/, "");
+  let baseUrl = "";
+  let query = "";
+
+  if (/^https?:\/\//i.test(normalizedSas)) {
+    const parsedUrl = new URL(normalizedSas);
+    baseUrl = `${parsedUrl.origin}${parsedUrl.pathname}`.replace(/\/$/, "");
+    query = parsedUrl.searchParams.toString();
+  } else {
+    if (!baseUrlEnv) {
+      return NextResponse.json(
+        {
+          error:
+            "Azure Blob base URL is missing. Set AZURE_BLOB_CONTAINER_URL to your container URL.",
+        },
+        { status: 500 },
+      );
+    }
+    baseUrl = baseUrlEnv.trim().replace(/\/$/, "");
+    query = normalizedSas;
   }
 
   const formData = await request.formData();
@@ -32,9 +58,12 @@ export async function POST(request: Request) {
     );
   }
 
-  const parsedUrl = new URL(sasUrl);
-  const baseUrl = `${parsedUrl.origin}${parsedUrl.pathname}`.replace(/\/$/, "");
-  const query = parsedUrl.searchParams.toString();
+  if (!query) {
+    return NextResponse.json(
+      { error: "Azure Blob SAS query string is missing." },
+      { status: 500 },
+    );
+  }
 
   const ext = sanitizeFileExtension(file.name);
   const blobName = `profile-${crypto.randomUUID()}${ext ? `.${ext}` : ""}`;
