@@ -62,9 +62,23 @@ export default function HomePage() {
     };
   }, [isAuthOpen]);
 
+  useEffect(() => {
+    document.body.classList.remove("onboarding-open");
+  }, []);
+
   return (
     <main className={`relative min-h-screen ${isAuthOpen ? "auth-open" : ""}`}>
-      <div className="bg-aurora-pro">
+      <div className="bg-aurora-pro home-hero">
+        <div className="hero-video" aria-hidden="true">
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="auto"
+            src="https://presspersona.blob.core.windows.net/images/Blue.mp4"
+          />
+        </div>
         <div className="aurora-blobs" aria-hidden="true">
           <span className="aurora-blob aurora-blob--teal" />
           <span className="aurora-blob aurora-blob--gold" />

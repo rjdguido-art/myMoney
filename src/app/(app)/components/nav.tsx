@@ -20,8 +20,6 @@ const links = [
   { href: "/guide", labelKey: "nav.guide" },
   { href: "/insights", labelKey: "nav.insights" },
   { href: "/settings", labelKey: "nav.settings" },
-  { href: "/onboarding", labelKey: "nav.onboarding" },
-  { href: "/auth", labelKey: "nav.auth" },
 ] as const;
 
 export function Nav() {
@@ -92,8 +90,6 @@ export function Nav() {
     "/guide",
     "/insights",
     "/settings",
-    "/onboarding",
-    "/auth",
   ]);
   const primaryLinks = links.filter((link) => !overflowLinks.has(link.href));
   const extraLinks = links.filter((link) => overflowLinks.has(link.href));

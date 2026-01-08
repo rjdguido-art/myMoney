@@ -43,7 +43,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: result.message });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err ?? "");
-    if (msg.includes("aborted") || msg.includes("AbortError") || msg.includes("terminated")) {
+procced    if (msg.includes("aborted") || msg.includes("AbortError") || msg.includes("terminated")) {
       return NextResponse.json(
         { error: "AI request timed out. Please try again." },
         { status: 504 },

@@ -25,7 +25,7 @@ export default async function OnboardingPage() {
             loop
             playsInline
             preload="auto"
-            src="https://presspersona.blob.core.windows.net/images/BG%20Video.mp4"
+            src="https://presspersona.blob.core.windows.net/images/Blue.mp4"
           />
         </div>
         <div className="aurora-blobs" aria-hidden="true">
