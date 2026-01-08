@@ -19,6 +19,7 @@
     "eventsource-parser": "^3.0.6",
     "firebase": "^12.7.0",
     "firebase-admin": "^13.6.0",
+    "framer-motion": "^12.24.10",
     "lucide-react": "^0.468.0",
     "next": "16.1.1",
     "next-auth": "^4.24.7",
