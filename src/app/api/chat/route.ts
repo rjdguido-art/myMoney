@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import type { ResponseCreateParamsStreaming, ResponseStreamEvent } from "openai/resources/responses/responses";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -11,11 +12,14 @@ function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function createResponseStreamWithRetry(payload: unknown, tries = 2) {
+async function createResponseStreamWithRetry(
+  payload: ResponseCreateParamsStreaming,
+  tries = 2,
+): Promise<AsyncIterable<ResponseStreamEvent>> {
   let lastErr: unknown;
   for (let i = 0; i < tries; i += 1) {
     try {
-      return await client.responses.create(payload as Record<string, unknown>);
+      return await client.responses.create(payload);
     } catch (err: unknown) {
       lastErr = err;
       const code = (err as { code?: string; error?: { code?: string } })?.code
@@ -64,7 +68,7 @@ export async function POST(req: Request) {
         2,
       );
 
-      for await (const event of stream as AsyncIterable<{ type?: string; delta?: string; error?: unknown }>) {
+      for await (const event of stream) {
         if (event.type === "response.output_text.delta") {
           const delta = event.delta ?? "";
           await writer.write(encoder.encode(`data: ${JSON.stringify({ delta })}\n\n`));
@@ -73,7 +77,7 @@ export async function POST(req: Request) {
         if (event.type === "response.completed") break;
 
         if (event.type === "error") {
-          throw event.error ?? new Error("Upstream error event");
+          throw new Error(event.message || "Upstream error event");
         }
       }
     } catch (err: unknown) {

@@ -96,23 +96,24 @@ export function ChatWidget() {
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
 
-      const parser = createParser((event) => {
-        if (event.type !== "event") return;
-        if (event.event === "error") {
-          const payload = JSON.parse(event.data || "{}") as { message?: string };
-          throw new Error(payload.message || "Stream error");
-        }
+      const parser = createParser({
+        onEvent: (event) => {
+          if (event.event === "error") {
+            const payload = JSON.parse(event.data || "{}") as { message?: string };
+            throw new Error(payload.message || "Stream error");
+          }
 
-        const payload = JSON.parse(event.data || "{}") as { delta?: string };
-        const delta = payload.delta ?? "";
-        if (!delta) return;
+          const payload = JSON.parse(event.data || "{}") as { delta?: string };
+          const delta = payload.delta ?? "";
+          if (!delta) return;
 
-        setMessages((prev) => {
-          const nextMessages = prev.map((m) => ({ ...m }));
-          const target = nextMessages[assistantIndex];
-          if (target && target.role === "assistant") target.content += delta;
-          return nextMessages;
-        });
+          setMessages((prev) => {
+            const nextMessages = prev.map((m) => ({ ...m }));
+            const target = nextMessages[assistantIndex];
+            if (target && target.role === "assistant") target.content += delta;
+            return nextMessages;
+          });
+        },
       });
 
       while (true) {

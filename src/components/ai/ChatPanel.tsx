@@ -282,17 +282,26 @@ function MessageContent({ role, content }: { role: "user" | "assistant"; content
         rehypePlugins={[rehypeSanitize]}
         components={{
           // Keep inline code clean and avoid backticks styling getting weird
-          code({ inline, children, ...props }) {
-            if (inline) {
+          code(props) {
+            const { inline, children, className, ...rest } = props as React.HTMLAttributes<HTMLElement> & {
+              inline?: boolean;
+            };
+            const text = String(children ?? "");
+            const isInline = inline ?? !(className?.includes("language-") || text.includes("\n"));
+
+            if (isInline) {
               return (
-                <code className="rounded bg-white/10 px-1 py-0.5 text-[#d7e7ff]" {...props}>
+                <code
+                  className={cx("rounded bg-white/10 px-1 py-0.5 text-[#d7e7ff]", className)}
+                  {...rest}
+                >
                   {children}
                 </code>
               );
             }
             return (
               <pre className="overflow-x-auto rounded-xl border border-white/10 bg-black/40 p-3">
-                <code className="text-[#d7e7ff]">{children}</code>
+                <code className={cx("text-[#d7e7ff]", className)}>{children}</code>
               </pre>
             );
           },
